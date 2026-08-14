@@ -1,0 +1,35 @@
+# Configuration for AIC 2026 KIS System
+
+directories:
+  raw: "raw"
+  processed: "data/processed"
+  indexes: "indexes"
+  outputs: "outputs/submission"
+
+data:
+  clip_dim: 512
+  expected_videos: 873
+  expected_keyframes: 177321
+
+retrieval:
+  top_k_per_cue: 500
+  top_k_videos: 50
+  
+reranking:
+  weights:
+    clip_score: 1.0
+    metadata_score: 0.2
+    object_score: 0.1
+    temporal_score: 0.1
+    cue_coverage_multiplier: 0.2
+  
+  diversification:
+    max_frames_per_video: 2
+    target_results: 100
+
+models:
+  text_encoder: "openai/clip-vit-base-patch32"
+  translator: "Helsinki-NLP/opus-mt-vi-en"
+  # Set to true to enable Vietnamese -> English translation fusion
+  use_translation: true
+  fusion_alpha: 0.5  # Weight of Vietnamese vector if dual-encoding is used

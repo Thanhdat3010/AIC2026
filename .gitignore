@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Data & Indexes (Do not upload 10GB+ to GitHub)
+raw/
+data/
+indexes/
+outputs/
+
+# Virtual environments
+venv/
+env/
+.env
+.venv
+AIC2026/
+
+# Pytest
+.pytest_cache/
+.coverage
+
+# IDEs
+.idea/
+.vscode/
+*.swp
