@@ -64,7 +64,7 @@ def main():
     print(f"\nFound {len(query_files)} KIS queries. Processing...")
     
     for qf in tqdm(query_files, desc="Batch Search"):
-        query_id = qf.stem.replace("-kis", "")
+        query_id = qf.stem
         # read text
         with open(qf, "r", encoding="utf-8") as f:
             query_text = f.read().strip()

@@ -3,11 +3,45 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Data & Indexes (Do not upload 10GB+ to GitHub)
-raw/
-data/
-indexes/
-outputs/
+# Large binary / data files
+*.zip
+*.npy
+*.faiss
+*.parquet
+*.mp4
+*.tar
+*.gz
+
+# Ignore data folder contents but preserve structure via .gitkeep
+raw/*
+!raw/.gitkeep
+!raw/AIC2026_BTC_Data_Structure.md
+
+data/*
+!data/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+indexes/*
+!indexes/.gitkeep
+
+outputs/*
+!outputs/.gitkeep
+outputs/submission/*
+!outputs/submission/.gitkeep
+
+backups/*
+!backups/.gitkeep
+
+# Large Media & Keyframe Folders added by user
+Keyframes/
+keyframes/
+Keyframes_*/
+Keyframes*/
+Videos/
+videos/
+Videos_*/
+Videos*/
 
 # Virtual environments
 venv/
@@ -16,11 +50,9 @@ env/
 .venv
 AIC2026/
 
-# Pytest
+# Pytest & IDEs
 .pytest_cache/
 .coverage
-
-# IDEs
 .idea/
 .vscode/
 *.swp
