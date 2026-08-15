@@ -17,9 +17,9 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.config import settings
 
-def download_file(url_or_id, target_path):
-    """Tải 1 file zip video tốc độ cao trực tiếp từ máy chủ BTC (ledo.io.vn) hoặc Google Drive"""
-    print(f"\n📥 Đang tải: {url_or_id}")
+def download_file(url_or_id, target_path, pkg_idx, total_pkgs):
+    """Tải file video zip kèm thanh tiến trình đo tốc độ MB/s"""
+    filename = Path(url_or_id).name if "http" in url_or_id else f"Video_Package_{pkg_idx}.zip"
     
     if "ledo.io.vn" in url_or_id or (url_or_id.startswith("http") and "drive.google.com" not in url_or_id):
         response = requests.get(url_or_id, stream=True, timeout=60)
@@ -28,11 +28,12 @@ def download_file(url_or_id, target_path):
         block_size = 1024 * 1024  # 1MB chunk
         
         with open(target_path, 'wb') as file, tqdm(
-            desc=Path(url_or_id).name,
+            desc=f"📥 [Tải Video {pkg_idx}/{total_pkgs}] {filename}",
             total=total_size,
-            unit='iB',
+            unit='B',
             unit_scale=True,
             unit_divisor=1024,
+            leave=False
         ) as bar:
             for data in response.iter_content(block_size):
                 size = file.write(data)
@@ -48,60 +49,64 @@ def download_file(url_or_id, target_path):
         else:
             gdown.download(id=url_or_id, output=str(target_path), quiet=False)
 
-def process_video_zip(zpath, model, beam_size, video_fps_map):
-    """Trích xuất cuốn chiếu từng video trong file zip và nhận diện tiếng Việt bằng PhoWhisper/Whisper"""
+def process_video_zip(zpath, model, beam_size, video_fps_map, pkg_idx, total_pkgs):
+    """Trích xuất cuốn chiếu từng video trong file zip kèm thanh tiến trình chi tiết"""
     records = []
+    zip_name = Path(zpath).name
+    
     with zipfile.ZipFile(zpath, "r") as zf:
         mp4_names = [n for n in zf.namelist() if n.lower().endswith('.mp4')]
         
-        for mp4_name in tqdm(mp4_names, desc=f"Transcribing {Path(zpath).name}"):
-            # Bắt chính xác video_id dạng Lxx_Vxxx
-            match_vid = re.search(r'(L\d+_V\d+)', mp4_name)
-            if match_vid:
-                video_id = match_vid.group(1)
-            else:
-                video_id = Path(mp4_name).stem
-            
-            # Lấy FPS chuẩn xác từ bảng mapping frames.parquet (tránh lệch frame)
-            fps = video_fps_map.get(video_id, 30.0)
-
-            # Giải nén tạm 1 video
-            with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp_file:
-                tmp_path = tmp_file.name
-                tmp_file.write(zf.read(mp4_name))
-
-            try:
-                segments, info = model.transcribe(
-                    tmp_path,
-                    language="vi",
-                    beam_size=beam_size,
-                    best_of=beam_size,
-                    temperature=[0.0, 0.2, 0.4],
-                    vad_filter=True,
-                    vad_parameters=dict(min_silence_duration_ms=500),
-                    condition_on_previous_text=True
-                )
+        with tqdm(mp4_names, desc=f"🎙️ [ASR {pkg_idx}/{total_pkgs}] {zip_name}", unit="video", leave=False) as pbar:
+            for mp4_name in pbar:
+                match_vid = re.search(r'(L\d+_V\d+)', mp4_name)
+                if match_vid:
+                    video_id = match_vid.group(1)
+                else:
+                    video_id = Path(mp4_name).stem
                 
-                for seg in segments:
-                    text = seg.text.strip()
-                    if len(text) > 2:
-                        start_frame = int(round(seg.start * fps))
-                        end_frame = int(round(seg.end * fps))
-                        
-                        records.append({
-                            "video_id": video_id,
-                            "start_time": round(seg.start, 2),
-                            "end_time": round(seg.end, 2),
-                            "fps": fps,
-                            "start_frame": start_frame,
-                            "end_frame": end_frame,
-                            "transcript": text
-                        })
-            except Exception as e:
-                print(f"[WARNING] Lỗi xử lý video {video_id}: {e}")
-            finally:
-                if os.path.exists(tmp_path):
-                    os.remove(tmp_path)
+                fps = video_fps_map.get(video_id, 30.0)
+
+                with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp_file:
+                    tmp_path = tmp_file.name
+                    tmp_file.write(zf.read(mp4_name))
+
+                try:
+                    segments, info = model.transcribe(
+                        tmp_path,
+                        language="vi",
+                        beam_size=beam_size,
+                        best_of=beam_size,
+                        temperature=[0.0, 0.2, 0.4],
+                        vad_filter=True,
+                        vad_parameters=dict(min_silence_duration_ms=500),
+                        condition_on_previous_text=True
+                    )
+                    
+                    vid_seg_count = 0
+                    for seg in segments:
+                        text = seg.text.strip()
+                        if len(text) > 2:
+                            start_frame = int(round(seg.start * fps))
+                            end_frame = int(round(seg.end * fps))
+                            
+                            records.append({
+                                "video_id": video_id,
+                                "start_time": round(seg.start, 2),
+                                "end_time": round(seg.end, 2),
+                                "fps": fps,
+                                "start_frame": start_frame,
+                                "end_frame": end_frame,
+                                "transcript": text
+                            })
+                            vid_seg_count += 1
+                    
+                    pbar.set_postfix({"video": video_id, "câu_thoại": len(records)})
+                except Exception as e:
+                    print(f"[WARNING] Lỗi xử lý video {video_id}: {e}")
+                finally:
+                    if os.path.exists(tmp_path):
+                        os.remove(tmp_path)
     return records
 
 def main():
@@ -124,7 +129,6 @@ def main():
                         help="Compute type: float16 on GPU A100")
     args = parser.parse_args()
 
-    # Nạp mapping FPS từ frames.parquet để tính toán khung hình chuẩn 100%
     frames_path = settings.directories.processed / "frames.parquet"
     video_fps_map = {}
     if frames_path.exists():
@@ -149,7 +153,7 @@ def main():
         try:
             existing_df = pd.read_parquet(out_file)
             all_transcript_records = existing_df.to_dict("records")
-            print(f"Đã nạp {len(all_transcript_records)} phân đoạn lời thoại hiện có từ file trước đó.")
+            print(f"🔄 Đã nạp {len(all_transcript_records)} phân đoạn lời thoại hiện có để ghi tiếp (Resume).")
         except Exception:
             pass
 
@@ -159,49 +163,50 @@ def main():
     elif args.urls_file and Path(args.urls_file).exists():
         with open(args.urls_file, "r", encoding="utf-8") as f:
             targets = [line.strip() for line in f if line.strip() and not line.startswith("#")]
-        print(f"Đã nạp {len(targets)} link từ file {args.urls_file}")
+        print(f"📋 Đã nạp {len(targets)} link từ file {args.urls_file}")
     else:
         vid_dir = Path(args.videos_dir)
         if vid_dir.exists():
             targets = sorted(list(vid_dir.glob("*.zip")) + list(vid_dir.glob("*/*.zip")))
-            print(f"Đã tìm thấy {len(targets)} file ZIP trong thư mục local {vid_dir}")
+            print(f"📋 Đã tìm thấy {len(targets)} file ZIP trong thư mục local {vid_dir}")
 
     if not targets:
         print("[ERROR] Không tìm thấy link tải hoặc file ZIP nào để xử lý!")
         sys.exit(1)
 
     start_time = time.time()
+    total_pkgs = len(targets)
 
-    for idx, target in enumerate(targets, start=1):
-        print(f"\n========================================================")
-        print(f"🎥 Đang xử lý gói video {idx}/{len(targets)}: {target}")
-        print(f"========================================================")
+    # Thanh tiến trình tổng quan lớn
+    with tqdm(enumerate(targets, start=1), total=total_pkgs, desc="📦 [TIẾN ĐỘ TỔNG] Các gói Video", unit="gói") as main_bar:
+        for pkg_idx, target in main_bar:
+            main_bar.set_postfix({"gói_hiện_tại": Path(target).name if "http" in target else str(target)})
 
-        is_remote_link = isinstance(target, str) and ("http" in target or "drive.google.com" in target or len(target) > 20 and not Path(target).exists())
+            is_remote_link = isinstance(target, str) and ("http" in target or "drive.google.com" in target or len(target) > 20 and not Path(target).exists())
 
-        if is_remote_link:
-            with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
-                temp_zip_path = tmp_zip.name
+            if is_remote_link:
+                with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
+                    temp_zip_path = tmp_zip.name
 
-            download_file(target, temp_zip_path)
-            
-            records = process_video_zip(temp_zip_path, model, args.beam_size, video_fps_map)
-            all_transcript_records.extend(records)
+                download_file(target, temp_zip_path, pkg_idx, total_pkgs)
+                records = process_video_zip(temp_zip_path, model, args.beam_size, video_fps_map, pkg_idx, total_pkgs)
+                all_transcript_records.extend(records)
 
-            if os.path.exists(temp_zip_path):
-                os.remove(temp_zip_path)
-                print(f"🗑️ Đã xóa sạch file video zip tạm thời trên server để bảo vệ dung lượng đĩa!")
-        else:
-            records = process_video_zip(target, model, args.beam_size, video_fps_map)
-            all_transcript_records.extend(records)
+                if os.path.exists(temp_zip_path):
+                    os.remove(temp_zip_path)
+            else:
+                records = process_video_zip(target, model, args.beam_size, video_fps_map, pkg_idx, total_pkgs)
+                all_transcript_records.extend(records)
 
-        # Lưu checkpoint
-        if all_transcript_records:
-            pd.DataFrame(all_transcript_records).to_parquet(out_file, index=False)
-            print(f"💾 Đã lưu checkpoint: {len(all_transcript_records)} phân đoạn lời thoại vào {out_file}")
+            # Lưu checkpoint sau mỗi gói
+            if all_transcript_records:
+                pd.DataFrame(all_transcript_records).to_parquet(out_file, index=False)
+                main_bar.set_postfix({"tổng_câu_thoại": len(all_transcript_records)})
 
-    print(f"\n🎉 [HOÀN TẤT TOÀN BỘ] Tổng cộng trích xuất được {len(all_transcript_records)} phân đoạn lời thoại!")
-    print(f"File lưu tại: {out_file} (Tổng thời gian: {time.time() - start_time:.2f}s)")
+    print("\n" + "="*65)
+    print(f"🎉 [HOÀN TẤT TOÀN BỘ ASR] Tổng cộng trích xuất: {len(all_transcript_records):,} phân đoạn lời thoại!")
+    print(f"💾 File lưu tại: {out_file} (Tổng thời gian: {time.time() - start_time:.2f}s)")
+    print("="*65 + "\n")
 
 if __name__ == "__main__":
     main()
