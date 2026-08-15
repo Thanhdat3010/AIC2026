@@ -18,25 +18,14 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.config import settings
 
-def ensure_phowhisper_ct2(model_name_or_path):
-    """Tự động chuyển đổi VinAI PhoWhisper sang CTranslate2 float16 nếu cần"""
-    if "vinai" in model_name_or_path.lower():
-        ct2_dir = Path("/workspace/phowhisper-large-ct2")
-        if not (ct2_dir / "model.bin").exists():
-            print(f"\n🔄 Đang tự động tối ưu mô hình {model_name_or_path} sang CTranslate2 GPU float16...")
-            try:
-                import ctranslate2
-                converter = ctranslate2.converters.TransformersConverter(
-                    model_name_or_path,
-                    copy_files=["tokenizer.json", "preprocessor_config.json"]
-                )
-                converter.convert(str(ct2_dir), quantization="float16")
-                print(f"✅ Tối ưu hoàn tất! Lưu tại: {ct2_dir}\n")
-            except Exception as e:
-                print(f"[ERROR] Lỗi khi chuyển đổi VinAI PhoWhisper: {e}")
-                sys.exit(1)
-        return str(ct2_dir)
-    return model_name_or_path
+def get_actual_model_id(model_size):
+    """
+    Ánh xạ tên mô hình sang bản CTranslate2 chuẩn của faster-whisper:
+    - Nếu chọn VinAI PhoWhisper-large -> Dùng kiendt/PhoWhisper-large-ct2 (Bản CTranslate2 gốc của VinAI)
+    """
+    if "vinai" in model_size.lower() or "phowhisper" in model_size.lower():
+        return "kiendt/PhoWhisper-large-ct2"
+    return model_size
 
 def download_file(url_or_id, target_path, pkg_idx, total_pkgs):
     """Tải file video zip từ server BTC kèm thanh tiến trình tốc độ cao"""
@@ -198,17 +187,16 @@ def main():
         video_fps_map = dict(zip(frames_df["video_id"], frames_df["fps"]))
         print(f"✅ Đã nạp mapping FPS thực tế của {len(video_fps_map)} video từ frames.parquet.")
 
-    # Đảm bảo VinAI PhoWhisper đã được convert sang CTranslate2
-    actual_model_path = ensure_phowhisper_ct2(args.model_size)
+    actual_model_id = get_actual_model_id(args.model_size)
 
-    print(f"=== [1/2] Khởi tạo Mô Hình ASR Tiếng Việt: {args.model_size} trên GPU {args.device} ({args.compute_type}) ===")
+    print(f"=== [1/2] Khởi tạo Mô Hình VinAI PhoWhisper: {actual_model_id} trên GPU {args.device} ({args.compute_type}) ===")
     try:
         from faster_whisper import WhisperModel, BatchedInferencePipeline
     except ImportError:
         print("[ERROR] faster-whisper chưa được cài đặt! Hãy chạy: pip install faster-whisper")
         sys.exit(1)
 
-    model = WhisperModel(actual_model_path, device=args.device, compute_type=args.compute_type)
+    model = WhisperModel(actual_model_id, device=args.device, compute_type=args.compute_type)
     
     print(f"=== [2/2] Bật BatchedInferencePipeline (Batch Size = {args.batch_size}) để tăng tốc 3-4x ===")
     batched_pipeline = BatchedInferencePipeline(model=model)
