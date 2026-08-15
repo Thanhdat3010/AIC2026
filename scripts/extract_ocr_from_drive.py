@@ -22,28 +22,27 @@ from src.config import settings
 
 class VietnameseMaxAccuracyOCR:
     """
-    Hệ thống OCR 2-Stage Đạt Độ Chính Xác Tối Đa Cho Tiếng Việt (Maximum Accuracy):
-    - Stage 1 (Text Detection): PaddleOCR DBNet Server Model.
-    - Stage 2 (Text Recognition): VietOCR VGG-Transformer (Chuyên sâu tiếng Việt, bắt trọn 100% dấu).
+    Hệ thống OCR 2-Stage Đạt Độ Chính Xác Tối Đa Cho Tiếng Việt:
+    - Stage 1 (Text Detection): PaddleOCR DBNet (paddleocr==2.8.1)
+    - Stage 2 (Text Recognition): VietOCR VGG-Transformer
     """
     def __init__(self, use_vietocr=True, use_gpu=True):
         self.use_vietocr = use_vietocr
         self.use_gpu = use_gpu
 
-        print("=== Khởi tạo mô hình Text Detection (PaddleOCR DBNet) ===")
+        print("=== [1/2] Đang nạp mô hình Text Detection (PaddleOCR DBNet) ===")
         from paddleocr import PaddleOCR
-        
-        # Khởi tạo tương thích với mọi phiên bản PaddleOCR (mới và cũ)
-        try:
-            self.detector = PaddleOCR(use_angle_cls=True, lang='vi', use_gpu=use_gpu)
-        except Exception:
-            try:
-                self.detector = PaddleOCR(use_textline_orientation=True, lang='vi')
-            except Exception:
-                self.detector = PaddleOCR(lang='vi')
+        # paddleocr==2.8.1 classic API (ổn định, đã test kỹ trên GPU A100)
+        self.detector = PaddleOCR(
+            use_angle_cls=True,
+            lang='vi',
+            use_gpu=use_gpu,
+            show_log=False
+        )
+        print("✅ PaddleOCR DBNet đã sẵn sàng.")
 
         if self.use_vietocr:
-            print("=== Khởi tạo mô hình Text Recognition (VietOCR VGG-Transformer) ===")
+            print("=== [2/2] Đang nạp mô hình Text Recognition (VietOCR VGG-Transformer) ===")
             try:
                 from vietocr.tool.predictor import Predictor
                 from vietocr.tool.config import Cfg
@@ -51,9 +50,9 @@ class VietnameseMaxAccuracyOCR:
                 config['device'] = 'cuda:0' if use_gpu else 'cpu'
                 config['predictor']['beamsearch'] = True
                 self.vietocr_predictor = Predictor(config)
-                print("✅ Đã kích hoạt chế độ MAX ACCURACY (PaddleOCR Detection + VietOCR Transformer)")
+                print("✅ VietOCR VGG-Transformer đã sẵn sàng (MAX ACCURACY cho tiếng Việt).")
             except ImportError:
-                print("[WARNING] Chưa cài VietOCR. Đang fallback về PaddleOCR Recognition. (Để cài: pip install vietocr)")
+                print("[WARNING] Chưa cài VietOCR. Fallback về PaddleOCR Recognition. (pip install vietocr)")
                 self.use_vietocr = False
 
     def predict(self, img_array):
@@ -95,14 +94,14 @@ class VietnameseMaxAccuracyOCR:
         return None, None
 
 def download_file(url_or_id, target_path, pkg_idx, total_pkgs):
-    """Tải file zip kèm thanh tiến trình tốc độ cao và đo tốc độ MB/s"""
+    """Tải file zip kèm thanh tiến trình tốc độ cao"""
     filename = Path(url_or_id).name if "http" in url_or_id else f"Package_{pkg_idx}.zip"
     
     if "ledo.io.vn" in url_or_id or (url_or_id.startswith("http") and "drive.google.com" not in url_or_id):
         response = requests.get(url_or_id, stream=True, timeout=60)
         response.raise_for_status()
         total_size = int(response.headers.get('content-length', 0))
-        block_size = 1024 * 1024  # 1MB chunk
+        block_size = 1024 * 1024
         
         with open(target_path, 'wb') as file, tqdm(
             desc=f"📥 [Tải {pkg_idx}/{total_pkgs}] {filename}",
@@ -119,7 +118,7 @@ def download_file(url_or_id, target_path, pkg_idx, total_pkgs):
         try:
             import gdown
         except ImportError:
-            print("[ERROR] Chưa cài gdown! Hãy chạy: pip install gdown")
+            print("[ERROR] Chưa cài gdown! pip install gdown")
             sys.exit(1)
         if "drive.google.com" in url_or_id:
             gdown.download(url=url_or_id, output=str(target_path), quiet=False, fuzzy=True)
@@ -127,7 +126,7 @@ def download_file(url_or_id, target_path, pkg_idx, total_pkgs):
             gdown.download(id=url_or_id, output=str(target_path), quiet=False)
 
 def process_zip_archive(zpath, ocr_engine, frames_df, pkg_idx, total_pkgs):
-    """Đọc trực tiếp luồng byte ảnh từ ZIP vào RAM và chạy OCR với thanh tiến trình chi tiết"""
+    """Đọc trực tiếp byte ảnh từ ZIP vào RAM và chạy OCR kèm thanh tiến trình"""
     records = []
     zip_name = Path(zpath).name
     
@@ -167,23 +166,17 @@ def process_zip_archive(zpath, ocr_engine, frames_df, pkg_idx, total_pkgs):
                             "ocr_text": text,
                             "confidence": conf
                         })
-                        pbar.set_postfix({"chữ_tìm_thấy": len(records), "video": video_id})
+                        pbar.set_postfix({"found": len(records), "vid": video_id})
     return records
 
 def main():
-    parser = argparse.ArgumentParser(description="Download from BTC/Drive Link -> In-Memory SOTA OCR -> Auto-Delete ZIP")
-    parser.add_argument("--url", type=str, default=None,
-                        help="Single direct link of Keyframes_Lxx.zip (e.g. from ledo.io.vn or Drive)")
-    parser.add_argument("--urls_file", type=str, default="config/drive_keyframes_urls.txt",
-                        help="Path to .txt file containing list of links (default: config/drive_keyframes_urls.txt)")
-    parser.add_argument("--keyframes_dir", type=str, default="Keyframes",
-                        help="Local folder containing Keyframes_Lxx.zip (if already downloaded)")
-    parser.add_argument("--output_path", type=str, default="data/processed/ocr_results.parquet",
-                        help="Path to save extracted OCR parquet file")
-    parser.add_argument("--use_vietocr", action="store_true", default=True,
-                        help="Use VietOCR VGG-Transformer for maximum recognition accuracy")
-    parser.add_argument("--use_gpu", action="store_true", default=True,
-                        help="Use GPU A100 for inference")
+    parser = argparse.ArgumentParser(description="BTC/Drive -> In-Memory SOTA OCR -> Auto-Delete ZIP")
+    parser.add_argument("--url", type=str, default=None)
+    parser.add_argument("--urls_file", type=str, default="config/drive_keyframes_urls.txt")
+    parser.add_argument("--keyframes_dir", type=str, default="Keyframes")
+    parser.add_argument("--output_path", type=str, default="data/processed/ocr_results.parquet")
+    parser.add_argument("--use_vietocr", action="store_true", default=True)
+    parser.add_argument("--use_gpu", action="store_true", default=True)
     args = parser.parse_args()
 
     ocr_engine = VietnameseMaxAccuracyOCR(use_vietocr=args.use_vietocr, use_gpu=args.use_gpu)
@@ -202,7 +195,7 @@ def main():
         try:
             existing_df = pd.read_parquet(out_file)
             all_ocr_records = existing_df.to_dict("records")
-            print(f"🔄 Đã nạp {len(all_ocr_records)} bản ghi OCR hiện có để ghi tiếp (Resume).")
+            print(f"🔄 Resume: đã nạp {len(all_ocr_records)} bản ghi OCR hiện có.")
         except Exception:
             pass
 
@@ -217,22 +210,20 @@ def main():
         kf_dir = Path(args.keyframes_dir)
         if kf_dir.exists():
             targets = sorted(list(kf_dir.glob("*.zip")) + list(kf_dir.glob("*/*.zip")))
-            print(f"📋 Đã tìm thấy {len(targets)} file ZIP trong thư mục local {kf_dir}")
+            print(f"📋 Đã tìm thấy {len(targets)} file ZIP local")
 
     if not targets:
-        print("[ERROR] Không tìm thấy link tải hoặc file ZIP nào để xử lý!")
+        print("[ERROR] Không tìm thấy link tải hoặc file ZIP nào!")
         sys.exit(1)
 
     start_time = time.time()
     total_pkgs = len(targets)
 
-    with tqdm(enumerate(targets, start=1), total=total_pkgs, desc="📦 [TIẾN ĐỘ TỔNG] Các gói Keyframe", unit="gói") as main_bar:
+    with tqdm(enumerate(targets, start=1), total=total_pkgs, desc="📦 [TỔNG] Keyframes", unit="gói") as main_bar:
         for pkg_idx, target in main_bar:
-            main_bar.set_postfix({"gói_hiện_tại": Path(target).name if "http" in target else str(target)})
-
-            is_remote_link = isinstance(target, str) and ("http" in target or "drive.google.com" in target or len(target) > 20 and not Path(target).exists())
+            is_remote = isinstance(target, str) and ("http" in target or "drive.google.com" in target or (len(target) > 20 and not Path(target).exists()))
             
-            if is_remote_link:
+            if is_remote:
                 with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
                     temp_zip_path = tmp_zip.name
 
@@ -248,12 +239,13 @@ def main():
 
             if all_ocr_records:
                 pd.DataFrame(all_ocr_records).to_parquet(out_file, index=False)
-                main_bar.set_postfix({"tổng_frame_có_chữ": len(all_ocr_records)})
+                main_bar.set_postfix({"tổng_chữ": len(all_ocr_records)})
 
+    elapsed = time.time() - start_time
     print("\n" + "="*65)
-    print(f"🎉 [HOÀN TẤT TOÀN BỘ OCR] Tổng cộng trích xuất: {len(all_ocr_records):,} khung hình có chữ!")
-    print(f"💾 File lưu tại: {out_file} (Tổng thời gian: {time.time() - start_time:.2f}s)")
-    print("="*65 + "\n")
+    print(f"🎉 HOÀN TẤT OCR: {len(all_ocr_records):,} khung hình có chữ")
+    print(f"💾 Lưu tại: {out_file} ({elapsed:.0f}s)")
+    print("="*65)
 
 if __name__ == "__main__":
     main()
