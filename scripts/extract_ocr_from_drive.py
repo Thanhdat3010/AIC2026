@@ -4,6 +4,7 @@ import time
 import zipfile
 import tempfile
 import os
+import re
 import requests
 from pathlib import Path
 import pandas as pd
@@ -88,7 +89,6 @@ def download_file(url_or_id, target_path):
     """Tải 1 file zip tốc độ cao trực tiếp từ link máy chủ BTC (ledo.io.vn) hoặc Google Drive"""
     print(f"\n📥 Đang tải: {url_or_id}")
     
-    # 1. Link trực tiếp từ máy chủ BTC (ledo.io.vn) hoặc link HTTP trực tiếp
     if "ledo.io.vn" in url_or_id or (url_or_id.startswith("http") and "drive.google.com" not in url_or_id):
         response = requests.get(url_or_id, stream=True, timeout=60)
         response.raise_for_status()
@@ -106,7 +106,6 @@ def download_file(url_or_id, target_path):
                 size = file.write(data)
                 bar.update(size)
     else:
-        # 2. Link Google Drive
         try:
             import gdown
         except ImportError:
@@ -118,21 +117,26 @@ def download_file(url_or_id, target_path):
             gdown.download(id=url_or_id, output=str(target_path), quiet=False)
 
 def process_zip_archive(zpath, ocr_engine, frames_df):
-    """Đọc trực tiếp luồng byte ảnh từ ZIP vào RAM và chạy OCR"""
+    """Đọc trực tiếp luồng byte ảnh từ ZIP vào RAM và chạy OCR (Xử lý mọi cấu trúc thư mục lồng nhau)"""
     records = []
     with zipfile.ZipFile(zpath, "r") as zf:
         img_names = [n for n in zf.namelist() if n.lower().endswith(('.jpg', '.png', '.jpeg'))]
         
         for img_name in tqdm(img_names, desc=f"OCR Scanning {Path(zpath).name}"):
-            parts = Path(img_name).parts
-            if len(parts) < 2:
+            # Bắt chính xác video_id dạng Lxx_Vxxx (bất chấp thư mục lồng nhau bên trong zip)
+            match_vid = re.search(r'(L\d+_V\d+)', img_name)
+            if not match_vid:
                 continue
-            video_id = parts[-2]
-            try:
-                kf_idx = int(Path(parts[-1]).stem)
-            except ValueError:
-                continue
+            video_id = match_vid.group(1)
 
+            # Lấy số thứ tự keyframe (stem của tên file ảnh: 001.jpg -> 1)
+            filename = Path(img_name).name
+            match_idx = re.search(r'(\d+)', Path(filename).stem)
+            if not match_idx:
+                continue
+            kf_idx = int(match_idx.group(1))
+
+            # Tra cứu frame_idx gốc
             frame_idx, pts_time = -1, 0.0
             if frames_df is not None and (video_id, kf_idx) in frames_df.index:
                 row = frames_df.loc[(video_id, kf_idx)]
@@ -184,7 +188,6 @@ def main():
     out_file = Path(args.output_path)
     out_file.parent.mkdir(parents=True, exist_ok=True)
 
-    # Resume checkpoint nếu có
     if out_file.exists():
         try:
             existing_df = pd.read_parquet(out_file)
@@ -225,11 +228,9 @@ def main():
 
             download_file(target, temp_zip_path)
             
-            # Xử lý OCR trực tiếp trong RAM
             records = process_zip_archive(temp_zip_path, ocr_engine, frames_df)
             all_ocr_records.extend(records)
 
-            # TỰ ĐỘNG XÓA NGAY LẬP TỨC file zip tạm thời khỏi Server!
             if os.path.exists(temp_zip_path):
                 os.remove(temp_zip_path)
                 print(f"🗑️ Đã xóa sạch file zip tạm thời trên server để bảo vệ dung lượng đĩa!")
@@ -237,7 +238,6 @@ def main():
             records = process_zip_archive(target, ocr_engine, frames_df)
             all_ocr_records.extend(records)
 
-        # Lưu checkpoint sau mỗi file zip
         if all_ocr_records:
             pd.DataFrame(all_ocr_records).to_parquet(out_file, index=False)
             print(f"💾 Đã lưu checkpoint: {len(all_ocr_records)} bản ghi OCR vào {out_file}")

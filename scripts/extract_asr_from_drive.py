@@ -4,6 +4,7 @@ import time
 import zipfile
 import tempfile
 import os
+import re
 import requests
 from pathlib import Path
 import pandas as pd
@@ -54,7 +55,12 @@ def process_video_zip(zpath, model, beam_size):
         mp4_names = [n for n in zf.namelist() if n.lower().endswith('.mp4')]
         
         for mp4_name in tqdm(mp4_names, desc=f"Transcribing {Path(zpath).name}"):
-            video_id = Path(mp4_name).stem
+            # Bắt chính xác video_id dạng Lxx_Vxxx (bất chấp thư mục lồng nhau bên trong zip)
+            match_vid = re.search(r'(L\d+_V\d+)', mp4_name)
+            if match_vid:
+                video_id = match_vid.group(1)
+            else:
+                video_id = Path(mp4_name).stem
             
             # Giải nén tạm 1 video
             with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp_file:
