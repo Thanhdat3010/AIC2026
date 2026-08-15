@@ -2,6 +2,8 @@ import argparse
 import sys
 import time
 import zipfile
+import tempfile
+import os
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -19,8 +21,8 @@ from src.config import settings
 class VietnameseMaxAccuracyOCR:
     """
     Hệ thống OCR 2-Stage Đạt Độ Chính Xác Tối Đa Cho Tiếng Việt (Maximum Accuracy):
-    - Stage 1 (Text Detection): PaddleOCR DBNet Server Model (Tìm chính xác tọa độ hộp bao chữ).
-    - Stage 2 (Text Recognition): VietOCR VGG-Transformer (Mô hình Transformer chuyên biệt tiếng Việt, bắt chuẩn 100% dấu).
+    - Stage 1 (Text Detection): PaddleOCR DBNet Server Model.
+    - Stage 2 (Text Recognition): VietOCR VGG-Transformer (Chuyên sâu tiếng Việt, bắt trọn 100% dấu).
     """
     def __init__(self, use_vietocr=True, use_gpu=True):
         self.use_vietocr = use_vietocr
@@ -28,7 +30,6 @@ class VietnameseMaxAccuracyOCR:
 
         print("=== Khởi tạo mô hình Text Detection (PaddleOCR DBNet) ===")
         from paddleocr import PaddleOCR
-        # Khởi tạo detector với cấu hình phát hiện tối đa
         self.detector = PaddleOCR(use_angle_cls=True, lang='vi', use_gpu=use_gpu, show_log=False)
 
         if self.use_vietocr:
@@ -46,7 +47,6 @@ class VietnameseMaxAccuracyOCR:
 
     def predict(self, img_array):
         try:
-            # 1. Phát hiện hộp bao chữ
             result = self.detector.ocr(img_array, cls=True)
             if not result or not result[0]:
                 return None, None
@@ -55,12 +55,11 @@ class VietnameseMaxAccuracyOCR:
             confidences = []
 
             for line in result[0]:
-                box = line[0]  # Tọa độ 4 đỉnh [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
+                box = line[0]
                 paddle_text = line[1][0].strip()
                 paddle_score = float(line[1][1])
 
                 if self.use_vietocr:
-                    # Crop vùng chữ từ ảnh gốc
                     pts = np.array(box, dtype=np.int32)
                     rect = cv2.boundingRect(pts)
                     x, y, w, h = rect
@@ -74,7 +73,6 @@ class VietnameseMaxAccuracyOCR:
                                 confidences.append(prob)
                                 continue
                 
-                # Fallback PaddleOCR text nếu không dùng VietOCR
                 if len(paddle_text) >= 2 and paddle_score >= 0.5:
                     texts.append(paddle_text)
                     confidences.append(paddle_score)
@@ -85,10 +83,66 @@ class VietnameseMaxAccuracyOCR:
             pass
         return None, None
 
+def download_file_from_drive(drive_url_or_id, target_path):
+    """Tải 1 file zip từ link/ID Google Drive về đường dẫn tạm thời"""
+    try:
+        import gdown
+    except ImportError:
+        print("[ERROR] Chưa cài gdown! Hãy chạy: pip install gdown")
+        sys.exit(1)
+        
+    print(f"\n📥 Đang tải file từ Drive: {drive_url_or_id}")
+    if "drive.google.com" in drive_url_or_id or "http" in drive_url_or_id:
+        gdown.download(url=drive_url_or_id, output=str(target_path), quiet=False, fuzzy=True)
+    else:
+        gdown.download(id=drive_url_or_id, output=str(target_path), quiet=False)
+
+def process_zip_archive(zpath, ocr_engine, frames_df):
+    """Đọc trực tiếp luồng byte ảnh từ ZIP vào RAM và chạy OCR"""
+    records = []
+    with zipfile.ZipFile(zpath, "r") as zf:
+        img_names = [n for n in zf.namelist() if n.lower().endswith(('.jpg', '.png', '.jpeg'))]
+        
+        for img_name in tqdm(img_names, desc=f"OCR Scanning {Path(zpath).name}"):
+            parts = Path(img_name).parts
+            if len(parts) < 2:
+                continue
+            video_id = parts[-2]
+            try:
+                kf_idx = int(Path(parts[-1]).stem)
+            except ValueError:
+                continue
+
+            frame_idx, pts_time = -1, 0.0
+            if frames_df is not None and (video_id, kf_idx) in frames_df.index:
+                row = frames_df.loc[(video_id, kf_idx)]
+                frame_idx = int(row["frame_idx"])
+                pts_time = float(row["pts_time"])
+
+            img_bytes = zf.read(img_name)
+            img_array = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
+            
+            if img_array is not None:
+                text, conf = ocr_engine.predict(img_array)
+                if text:
+                    records.append({
+                        "video_id": video_id,
+                        "keyframe_index": kf_idx,
+                        "frame_idx": frame_idx,
+                        "pts_time": pts_time,
+                        "ocr_text": text,
+                        "confidence": conf
+                    })
+    return records
+
 def main():
-    parser = argparse.ArgumentParser(description="Maximum Accuracy Vietnamese Video OCR (PaddleOCR DBNet + VietOCR Transformer)")
+    parser = argparse.ArgumentParser(description="Download from Drive Link -> In-Memory SOTA OCR -> Auto-Delete ZIP")
+    parser.add_argument("--drive_url", type=str, default=None,
+                        help="Single Google Drive Link or File ID of Keyframes_Lxx.zip")
+    parser.add_argument("--urls_file", type=str, default=None,
+                        help="Path to .txt file containing list of Google Drive Links (one per line)")
     parser.add_argument("--keyframes_dir", type=str, default="Keyframes",
-                        help="Path to folder containing Keyframes_Lxx.zip files")
+                        help="Local folder containing Keyframes_Lxx.zip (if already downloaded)")
     parser.add_argument("--output_path", type=str, default="data/processed/ocr_results.parquet",
                         help="Path to save extracted OCR parquet file")
     parser.add_argument("--use_vietocr", action="store_true", default=True,
@@ -97,78 +151,84 @@ def main():
                         help="Use GPU A100 for inference")
     args = parser.parse_args()
 
-    kf_dir = Path(args.keyframes_dir)
-    if not kf_dir.exists():
-        print(f"[ERROR] Thư mục Keyframes không tồn tại: {kf_dir}")
-        sys.exit(1)
-
     ocr_engine = VietnameseMaxAccuracyOCR(use_vietocr=args.use_vietocr, use_gpu=args.use_gpu)
 
-    # Đọc bảng frames.parquet để tra cứu frame_idx gốc
+    # Nạp frames.parquet để tra cứu frame_idx gốc
     frames_path = settings.directories.processed / "frames.parquet"
     frames_df = None
     if frames_path.exists():
         frames_df = pd.read_parquet(frames_path).set_index(["video_id", "keyframe_index"])
         print(f"Đã nạp {len(frames_df)} bản ghi mapping từ frames.parquet.")
 
-    # Tìm toàn bộ file ZIP trong Keyframes/
-    zip_files = sorted(list(kf_dir.glob("*.zip")) + list(kf_dir.glob("*/*.zip")))
-    print(f"Tìm thấy {len(zip_files)} file ZIP trong {kf_dir}. Bắt đầu xử lý với cấu hình MAX ACCURACY...")
-
-    ocr_records = []
-    start_time = time.time()
-
-    for zpath in zip_files:
-        print(f"\n>> Đang xử lý file zip: {zpath.name}")
-        try:
-            with zipfile.ZipFile(zpath, "r") as zf:
-                img_names = [n for n in zf.namelist() if n.lower().endswith(('.jpg', '.png', '.jpeg'))]
-                
-                for img_name in tqdm(img_names, desc=f"Scanning {zpath.name}"):
-                    parts = Path(img_name).parts
-                    if len(parts) < 2:
-                        continue
-                    video_id = parts[-2]
-                    try:
-                        kf_idx = int(Path(parts[-1]).stem)
-                    except ValueError:
-                        continue
-
-                    frame_idx, pts_time = -1, 0.0
-                    if frames_df is not None and (video_id, kf_idx) in frames_df.index:
-                        row = frames_df.loc[(video_id, kf_idx)]
-                        frame_idx = int(row["frame_idx"])
-                        pts_time = float(row["pts_time"])
-
-                    # Đọc trực tiếp byte từ ZIP vào RAM
-                    img_bytes = zf.read(img_name)
-                    img_array = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
-                    
-                    if img_array is not None:
-                        text, conf = ocr_engine.predict(img_array)
-                        if text:
-                            ocr_records.append({
-                                "video_id": video_id,
-                                "keyframe_index": kf_idx,
-                                "frame_idx": frame_idx,
-                                "pts_time": pts_time,
-                                "ocr_text": text,
-                                "confidence": conf
-                            })
-        except Exception as e:
-            print(f"[WARNING] Lỗi khi xử lý file zip {zpath.name}: {e}")
-            continue
-
-    # Lưu kết quả sang Parquet
+    all_ocr_records = []
     out_file = Path(args.output_path)
     out_file.parent.mkdir(parents=True, exist_ok=True)
-    if ocr_records:
-        df_ocr = pd.DataFrame(ocr_records)
-        df_ocr.to_parquet(out_file, index=False)
-        print(f"\n🎉 [HOÀN TẤT MAX ACCURACY] Đã trích xuất xong {len(ocr_records)} khung hình có chữ!")
-        print(f"File lưu tại: {out_file} (Tổng thời gian: {time.time() - start_time:.2f} giây)")
+
+    # Nếu đã có file parquet trước đó -> nạp lên để ghi tiếp (Resume)
+    if out_file.exists():
+        try:
+            existing_df = pd.read_parquet(out_file)
+            all_ocr_records = existing_df.to_dict("records")
+            print(f"Đã nạp {len(all_ocr_records)} bản ghi OCR hiện có từ file trước đó.")
+        except Exception:
+            pass
+
+    # Thu thập danh sách các mục tiêu cần xử lý
+    targets = []
+    if args.drive_url:
+        targets.append(args.drive_url)
+    elif args.urls_file and Path(args.urls_file).exists():
+        with open(args.urls_file, "r", encoding="utf-8") as f:
+            targets = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+        print(f"Đã nạp {len(targets)} link Google Drive từ file {args.urls_file}")
     else:
-        print("\n[WARNING] Không tìm thấy dữ liệu chữ.")
+        # Quét thư mục local
+        kf_dir = Path(args.keyframes_dir)
+        if kf_dir.exists():
+            targets = sorted(list(kf_dir.glob("*.zip")) + list(kf_dir.glob("*/*.zip")))
+            print(f"Đã tìm thấy {len(targets)} file ZIP trong thư mục local {kf_dir}")
+
+    if not targets:
+        print("[ERROR] Không tìm thấy link Drive hoặc file ZIP nào để xử lý!")
+        print("Vui lòng cung cấp: --drive_url 'LINK_DRIVE' hoặc --urls_file 'config/drive_keyframes_urls.txt'")
+        sys.exit(1)
+
+    start_time = time.time()
+
+    for idx, target in enumerate(targets, start=1):
+        print(f"\n========================================================")
+        print(f"📦 Đang xử lý gói {idx}/{len(targets)}: {target}")
+        print(f"========================================================")
+
+        is_drive_link = isinstance(target, str) and ("drive.google.com" in target or "http" in target or len(target) > 20 and not Path(target).exists())
+        
+        if is_drive_link:
+            # Tải tạm 1 file zip từ Google Drive về thư mục temp
+            with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
+                temp_zip_path = tmp_zip.name
+
+            download_file_from_drive(target, temp_zip_path)
+            
+            # Xử lý OCR trực tiếp trong RAM
+            records = process_zip_archive(temp_zip_path, ocr_engine, frames_df)
+            all_ocr_records.extend(records)
+
+            # TỰ ĐỘNG XÓA NGAY LẬP TỨC file zip tạm thời khỏi Server!
+            if os.path.exists(temp_zip_path):
+                os.remove(temp_zip_path)
+                print(f"🗑️ Đã xóa sạch file zip tạm thời trên server để bảo vệ dung lượng đĩa!")
+        else:
+            # Xử lý file zip local
+            records = process_zip_archive(target, ocr_engine, frames_df)
+            all_ocr_records.extend(records)
+
+        # Lưu checkpoint sau mỗi file zip
+        if all_ocr_records:
+            pd.DataFrame(all_ocr_records).to_parquet(out_file, index=False)
+            print(f"💾 Đã lưu checkpoint: {len(all_ocr_records)} bản ghi OCR vào {out_file}")
+
+    print(f"\n🎉 [HOÀN TẤT TOÀN BỘ] Tổng cộng trích xuất được {len(all_ocr_records)} khung hình có chữ!")
+    print(f"File lưu tại: {out_file} (Tổng thời gian: {time.time() - start_time:.2f}s)")
 
 if __name__ == "__main__":
     main()

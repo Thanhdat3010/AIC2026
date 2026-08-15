@@ -1,0 +1,4 @@
+# Danh sách Link Google Drive các file Videos_Lxx_a.zip (Mỗi dòng 1 link)
+# Ví dụ:
+# https://drive.google.com/file/d/1ABCxyzVideos_L21_a.../view?usp=sharing
+# https://drive.google.com/file/d/1DEFxyzVideos_L22_a.../view?usp=sharing

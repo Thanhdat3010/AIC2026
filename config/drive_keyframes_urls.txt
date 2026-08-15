@@ -1,0 +1,4 @@
+# Danh sách Link Google Drive các file Keyframes_Lxx.zip (Mỗi dòng 1 link)
+# Ví dụ:
+# https://drive.google.com/file/d/1ABCxyzKeyframes_L21.../view?usp=sharing
+# https://drive.google.com/file/d/1DEFxyzKeyframes_L22.../view?usp=sharing
