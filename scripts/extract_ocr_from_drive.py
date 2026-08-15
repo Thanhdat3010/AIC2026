@@ -9,13 +9,13 @@ import requests
 from pathlib import Path
 
 # ==============================================================================
-# CẤU HÌNH TỐI ƯU HÓA VRAM GPU A100 — CHỈ DÙNG TỐI ĐA ~2GB VRAM
+# CẤU HÌNH TỐI ƯU HÓA VRAM GPU A100
 # ==============================================================================
-os.environ['FLAGS_allocator_strategy'] = 'auto_growth'              # Cấp phát động theo nhu cầu thực tế
-os.environ['FLAGS_fraction_of_gpu_memory_to_use'] = '0.05'          # Chỉ chiếm tối đa 5% VRAM (~2GB trên A100 40GB)
-os.environ['FLAGS_eager_delete_tensor_gb'] = '0.0'                  # Giải phóng tensor ngay lập tức sau khi dùng xong
-os.environ['FLAGS_fast_eager_deletion_mode'] = 'True'               # Chế độ giải phóng bộ nhớ cực nhanh
-os.environ['PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK'] = 'True'       # Tắt kiểm tra kết nối rườm rà
+os.environ['FLAGS_allocator_strategy'] = 'auto_growth'
+os.environ['FLAGS_fraction_of_gpu_memory_to_use'] = '0.10'
+os.environ['FLAGS_eager_delete_tensor_gb'] = '0.0'
+os.environ['FLAGS_fast_eager_deletion_mode'] = 'True'
+os.environ['PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK'] = 'True'
 
 import pandas as pd
 import numpy as np
@@ -33,8 +33,8 @@ from src.config import settings
 class VietnameseMaxAccuracyOCR:
     """
     Hệ thống OCR 2-Stage Đạt Độ Chính Xác Tối Đa Cho Tiếng Việt:
-    - Stage 1 (Text Detection): PaddleOCR DBNet (paddleocr==2.8.1)
-    - Stage 2 (Text Recognition): VietOCR VGG-Transformer
+    - Stage 1 (Text Detection): PaddleOCR DBNet
+    - Stage 2 (Text Recognition): VietOCR VGG-Transformer (hoặc PaddleOCR Rec nếu chưa cài VietOCR)
     """
     def __init__(self, use_vietocr=True, use_gpu=True):
         self.use_vietocr = use_vietocr
@@ -42,14 +42,17 @@ class VietnameseMaxAccuracyOCR:
 
         print("=== [1/2] Đang nạp mô hình Text Detection (PaddleOCR DBNet) ===")
         from paddleocr import PaddleOCR
-        self.detector = PaddleOCR(
-            use_angle_cls=True,
-            lang='vi',
-            use_gpu=use_gpu,
-            gpu_mem=500,
-            show_log=False
-        )
-        print("✅ PaddleOCR DBNet đã sẵn sàng (VRAM đã tối ưu auto-growth).")
+        try:
+            self.detector = PaddleOCR(
+                use_angle_cls=False,
+                lang='vi',
+                use_gpu=use_gpu,
+                show_log=False
+            )
+            print("✅ PaddleOCR DBNet đã sẵn sàng trên GPU.")
+        except Exception as e:
+            print(f"[ERROR] Không thể khởi tạo PaddleOCR: {e}")
+            raise e
 
         if self.use_vietocr:
             print("=== [2/2] Đang nạp mô hình Text Recognition (VietOCR VGG-Transformer) ===")
@@ -58,48 +61,63 @@ class VietnameseMaxAccuracyOCR:
                 from vietocr.tool.config import Cfg
                 config = Cfg.load_config_from_name('vgg_transformer')
                 config['device'] = 'cuda:0' if use_gpu else 'cpu'
-                config['predictor']['beamsearch'] = True
+                config['predictor']['beamsearch'] = False  # Beamsearch False để nhanh và nhẹ
                 self.vietocr_predictor = Predictor(config)
                 print("✅ VietOCR VGG-Transformer đã sẵn sàng (MAX ACCURACY cho tiếng Việt).")
-            except ImportError:
-                print("[WARNING] Chưa cài VietOCR. Fallback về PaddleOCR Recognition. (pip install vietocr)")
+            except Exception as e:
+                print(f"[WARNING] Chưa cài hoặc lỗi VietOCR ({e}). Fallback về PaddleOCR Recognition.")
                 self.use_vietocr = False
 
     def predict(self, img_array):
         try:
-            result = self.detector.ocr(img_array, cls=True)
-            if not result or not result[0]:
+            if img_array is None or img_array.size == 0:
+                return None, None
+
+            result = self.detector.ocr(img_array, cls=False)
+            if not result or result[0] is None or len(result[0]) == 0:
                 return None, None
 
             texts = []
             confidences = []
 
             for line in result[0]:
+                if not line or len(line) < 2:
+                    continue
                 box = line[0]
-                paddle_text = line[1][0].strip()
-                paddle_score = float(line[1][1])
+                rec_res = line[1]
+                paddle_text = str(rec_res[0]).strip() if isinstance(rec_res, (list, tuple)) else ""
+                paddle_score = float(rec_res[1]) if isinstance(rec_res, (list, tuple)) and len(rec_res) > 1 else 0.0
 
                 if self.use_vietocr:
-                    pts = np.array(box, dtype=np.int32)
-                    rect = cv2.boundingRect(pts)
-                    x, y, w, h = rect
-                    if w > 5 and h > 5:
-                        crop = img_array[y:y+h, x:x+w]
-                        if crop.size > 0:
-                            pil_img = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
-                            vietocr_text, prob = self.vietocr_predictor.predict(pil_img, return_prob=True)
-                            if len(vietocr_text.strip()) >= 2 and prob >= 0.5:
-                                texts.append(vietocr_text.strip())
-                                confidences.append(prob)
-                                continue
+                    try:
+                        pts = np.array(box, dtype=np.int32)
+                        rect = cv2.boundingRect(pts)
+                        x, y, w, h = rect
+                        if w > 8 and h > 8:
+                            h_img, w_img = img_array.shape[:2]
+                            x1, y1 = max(0, x), max(0, y)
+                            x2, y2 = min(w_img, x + w), min(h_img, y + h)
+                            crop = img_array[y1:y2, x1:x2]
+                            if crop.size > 0:
+                                pil_img = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
+                                vietocr_text, prob = self.vietocr_predictor.predict(pil_img, return_prob=True)
+                                vietocr_text = vietocr_text.strip()
+                                if len(vietocr_text) >= 2 and prob >= 0.4:
+                                    texts.append(vietocr_text)
+                                    confidences.append(prob)
+                                    continue
+                    except Exception:
+                        pass
                 
-                if len(paddle_text) >= 2 and paddle_score >= 0.5:
+                # Fallback PaddleOCR text nếu không dùng VietOCR hoặc crop lỗi
+                if len(paddle_text) >= 2 and paddle_score >= 0.4:
                     texts.append(paddle_text)
                     confidences.append(paddle_score)
 
             if texts:
                 return " | ".join(texts), round(sum(confidences) / len(confidences), 3)
-        except Exception:
+        except Exception as e:
+            # Debug nếu cần
             pass
         return None, None
 
@@ -185,7 +203,7 @@ def process_zip_archive(zpath, ocr_engine, frames_df, pkg_idx, total_pkgs, proce
 
 def save_and_merge_parquet(new_records, out_file):
     """Ghi checkpoint và gộp dữ liệu không bao giờ bị mất hoặc trùng lặp"""
-    if not new_records and not out_file.exists():
+    if not new_records:
         return
     
     combined_df = pd.DataFrame(new_records)
@@ -197,28 +215,20 @@ def save_and_merge_parquet(new_records, out_file):
             pass
     
     if not combined_df.empty:
-        # Loại bỏ trùng lặp theo (video_id, keyframe_index)
         combined_df = combined_df.drop_duplicates(subset=["video_id", "keyframe_index"], keep="last")
         combined_df.to_parquet(out_file, index=False)
+        print(f"\n💾 [CHECKPOINT] Đã ghi thành công {len(combined_df):,} khung hình có chữ vào {out_file}")
 
 def main():
     parser = argparse.ArgumentParser(description="BTC/Drive -> In-Memory SOTA OCR -> Auto-Delete ZIP & Auto-Resume")
-    parser.add_argument("--url", type=str, default=None,
-                        help="Chạy 1 link cụ thể (VD: https://aic-data.ledo.io.vn/Keyframes_L25.zip)")
-    parser.add_argument("--urls_file", type=str, default="config/drive_keyframes_urls.txt",
-                        help="File danh sách link (mặc định: config/drive_keyframes_urls.txt)")
-    parser.add_argument("--start_index", type=int, default=1,
-                        help="Bắt đầu chạy từ gói số N (1-indexed, ví dụ: --start_index 5 chạy từ gói 5 đến 14)")
-    parser.add_argument("--start_from", type=str, default=None,
-                        help="Bắt đầu chạy từ file cụ thể (ví dụ: --start_from Keyframes_L25.zip)")
-    parser.add_argument("--keyframes_dir", type=str, default="Keyframes",
-                        help="Thư mục ZIP local nếu đã tải sẵn")
-    parser.add_argument("--output_path", type=str, default="data/processed/ocr_results.parquet",
-                        help="Nơi lưu file kết quả OCR parquet")
-    parser.add_argument("--use_vietocr", action="store_true", default=True,
-                        help="Dùng VietOCR VGG-Transformer để đạt độ chính xác tối đa")
-    parser.add_argument("--use_gpu", action="store_true", default=True,
-                        help="Chạy trên GPU A100")
+    parser.add_argument("--url", type=str, default=None)
+    parser.add_argument("--urls_file", type=str, default="config/drive_keyframes_urls.txt")
+    parser.add_argument("--start_index", type=int, default=1)
+    parser.add_argument("--start_from", type=str, default=None)
+    parser.add_argument("--keyframes_dir", type=str, default="Keyframes")
+    parser.add_argument("--output_path", type=str, default="data/processed/ocr_results.parquet")
+    parser.add_argument("--use_vietocr", action="store_true", default=True)
+    parser.add_argument("--use_gpu", action="store_true", default=True)
     args = parser.parse_args()
 
     ocr_engine = VietnameseMaxAccuracyOCR(use_vietocr=args.use_vietocr, use_gpu=args.use_gpu)
@@ -232,7 +242,6 @@ def main():
     out_file = Path(args.output_path)
     out_file.parent.mkdir(parents=True, exist_ok=True)
     
-    # Tập các video_id đã từng được xử lý trong file parquet cũ
     processed_videos_set = set()
     total_existing_records = 0
     if out_file.exists():
@@ -244,7 +253,6 @@ def main():
         except Exception:
             pass
 
-    # Nạp danh sách mục tiêu
     all_targets = []
     if args.url:
         all_targets.append(args.url)
@@ -265,7 +273,6 @@ def main():
     total_pkgs = len(all_targets)
     start_offset = 0
 
-    # Xử lý chọn điểm bắt đầu (Start from / Start index)
     if args.start_from:
         target_name = args.start_from.lower().replace(".zip", "")
         found = False
@@ -304,14 +311,11 @@ def main():
             else:
                 new_records = process_zip_archive(target, ocr_engine, frames_df, pkg_idx, total_pkgs, processed_videos_set)
 
-            # Cập nhật checkpoint vào parquet
             if new_records:
                 save_and_merge_parquet(new_records, out_file)
-                # Cập nhật danh sách video đã làm
                 for r in new_records:
                     processed_videos_set.add(r["video_id"])
                 
-                # Đọc lại tổng số dòng hiện có
                 try:
                     cur_total = len(pd.read_parquet(out_file))
                     main_bar.set_postfix({"gói": pkg_name, "tổng_khung_hình": cur_total})
