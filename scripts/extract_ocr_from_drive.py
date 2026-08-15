@@ -7,6 +7,14 @@ import os
 import re
 import requests
 from pathlib import Path
+
+# ==============================================================================
+# CẤU HÌNH TỐI ƯU HÓA VRAM GPU A100 (Tránh PaddlePaddle chiếm dụng 40GB VRAM)
+# ==============================================================================
+os.environ['FLAGS_allocator_strategy'] = 'auto_growth'          # Cấp phát động theo nhu cầu thực tế
+os.environ['FLAGS_fraction_of_gpu_memory_to_use'] = '0.15'      # Giới hạn tối đa 15% VRAM (~6GB)
+os.environ['PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK'] = 'True'     # Tắt kiểm tra kết nối rườm rà
+
 import pandas as pd
 import numpy as np
 import cv2
@@ -32,14 +40,13 @@ class VietnameseMaxAccuracyOCR:
 
         print("=== [1/2] Đang nạp mô hình Text Detection (PaddleOCR DBNet) ===")
         from paddleocr import PaddleOCR
-        # paddleocr==2.8.1 classic API (ổn định, đã test kỹ trên GPU A100)
         self.detector = PaddleOCR(
             use_angle_cls=True,
             lang='vi',
             use_gpu=use_gpu,
             show_log=False
         )
-        print("✅ PaddleOCR DBNet đã sẵn sàng.")
+        print("✅ PaddleOCR DBNet đã sẵn sàng (VRAM đã tối ưu auto-growth).")
 
         if self.use_vietocr:
             print("=== [2/2] Đang nạp mô hình Text Recognition (VietOCR VGG-Transformer) ===")
@@ -125,8 +132,8 @@ def download_file(url_or_id, target_path, pkg_idx, total_pkgs):
         else:
             gdown.download(id=url_or_id, output=str(target_path), quiet=False)
 
-def process_zip_archive(zpath, ocr_engine, frames_df, pkg_idx, total_pkgs):
-    """Đọc trực tiếp byte ảnh từ ZIP vào RAM và chạy OCR kèm thanh tiến trình"""
+def process_zip_archive(zpath, ocr_engine, frames_df, pkg_idx, total_pkgs, processed_videos_set=None):
+    """Đọc trực tiếp byte ảnh từ ZIP vào RAM và chạy OCR kèm thanh tiến trình (Bỏ qua video đã làm)"""
     records = []
     zip_name = Path(zpath).name
     
@@ -139,6 +146,10 @@ def process_zip_archive(zpath, ocr_engine, frames_df, pkg_idx, total_pkgs):
                 if not match_vid:
                     continue
                 video_id = match_vid.group(1)
+
+                # Bỏ qua nếu video này đã được xử lý xong từ trước
+                if processed_videos_set and video_id in processed_videos_set:
+                    continue
 
                 filename = Path(img_name).name
                 match_idx = re.search(r'(\d+)', Path(filename).stem)
@@ -166,17 +177,45 @@ def process_zip_archive(zpath, ocr_engine, frames_df, pkg_idx, total_pkgs):
                             "ocr_text": text,
                             "confidence": conf
                         })
-                        pbar.set_postfix({"found": len(records), "vid": video_id})
+                        pbar.set_postfix({"chữ_tìm_thấy": len(records), "video": video_id})
     return records
 
+def save_and_merge_parquet(new_records, out_file):
+    """Ghi checkpoint và gộp dữ liệu không bao giờ bị mất hoặc trùng lặp"""
+    if not new_records and not out_file.exists():
+        return
+    
+    combined_df = pd.DataFrame(new_records)
+    if out_file.exists():
+        try:
+            old_df = pd.read_parquet(out_file)
+            combined_df = pd.concat([old_df, combined_df], ignore_index=True)
+        except Exception:
+            pass
+    
+    if not combined_df.empty:
+        # Loại bỏ trùng lặp theo (video_id, keyframe_index)
+        combined_df = combined_df.drop_duplicates(subset=["video_id", "keyframe_index"], keep="last")
+        combined_df.to_parquet(out_file, index=False)
+
 def main():
-    parser = argparse.ArgumentParser(description="BTC/Drive -> In-Memory SOTA OCR -> Auto-Delete ZIP")
-    parser.add_argument("--url", type=str, default=None)
-    parser.add_argument("--urls_file", type=str, default="config/drive_keyframes_urls.txt")
-    parser.add_argument("--keyframes_dir", type=str, default="Keyframes")
-    parser.add_argument("--output_path", type=str, default="data/processed/ocr_results.parquet")
-    parser.add_argument("--use_vietocr", action="store_true", default=True)
-    parser.add_argument("--use_gpu", action="store_true", default=True)
+    parser = argparse.ArgumentParser(description="BTC/Drive -> In-Memory SOTA OCR -> Auto-Delete ZIP & Auto-Resume")
+    parser.add_argument("--url", type=str, default=None,
+                        help="Chạy 1 link cụ thể (VD: https://aic-data.ledo.io.vn/Keyframes_L25.zip)")
+    parser.add_argument("--urls_file", type=str, default="config/drive_keyframes_urls.txt",
+                        help="File danh sách link (mặc định: config/drive_keyframes_urls.txt)")
+    parser.add_argument("--start_index", type=int, default=1,
+                        help="Bắt đầu chạy từ gói số N (1-indexed, ví dụ: --start_index 5 chạy từ gói 5 đến 14)")
+    parser.add_argument("--start_from", type=str, default=None,
+                        help="Bắt đầu chạy từ file cụ thể (ví dụ: --start_from Keyframes_L25.zip)")
+    parser.add_argument("--keyframes_dir", type=str, default="Keyframes",
+                        help="Thư mục ZIP local nếu đã tải sẵn")
+    parser.add_argument("--output_path", type=str, default="data/processed/ocr_results.parquet",
+                        help="Nơi lưu file kết quả OCR parquet")
+    parser.add_argument("--use_vietocr", action="store_true", default=True,
+                        help="Dùng VietOCR VGG-Transformer để đạt độ chính xác tối đa")
+    parser.add_argument("--use_gpu", action="store_true", default=True,
+                        help="Chạy trên GPU A100")
     args = parser.parse_args()
 
     ocr_engine = VietnameseMaxAccuracyOCR(use_vietocr=args.use_vietocr, use_gpu=args.use_gpu)
@@ -187,65 +226,107 @@ def main():
         frames_df = pd.read_parquet(frames_path).set_index(["video_id", "keyframe_index"])
         print(f"✅ Đã nạp {len(frames_df)} bản ghi mapping từ frames.parquet.")
 
-    all_ocr_records = []
     out_file = Path(args.output_path)
     out_file.parent.mkdir(parents=True, exist_ok=True)
-
+    
+    # Tập các video_id đã từng được xử lý trong file parquet cũ
+    processed_videos_set = set()
+    total_existing_records = 0
     if out_file.exists():
         try:
             existing_df = pd.read_parquet(out_file)
-            all_ocr_records = existing_df.to_dict("records")
-            print(f"🔄 Resume: đã nạp {len(all_ocr_records)} bản ghi OCR hiện có.")
+            total_existing_records = len(existing_df)
+            processed_videos_set = set(existing_df["video_id"].unique())
+            print(f"🔄 [RESUME] Đã tìm thấy {total_existing_records:,} bản ghi OCR của {len(processed_videos_set)} video từ trước!")
         except Exception:
             pass
 
-    targets = []
+    # Nạp danh sách mục tiêu
+    all_targets = []
     if args.url:
-        targets.append(args.url)
+        all_targets.append(args.url)
     elif args.urls_file and Path(args.urls_file).exists():
         with open(args.urls_file, "r", encoding="utf-8") as f:
-            targets = [line.strip() for line in f if line.strip() and not line.startswith("#")]
-        print(f"📋 Đã nạp {len(targets)} link từ file {args.urls_file}")
+            all_targets = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+        print(f"📋 Đã nạp {len(all_targets)} link từ file {args.urls_file}")
     else:
         kf_dir = Path(args.keyframes_dir)
         if kf_dir.exists():
-            targets = sorted(list(kf_dir.glob("*.zip")) + list(kf_dir.glob("*/*.zip")))
-            print(f"📋 Đã tìm thấy {len(targets)} file ZIP local")
+            all_targets = sorted(list(kf_dir.glob("*.zip")) + list(kf_dir.glob("*/*.zip")))
+            print(f"📋 Đã tìm thấy {len(all_targets)} file ZIP local")
 
-    if not targets:
-        print("[ERROR] Không tìm thấy link tải hoặc file ZIP nào!")
+    if not all_targets:
+        print("[ERROR] Không tìm thấy link tải hoặc file ZIP nào để xử lý!")
         sys.exit(1)
 
-    start_time = time.time()
-    total_pkgs = len(targets)
+    total_pkgs = len(all_targets)
+    start_offset = 0
 
-    with tqdm(enumerate(targets, start=1), total=total_pkgs, desc="📦 [TỔNG] Keyframes", unit="gói") as main_bar:
+    # Xử lý chọn điểm bắt đầu (Start from / Start index)
+    if args.start_from:
+        target_name = args.start_from.lower().replace(".zip", "")
+        found = False
+        for idx, t in enumerate(all_targets):
+            if target_name in str(t).lower():
+                start_offset = idx
+                found = True
+                print(f"⏩ [CHỈ ĐỊNH ĐIỂM BẮT ĐẦU] Tìm thấy '{args.start_from}' tại vị trí {start_offset + 1}/{total_pkgs}")
+                break
+        if not found:
+            print(f"[WARNING] Không tìm thấy '{args.start_from}' trong danh sách, bắt đầu từ đầu.")
+    elif args.start_index > 1:
+        start_offset = max(0, min(args.start_index - 1, total_pkgs - 1))
+        print(f"⏩ [CHỈ ĐỊNH ĐIỂM BẮT ĐẦU] Bắt đầu chạy từ gói số {start_offset + 1}/{total_pkgs}")
+
+    active_targets = all_targets[start_offset:]
+    start_time = time.time()
+
+    with tqdm(enumerate(active_targets, start=start_offset + 1), total=total_pkgs, initial=start_offset, desc="📦 [TỔNG] Keyframes", unit="gói") as main_bar:
         for pkg_idx, target in main_bar:
+            pkg_name = Path(target).name if "http" in target else str(target)
+            main_bar.set_postfix({"gói_hiện_tại": pkg_name})
+
             is_remote = isinstance(target, str) and ("http" in target or "drive.google.com" in target or (len(target) > 20 and not Path(target).exists()))
             
+            new_records = []
             if is_remote:
                 with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
                     temp_zip_path = tmp_zip.name
 
                 download_file(target, temp_zip_path, pkg_idx, total_pkgs)
-                records = process_zip_archive(temp_zip_path, ocr_engine, frames_df, pkg_idx, total_pkgs)
-                all_ocr_records.extend(records)
+                new_records = process_zip_archive(temp_zip_path, ocr_engine, frames_df, pkg_idx, total_pkgs, processed_videos_set)
 
                 if os.path.exists(temp_zip_path):
                     os.remove(temp_zip_path)
             else:
-                records = process_zip_archive(target, ocr_engine, frames_df, pkg_idx, total_pkgs)
-                all_ocr_records.extend(records)
+                new_records = process_zip_archive(target, ocr_engine, frames_df, pkg_idx, total_pkgs, processed_videos_set)
 
-            if all_ocr_records:
-                pd.DataFrame(all_ocr_records).to_parquet(out_file, index=False)
-                main_bar.set_postfix({"tổng_chữ": len(all_ocr_records)})
+            # Cập nhật checkpoint vào parquet
+            if new_records:
+                save_and_merge_parquet(new_records, out_file)
+                # Cập nhật danh sách video đã làm
+                for r in new_records:
+                    processed_videos_set.add(r["video_id"])
+                
+                # Đọc lại tổng số dòng hiện có
+                try:
+                    cur_total = len(pd.read_parquet(out_file))
+                    main_bar.set_postfix({"gói": pkg_name, "tổng_khung_hình": cur_total})
+                except Exception:
+                    pass
 
     elapsed = time.time() - start_time
-    print("\n" + "="*65)
-    print(f"🎉 HOÀN TẤT OCR: {len(all_ocr_records):,} khung hình có chữ")
-    print(f"💾 Lưu tại: {out_file} ({elapsed:.0f}s)")
-    print("="*65)
+    final_count = 0
+    if out_file.exists():
+        try:
+            final_count = len(pd.read_parquet(out_file))
+        except Exception:
+            pass
+
+    print("\n" + "="*70)
+    print(f"🎉 HOÀN TẤT OCR: Tổng cộng có {final_count:,} khung hình có chữ trong {out_file}")
+    print(f"⏱️ Tổng thời gian chạy đợt này: {elapsed:.0f}s")
+    print("="*70)
 
 if __name__ == "__main__":
     main()

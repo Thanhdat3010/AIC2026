@@ -7,6 +7,13 @@ import os
 import re
 import requests
 from pathlib import Path
+
+# ==============================================================================
+# CẤU HÌNH TỐI ƯU HÓA VRAM GPU A100
+# ==============================================================================
+os.environ['FLAGS_allocator_strategy'] = 'auto_growth'
+os.environ['FLAGS_fraction_of_gpu_memory_to_use'] = '0.15'
+
 import pandas as pd
 from tqdm import tqdm
 
@@ -25,7 +32,7 @@ def download_file(url_or_id, target_path, pkg_idx, total_pkgs):
         response = requests.get(url_or_id, stream=True, timeout=60)
         response.raise_for_status()
         total_size = int(response.headers.get('content-length', 0))
-        block_size = 1024 * 1024  # 1MB chunk
+        block_size = 1024 * 1024
         
         with open(target_path, 'wb') as file, tqdm(
             desc=f"📥 [Tải Video {pkg_idx}/{total_pkgs}] {filename}",
@@ -42,15 +49,15 @@ def download_file(url_or_id, target_path, pkg_idx, total_pkgs):
         try:
             import gdown
         except ImportError:
-            print("[ERROR] Chưa cài gdown! Hãy chạy: pip install gdown")
+            print("[ERROR] Chưa cài gdown! pip install gdown")
             sys.exit(1)
         if "drive.google.com" in url_or_id:
             gdown.download(url=url_or_id, output=str(target_path), quiet=False, fuzzy=True)
         else:
             gdown.download(id=url_or_id, output=str(target_path), quiet=False)
 
-def process_video_zip(zpath, model, beam_size, video_fps_map, pkg_idx, total_pkgs):
-    """Trích xuất cuốn chiếu từng video trong file zip kèm thanh tiến trình chi tiết"""
+def process_video_zip(zpath, model, beam_size, video_fps_map, pkg_idx, total_pkgs, processed_videos_set=None):
+    """Trích xuất cuốn chiếu từng video trong file zip kèm thanh tiến trình (Bỏ qua video đã làm)"""
     records = []
     zip_name = Path(zpath).name
     
@@ -64,6 +71,10 @@ def process_video_zip(zpath, model, beam_size, video_fps_map, pkg_idx, total_pkg
                     video_id = match_vid.group(1)
                 else:
                     video_id = Path(mp4_name).stem
+
+                # Bỏ qua nếu video này đã có trong dữ liệu trước đó
+                if processed_videos_set and video_id in processed_videos_set:
+                    continue
                 
                 fps = video_fps_map.get(video_id, 30.0)
 
@@ -83,7 +94,6 @@ def process_video_zip(zpath, model, beam_size, video_fps_map, pkg_idx, total_pkg
                         condition_on_previous_text=True
                     )
                     
-                    vid_seg_count = 0
                     for seg in segments:
                         text = seg.text.strip()
                         if len(text) > 2:
@@ -99,7 +109,6 @@ def process_video_zip(zpath, model, beam_size, video_fps_map, pkg_idx, total_pkg
                                 "end_frame": end_frame,
                                 "transcript": text
                             })
-                            vid_seg_count += 1
                     
                     pbar.set_postfix({"video": video_id, "câu_thoại": len(records)})
                 except Exception as e:
@@ -109,24 +118,45 @@ def process_video_zip(zpath, model, beam_size, video_fps_map, pkg_idx, total_pkg
                         os.remove(tmp_path)
     return records
 
+def save_and_merge_parquet(new_records, out_file):
+    """Ghi checkpoint lời thoại và loại bỏ trùng lặp"""
+    if not new_records and not out_file.exists():
+        return
+    
+    combined_df = pd.DataFrame(new_records)
+    if out_file.exists():
+        try:
+            old_df = pd.read_parquet(out_file)
+            combined_df = pd.concat([old_df, combined_df], ignore_index=True)
+        except Exception:
+            pass
+    
+    if not combined_df.empty:
+        combined_df = combined_df.drop_duplicates(subset=["video_id", "start_frame", "end_frame"], keep="last")
+        combined_df.to_parquet(out_file, index=False)
+
 def main():
-    parser = argparse.ArgumentParser(description="Download Video ZIP from BTC/Drive Link -> VinAI PhoWhisper ASR -> Auto-Delete")
+    parser = argparse.ArgumentParser(description="Download Video ZIP -> VinAI PhoWhisper ASR -> Auto-Delete & Auto-Resume")
     parser.add_argument("--url", type=str, default=None,
-                        help="Single direct link of Videos_Lxx_a.zip (e.g. from ledo.io.vn or Drive)")
+                        help="Chạy 1 link cụ thể (VD: https://aic-data.ledo.io.vn/Videos_L25_a.zip)")
     parser.add_argument("--urls_file", type=str, default="config/drive_videos_urls.txt",
-                        help="Path to .txt file containing list of links (default: config/drive_videos_urls.txt)")
+                        help="File danh sách link (mặc định: config/drive_videos_urls.txt)")
+    parser.add_argument("--start_index", type=int, default=1,
+                        help="Bắt đầu chạy từ gói số N (1-indexed, ví dụ: --start_index 5 chạy từ gói 5 đến 14)")
+    parser.add_argument("--start_from", type=str, default=None,
+                        help="Bắt đầu chạy từ file cụ thể (ví dụ: --start_from Videos_L25_a.zip)")
     parser.add_argument("--videos_dir", type=str, default="Videos",
-                        help="Local folder containing Videos_Lxx_a.zip (if already downloaded)")
+                        help="Thư mục video ZIP local")
     parser.add_argument("--output_path", type=str, default="data/processed/transcripts.parquet",
-                        help="Path to save extracted ASR transcripts parquet file")
+                        help="Nơi lưu file kết quả lời thoại parquet")
     parser.add_argument("--model_size", type=str, default="vinai/PhoWhisper-large",
-                        help="Model choice: 'vinai/PhoWhisper-large' (VinAI) OR 'large-v3' (OpenAI)")
+                        help="Mô hình: 'vinai/PhoWhisper-large' hoặc 'large-v3'")
     parser.add_argument("--device", type=str, default="cuda",
-                        help="Device to run Whisper (cuda on GPU A100)")
+                        help="Thiết bị chạy (cuda trên A100)")
     parser.add_argument("--beam_size", type=int, default=5,
-                        help="Beam search size (5 or 10 for best quality)")
+                        help="Beam search size (5)")
     parser.add_argument("--compute_type", type=str, default="float16",
-                        help="Compute type: float16 on GPU A100")
+                        help="Compute type: float16")
     args = parser.parse_args()
 
     frames_path = settings.directories.processed / "frames.parquet"
@@ -145,68 +175,101 @@ def main():
 
     model = WhisperModel(args.model_size, device=args.device, compute_type=args.compute_type)
 
-    all_transcript_records = []
     out_file = Path(args.output_path)
     out_file.parent.mkdir(parents=True, exist_ok=True)
 
+    processed_videos_set = set()
+    total_existing_records = 0
     if out_file.exists():
         try:
             existing_df = pd.read_parquet(out_file)
-            all_transcript_records = existing_df.to_dict("records")
-            print(f"🔄 Đã nạp {len(all_transcript_records)} phân đoạn lời thoại hiện có để ghi tiếp (Resume).")
+            total_existing_records = len(existing_df)
+            processed_videos_set = set(existing_df["video_id"].unique())
+            print(f"🔄 [RESUME] Đã tìm thấy {total_existing_records:,} phân đoạn lời thoại của {len(processed_videos_set)} video từ trước!")
         except Exception:
             pass
 
-    targets = []
+    all_targets = []
     if args.url:
-        targets.append(args.url)
+        all_targets.append(args.url)
     elif args.urls_file and Path(args.urls_file).exists():
         with open(args.urls_file, "r", encoding="utf-8") as f:
-            targets = [line.strip() for line in f if line.strip() and not line.startswith("#")]
-        print(f"📋 Đã nạp {len(targets)} link từ file {args.urls_file}")
+            all_targets = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+        print(f"📋 Đã nạp {len(all_targets)} link từ file {args.urls_file}")
     else:
         vid_dir = Path(args.videos_dir)
         if vid_dir.exists():
-            targets = sorted(list(vid_dir.glob("*.zip")) + list(vid_dir.glob("*/*.zip")))
-            print(f"📋 Đã tìm thấy {len(targets)} file ZIP trong thư mục local {vid_dir}")
+            all_targets = sorted(list(vid_dir.glob("*.zip")) + list(vid_dir.glob("*/*.zip")))
+            print(f"📋 Đã tìm thấy {len(all_targets)} file ZIP local")
 
-    if not targets:
+    if not all_targets:
         print("[ERROR] Không tìm thấy link tải hoặc file ZIP nào để xử lý!")
         sys.exit(1)
 
+    total_pkgs = len(all_targets)
+    start_offset = 0
+
+    if args.start_from:
+        target_name = args.start_from.lower().replace(".zip", "")
+        found = False
+        for idx, t in enumerate(all_targets):
+            if target_name in str(t).lower():
+                start_offset = idx
+                found = True
+                print(f"⏩ [CHỈ ĐỊNH ĐIỂM BẮT ĐẦU] Tìm thấy '{args.start_from}' tại vị trí {start_offset + 1}/{total_pkgs}")
+                break
+        if not found:
+            print(f"[WARNING] Không tìm thấy '{args.start_from}' trong danh sách, bắt đầu từ đầu.")
+    elif args.start_index > 1:
+        start_offset = max(0, min(args.start_index - 1, total_pkgs - 1))
+        print(f"⏩ [CHỈ ĐỊNH ĐIỂM BẮT ĐẦU] Bắt đầu chạy từ gói số {start_offset + 1}/{total_pkgs}")
+
+    active_targets = all_targets[start_offset:]
     start_time = time.time()
-    total_pkgs = len(targets)
 
-    # Thanh tiến trình tổng quan lớn
-    with tqdm(enumerate(targets, start=1), total=total_pkgs, desc="📦 [TIẾN ĐỘ TỔNG] Các gói Video", unit="gói") as main_bar:
+    with tqdm(enumerate(active_targets, start=start_offset + 1), total=total_pkgs, initial=start_offset, desc="📦 [TỔNG] Videos", unit="gói") as main_bar:
         for pkg_idx, target in main_bar:
-            main_bar.set_postfix({"gói_hiện_tại": Path(target).name if "http" in target else str(target)})
+            pkg_name = Path(target).name if "http" in target else str(target)
+            main_bar.set_postfix({"gói_hiện_tại": pkg_name})
 
-            is_remote_link = isinstance(target, str) and ("http" in target or "drive.google.com" in target or len(target) > 20 and not Path(target).exists())
+            is_remote = isinstance(target, str) and ("http" in target or "drive.google.com" in target or (len(target) > 20 and not Path(target).exists()))
 
-            if is_remote_link:
+            new_records = []
+            if is_remote:
                 with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
                     temp_zip_path = tmp_zip.name
 
                 download_file(target, temp_zip_path, pkg_idx, total_pkgs)
-                records = process_video_zip(temp_zip_path, model, args.beam_size, video_fps_map, pkg_idx, total_pkgs)
-                all_transcript_records.extend(records)
+                new_records = process_video_zip(temp_zip_path, model, args.beam_size, video_fps_map, pkg_idx, total_pkgs, processed_videos_set)
 
                 if os.path.exists(temp_zip_path):
                     os.remove(temp_zip_path)
             else:
-                records = process_video_zip(target, model, args.beam_size, video_fps_map, pkg_idx, total_pkgs)
-                all_transcript_records.extend(records)
+                new_records = process_video_zip(target, model, args.beam_size, video_fps_map, pkg_idx, total_pkgs, processed_videos_set)
 
-            # Lưu checkpoint sau mỗi gói
-            if all_transcript_records:
-                pd.DataFrame(all_transcript_records).to_parquet(out_file, index=False)
-                main_bar.set_postfix({"tổng_câu_thoại": len(all_transcript_records)})
+            if new_records:
+                save_and_merge_parquet(new_records, out_file)
+                for r in new_records:
+                    processed_videos_set.add(r["video_id"])
+                
+                try:
+                    cur_total = len(pd.read_parquet(out_file))
+                    main_bar.set_postfix({"gói": pkg_name, "tổng_câu_thoại": cur_total})
+                except Exception:
+                    pass
 
-    print("\n" + "="*65)
-    print(f"🎉 [HOÀN TẤT TOÀN BỘ ASR] Tổng cộng trích xuất: {len(all_transcript_records):,} phân đoạn lời thoại!")
-    print(f"💾 File lưu tại: {out_file} (Tổng thời gian: {time.time() - start_time:.2f}s)")
-    print("="*65 + "\n")
+    elapsed = time.time() - start_time
+    final_count = 0
+    if out_file.exists():
+        try:
+            final_count = len(pd.read_parquet(out_file))
+        except Exception:
+            pass
+
+    print("\n" + "="*70)
+    print(f"🎉 HOÀN TẤT ASR: Tổng cộng có {final_count:,} phân đoạn lời thoại trong {out_file}")
+    print(f"⏱️ Tổng thời gian chạy đợt này: {elapsed:.0f}s")
+    print("="*70)
 
 if __name__ == "__main__":
     main()

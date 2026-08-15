@@ -1,70 +1,76 @@
 # 🏆 HƯỚNG DẪN TRÍCH XUẤT OCR & WHISPER (TẢI TRỰC TIẾP TỪ MÁY CHỦ BTC HOẶC DRIVE)
 
-> **Cơ chế đỉnh cao:** Script tự động **Tải trực tiếp qua Link BTC (`aic-data.ledo.io.vn`) hoặc Google Drive $\to$ Xử lý trong RAM bằng GPU A100 $\to$ Tự động xóa ngay file zip trên server $\to$ Tải tiếp file sau**.  
-> **Ưu điểm:** **Không cần Mount**, tốc độ tải mạng cực đại 1Gbps, ổ cứng server luôn $\le$ 3GB.
+> **Cơ chế đỉnh cao:** Script tự động **Tải trực tiếp qua Link BTC (`aic-data.ledo.io.vn`) $\to$ Xử lý trong RAM bằng GPU A100 $\to$ Tự động xóa ngay file zip trên server $\to$ Tải tiếp file sau**.  
+> **Cơ chế chịu lỗi (Fault-Tolerant):** Nếu bị rớt mạng hoặc đứt quãng giữa chừng, script **tự động Resume** hoặc cho phép bạn **chọn chạy từ gói bị hỏng trở đi** mà không phải chạy lại từ đầu!
 
 ---
 
 ## 🧠 CÁC MÔ HÌNH MAX ACCURACY ĐƯỢC SỬ DỤNG
 
 1. **OCR (Chữ trên ảnh):** **PaddleOCR Detection + `VietOCR VGG-Transformer`** (Nhận diện chuẩn xác 100% dấu tiếng Việt).
-2. **ASR (Lời thoại video):** **`vinai/PhoWhisper-large` (VinAI Research)** (Tinh chỉnh chuyên sâu trên 844 giờ audio tiếng Việt đa phương ngữ Bắc/Trung/Nam).
+2. **ASR (Lời thoại video):** **`vinai/PhoWhisper-large` (VinAI Research)** (Tinh chỉnh chuyên sâu trên 844 giờ audio tiếng Việt).
 
 ---
 
-## 📋 1. DANH SÁCH LINK ĐÃ ĐƯỢC CẤU HÌNH SẴN 100%
-
-Hệ thống đã nạp sẵn toàn bộ 14 link tải trực tiếp từ máy chủ BTC (`aic-data.ledo.io.vn`) vào 2 file cấu hình:
-
-* 👉 **`config/drive_keyframes_urls.txt`** (Chứa đủ 14 link `Keyframes_L21.zip` $\to$ `Keyframes_L30.zip`)
-* 👉 **`config/drive_videos_urls.txt`** (Chứa đủ 14 link `Videos_L21_a.zip` $\to$ `Videos_L30_a.zip`)
-
----
-
-## 💻 2. CÀI ĐẶT THƯ VIỆN TRÊN SERVER FABLAB
-
-Mở terminal trên Server Fablab:
+## 💻 1. CÀI ĐẶT THƯ VIỆN TRÊN SERVER FABLAB
 
 ```bash
-cd AIC2026
-git pull origin master
-
 conda activate AIC2026
-pip install requests paddlepaddle-gpu paddleocr vietocr faster-whisper gdown
+pip install paddleocr==2.8.1 requests vietocr faster-whisper gdown
 ```
 
 ---
 
-## ⚡ 3. CÂU LỆNH CHẠY TỰ ĐỘNG CUỐN CHIẾU (1-CLICK)
+## ⚡ 2. CÂU LỆNH CHẠY TOÀN BỘ (TỰ ĐỘNG TỪ ĐẦU ĐẾN CUỐI)
 
-### 🔹 Bước 3.1: Chạy OCR (Tự động kéo từ máy chủ BTC $\to$ VietOCR đọc chữ $\to$ Tự xóa ZIP)
+### 🔹 Chạy OCR:
 ```bash
-python scripts/extract_ocr_from_drive.py \
-    --urls_file config/drive_keyframes_urls.txt \
-    --output_path data/processed/ocr_results.parquet \
-    --use_vietocr \
-    --use_gpu
+python scripts/extract_ocr_from_drive.py --urls_file config/drive_keyframes_urls.txt --output_path data/processed/ocr_results.parquet --use_vietocr --use_gpu
+```
+
+### 🔹 Chạy PhoWhisper:
+```bash
+python scripts/extract_asr_from_drive.py --urls_file config/drive_videos_urls.txt --output_path data/processed/transcripts.parquet --model_size vinai/PhoWhisper-large --beam_size 5 --device cuda
 ```
 
 ---
 
-### 🔹 Bước 3.2: Chạy PhoWhisper (Tự động kéo từ máy chủ BTC $\to$ PhoWhisper nghe $\to$ Tự xóa ZIP)
+## 🔄 3. CƠ CHẾ TIẾP TỤC CHẠY KHI BỊ HỎNG / GIÁN ĐOẠN (RESUME)
+
+### 🌟 Cách 1: Tự Động Resume Thông Minh (Không cần làm gì cả)
+Nếu đang chạy mà bị rớt mạng hoặc ngắt giữa chừng, bạn chỉ cần **chạy lại y nguyên lệnh cũ**:
+* Script sẽ tự động nạp file parquet cũ.
+* Tự động **bỏ qua 100% các video đã làm xong** và chỉ xử lý tiếp những video còn thiếu!
+
+---
+
+### 🌟 Cách 2: Chọn chạy từ một gói cụ thể bằng `--start_from`
+Ví dụ: Đang chạy đến gói `Keyframes_L25.zip` bị ngắt, bạn muốn chạy tiếp từ gói này:
+
 ```bash
-python scripts/extract_asr_from_drive.py \
-    --urls_file config/drive_videos_urls.txt \
-    --output_path data/processed/transcripts.parquet \
-    --model_size vinai/PhoWhisper-large \
-    --beam_size 5 \
-    --device cuda
+# OCR chạy tiếp từ Keyframes_L25.zip:
+python scripts/extract_ocr_from_drive.py --start_from Keyframes_L25.zip --use_vietocr --use_gpu
+
+# PhoWhisper chạy tiếp từ Videos_L25_a.zip:
+python scripts/extract_asr_from_drive.py --start_from Videos_L25_a.zip --model_size vinai/PhoWhisper-large --device cuda
 ```
 
 ---
 
-### 💡 MẸO TEST THỬ 1 LINK TRỰC TIẾP QUA DÒNG LỆNH:
-```bash
-# Test OCR 1 file zip từ link BTC:
-python scripts/extract_ocr_from_drive.py --url "https://aic-data.ledo.io.vn/Keyframes_L21.zip" --use_vietocr --use_gpu
+### 🌟 Cách 3: Chọn chạy từ số thứ tự gói bằng `--start_index`
+Ví dụ: Có 14 gói, bạn muốn bắt đầu chạy từ gói số 5 (tức từ gói 5 đến 14):
 
-# Test PhoWhisper 1 file zip từ link BTC:
-python scripts/extract_asr_from_drive.py --url "https://aic-data.ledo.io.vn/Videos_L21_a.zip" --model_size vinai/PhoWhisper-large --device cuda
+```bash
+# OCR chạy từ gói 5:
+python scripts/extract_ocr_from_drive.py --start_index 5 --use_vietocr --use_gpu
+
+# PhoWhisper chạy từ gói 5:
+python scripts/extract_asr_from_drive.py --start_index 5 --model_size vinai/PhoWhisper-large --device cuda
+```
+
+---
+
+### 🌟 Cách 4: Chạy riêng lẻ duy nhất 1 link cụ thể bằng `--url`
+```bash
+python scripts/extract_ocr_from_drive.py --url "https://aic-data.ledo.io.vn/Keyframes_L26_a.zip" --use_vietocr --use_gpu
 ```
