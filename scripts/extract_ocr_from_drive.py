@@ -60,12 +60,21 @@ class VietnameseMaxAccuracyOCR:
                 from vietocr.tool.predictor import Predictor
                 from vietocr.tool.config import Cfg
                 config = Cfg.load_config_from_name('vgg_transformer')
-                config['device'] = 'cuda:0' if use_gpu else 'cpu'
-                config['predictor']['beamsearch'] = False  # Beamsearch False để nhanh và nhẹ
-                self.vietocr_predictor = Predictor(config)
-                print("✅ VietOCR VGG-Transformer đã sẵn sàng (MAX ACCURACY cho tiếng Việt).")
+                config['predictor']['beamsearch'] = False
+                
+                # Thử khởi tạo trên GPU, nếu Driver cũ thì tự động chạy CPU (vẫn cực nhanh cho mẩu ảnh chữ)
+                try:
+                    config['device'] = 'cuda:0' if use_gpu else 'cpu'
+                    self.vietocr_predictor = Predictor(config)
+                    print("✅ VietOCR VGG-Transformer đã sẵn sàng trên GPU.")
+                except Exception as cuda_err:
+                    print(f"⚠️ PyTorch CUDA không khớp Driver ({cuda_err}). Tự động chuyển VietOCR sang CPU...")
+                    config['device'] = 'cpu'
+                    self.vietocr_predictor = Predictor(config)
+                    print("✅ VietOCR VGG-Transformer đã sẵn sàng trên CPU.")
+                    
             except Exception as e:
-                print(f"[WARNING] Chưa cài hoặc lỗi VietOCR ({e}). Fallback về PaddleOCR Recognition.")
+                print(f"[WARNING] Không thể nạp VietOCR ({e}). Fallback về PaddleOCR Recognition.")
                 self.use_vietocr = False
 
     def predict(self, img_array):
