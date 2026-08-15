@@ -18,6 +18,26 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.config import settings
 
+def ensure_phowhisper_ct2(model_name_or_path):
+    """Tự động chuyển đổi VinAI PhoWhisper sang CTranslate2 float16 nếu cần"""
+    if "vinai" in model_name_or_path.lower():
+        ct2_dir = Path("/workspace/phowhisper-large-ct2")
+        if not (ct2_dir / "model.bin").exists():
+            print(f"\n🔄 Đang tự động tối ưu mô hình {model_name_or_path} sang CTranslate2 GPU float16...")
+            try:
+                import ctranslate2
+                converter = ctranslate2.converters.TransformersConverter(
+                    model_name_or_path,
+                    copy_files=["tokenizer.json", "preprocessor_config.json"]
+                )
+                converter.convert(str(ct2_dir), quantization="float16")
+                print(f"✅ Tối ưu hoàn tất! Lưu tại: {ct2_dir}\n")
+            except Exception as e:
+                print(f"[ERROR] Lỗi khi chuyển đổi VinAI PhoWhisper: {e}")
+                sys.exit(1)
+        return str(ct2_dir)
+    return model_name_or_path
+
 def download_file(url_or_id, target_path, pkg_idx, total_pkgs):
     """Tải file video zip từ server BTC kèm thanh tiến trình tốc độ cao"""
     filename = Path(url_or_id).name if "http" in url_or_id else f"Video_Package_{pkg_idx}.zip"
@@ -145,7 +165,7 @@ def process_video_zip(zpath, batched_pipeline, beam_size, batch_size, video_fps_
     return total_records_in_pkg
 
 def main():
-    parser = argparse.ArgumentParser(description="Download Video ZIP -> SOTA PhoWhisper ASR (Batched + Per-Video Checkpoint) -> Auto-Resume")
+    parser = argparse.ArgumentParser(description="Download Video ZIP -> VinAI PhoWhisper ASR (Batched + Per-Video Checkpoint) -> Auto-Resume")
     parser.add_argument("--url", type=str, default=None,
                         help="Chạy 1 link cụ thể (VD: https://aic-data.ledo.io.vn/Videos_L25_a.zip)")
     parser.add_argument("--urls_file", type=str, default="config/drive_videos_urls.txt",
@@ -178,6 +198,9 @@ def main():
         video_fps_map = dict(zip(frames_df["video_id"], frames_df["fps"]))
         print(f"✅ Đã nạp mapping FPS thực tế của {len(video_fps_map)} video từ frames.parquet.")
 
+    # Đảm bảo VinAI PhoWhisper đã được convert sang CTranslate2
+    actual_model_path = ensure_phowhisper_ct2(args.model_size)
+
     print(f"=== [1/2] Khởi tạo Mô Hình ASR Tiếng Việt: {args.model_size} trên GPU {args.device} ({args.compute_type}) ===")
     try:
         from faster_whisper import WhisperModel, BatchedInferencePipeline
@@ -185,11 +208,11 @@ def main():
         print("[ERROR] faster-whisper chưa được cài đặt! Hãy chạy: pip install faster-whisper")
         sys.exit(1)
 
-    model = WhisperModel(args.model_size, device=args.device, compute_type=args.compute_type)
+    model = WhisperModel(actual_model_path, device=args.device, compute_type=args.compute_type)
     
     print(f"=== [2/2] Bật BatchedInferencePipeline (Batch Size = {args.batch_size}) để tăng tốc 3-4x ===")
     batched_pipeline = BatchedInferencePipeline(model=model)
-    print("✅ Hệ thống PhoWhisper Batch Pipeline đã sẵn sàng trên GPU A100!")
+    print("✅ Hệ thống VinAI PhoWhisper Batch Pipeline đã sẵn sàng trên GPU A100!")
 
     out_file = Path(args.output_path)
     out_file.parent.mkdir(parents=True, exist_ok=True)
