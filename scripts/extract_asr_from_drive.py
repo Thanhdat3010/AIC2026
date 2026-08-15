@@ -48,20 +48,23 @@ def download_file(url_or_id, target_path):
         else:
             gdown.download(id=url_or_id, output=str(target_path), quiet=False)
 
-def process_video_zip(zpath, model, beam_size):
+def process_video_zip(zpath, model, beam_size, video_fps_map):
     """Trích xuất cuốn chiếu từng video trong file zip và nhận diện tiếng Việt bằng PhoWhisper/Whisper"""
     records = []
     with zipfile.ZipFile(zpath, "r") as zf:
         mp4_names = [n for n in zf.namelist() if n.lower().endswith('.mp4')]
         
         for mp4_name in tqdm(mp4_names, desc=f"Transcribing {Path(zpath).name}"):
-            # Bắt chính xác video_id dạng Lxx_Vxxx (bất chấp thư mục lồng nhau bên trong zip)
+            # Bắt chính xác video_id dạng Lxx_Vxxx
             match_vid = re.search(r'(L\d+_V\d+)', mp4_name)
             if match_vid:
                 video_id = match_vid.group(1)
             else:
                 video_id = Path(mp4_name).stem
             
+            # Lấy FPS chuẩn xác từ bảng mapping frames.parquet (tránh lệch frame)
+            fps = video_fps_map.get(video_id, 30.0)
+
             # Giải nén tạm 1 video
             with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp_file:
                 tmp_path = tmp_file.name
@@ -82,14 +85,14 @@ def process_video_zip(zpath, model, beam_size):
                 for seg in segments:
                     text = seg.text.strip()
                     if len(text) > 2:
-                        fps = 30.0
-                        start_frame = int(seg.start * fps)
-                        end_frame = int(seg.end * fps)
+                        start_frame = int(round(seg.start * fps))
+                        end_frame = int(round(seg.end * fps))
                         
                         records.append({
                             "video_id": video_id,
                             "start_time": round(seg.start, 2),
                             "end_time": round(seg.end, 2),
+                            "fps": fps,
                             "start_frame": start_frame,
                             "end_frame": end_frame,
                             "transcript": text
@@ -120,6 +123,14 @@ def main():
     parser.add_argument("--compute_type", type=str, default="float16",
                         help="Compute type: float16 on GPU A100")
     args = parser.parse_args()
+
+    # Nạp mapping FPS từ frames.parquet để tính toán khung hình chuẩn 100%
+    frames_path = settings.directories.processed / "frames.parquet"
+    video_fps_map = {}
+    if frames_path.exists():
+        frames_df = pd.read_parquet(frames_path, columns=["video_id", "fps"]).drop_duplicates(subset=["video_id"])
+        video_fps_map = dict(zip(frames_df["video_id"], frames_df["fps"]))
+        print(f"✅ Đã nạp mapping FPS thực tế của {len(video_fps_map)} video từ frames.parquet.")
 
     print(f"=== Khởi tạo Mô Hình ASR Tiếng Việt: {args.model_size} trên GPU {args.device} ===")
     try:
@@ -174,14 +185,14 @@ def main():
 
             download_file(target, temp_zip_path)
             
-            records = process_video_zip(temp_zip_path, model, args.beam_size)
+            records = process_video_zip(temp_zip_path, model, args.beam_size, video_fps_map)
             all_transcript_records.extend(records)
 
             if os.path.exists(temp_zip_path):
                 os.remove(temp_zip_path)
                 print(f"🗑️ Đã xóa sạch file video zip tạm thời trên server để bảo vệ dung lượng đĩa!")
         else:
-            records = process_video_zip(target, model, args.beam_size)
+            records = process_video_zip(target, model, args.beam_size, video_fps_map)
             all_transcript_records.extend(records)
 
         # Lưu checkpoint
