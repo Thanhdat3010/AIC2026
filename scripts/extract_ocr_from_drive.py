@@ -9,11 +9,13 @@ import requests
 from pathlib import Path
 
 # ==============================================================================
-# CẤU HÌNH TỐI ƯU HÓA VRAM GPU A100 (Tránh PaddlePaddle chiếm dụng 40GB VRAM)
+# CẤU HÌNH TỐI ƯU HÓA VRAM GPU A100 — CHỈ DÙNG TỐI ĐA ~2GB VRAM
 # ==============================================================================
-os.environ['FLAGS_allocator_strategy'] = 'auto_growth'          # Cấp phát động theo nhu cầu thực tế
-os.environ['FLAGS_fraction_of_gpu_memory_to_use'] = '0.15'      # Giới hạn tối đa 15% VRAM (~6GB)
-os.environ['PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK'] = 'True'     # Tắt kiểm tra kết nối rườm rà
+os.environ['FLAGS_allocator_strategy'] = 'auto_growth'              # Cấp phát động theo nhu cầu thực tế
+os.environ['FLAGS_fraction_of_gpu_memory_to_use'] = '0.05'          # Chỉ chiếm tối đa 5% VRAM (~2GB trên A100 40GB)
+os.environ['FLAGS_eager_delete_tensor_gb'] = '0.0'                  # Giải phóng tensor ngay lập tức sau khi dùng xong
+os.environ['FLAGS_fast_eager_deletion_mode'] = 'True'               # Chế độ giải phóng bộ nhớ cực nhanh
+os.environ['PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK'] = 'True'       # Tắt kiểm tra kết nối rườm rà
 
 import pandas as pd
 import numpy as np
@@ -44,6 +46,7 @@ class VietnameseMaxAccuracyOCR:
             use_angle_cls=True,
             lang='vi',
             use_gpu=use_gpu,
+            gpu_mem=500,
             show_log=False
         )
         print("✅ PaddleOCR DBNet đã sẵn sàng (VRAM đã tối ưu auto-growth).")
