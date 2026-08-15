@@ -1,0 +1,37 @@
+{
+  "benchmark_version": "1.0",
+  "created_by": "Team AIC 2026",
+  "total_queries": 3,
+  "test_cases": [
+    {
+      "query_id": "test-kis-01",
+      "task_type": "kis",
+      "query_text": "Tìm đoạn clip có cảnh người phụ nữ đang ngồi ăn bên bàn gỗ.",
+      "ground_truth": {
+        "video_id": "L21_V001",
+        "start_frame": 240,
+        "end_frame": 280
+      }
+    },
+    {
+      "query_id": "test-kis-02",
+      "task_type": "kis",
+      "query_text": "Một con chó màu vàng đang chạy trên cỏ.",
+      "ground_truth": {
+        "video_id": "L22_V025",
+        "start_frame": 21900,
+        "end_frame": 22500
+      }
+    },
+    {
+      "query_id": "test-qa-01",
+      "task_type": "qa",
+      "query_text": "Trong đoạn video trao quà từ thiện của CLB FANA tại Khánh Hòa, hỏi xã này có tên là gì?",
+      "ground_truth": {
+        "video_id": "L26_V112",
+        "frame_idx": 4520,
+        "answer": "Khánh Bình"
+      }
+    }
+  ]
+}
