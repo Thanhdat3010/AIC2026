@@ -82,7 +82,8 @@ class VietnameseMaxAccuracyOCR:
             if img_array is None or img_array.size == 0:
                 return None, None
 
-            result = self.detector.ocr(img_array, cls=False)
+            # Chạy Text Detection bằng PaddleOCR DBNet
+            result = self.detector.ocr(img_array, det=True, rec=True, cls=False)
             if not result or result[0] is None or len(result[0]) == 0:
                 return None, None
 
@@ -94,40 +95,52 @@ class VietnameseMaxAccuracyOCR:
                     continue
                 box = line[0]
                 rec_res = line[1]
-                paddle_text = str(rec_res[0]).strip() if isinstance(rec_res, (list, tuple)) else ""
-                paddle_score = float(rec_res[1]) if isinstance(rec_res, (list, tuple)) and len(rec_res) > 1 else 0.0
+                
+                # Bóc tách text và score từ PaddleOCR
+                if isinstance(rec_res, (list, tuple)):
+                    paddle_text = str(rec_res[0]).strip()
+                    paddle_score = float(rec_res[1]) if len(rec_res) > 1 else 0.8
+                else:
+                    paddle_text = str(rec_res).strip()
+                    paddle_score = 0.8
 
+                # Nhận diện bằng VietOCR nếu có
                 if self.use_vietocr:
                     try:
                         pts = np.array(box, dtype=np.int32)
-                        rect = cv2.boundingRect(pts)
-                        x, y, w, h = rect
-                        if w > 8 and h > 8:
+                        x, y, w, h = cv2.boundingRect(pts)
+                        if w > 5 and h > 5:
                             h_img, w_img = img_array.shape[:2]
                             x1, y1 = max(0, x), max(0, y)
                             x2, y2 = min(w_img, x + w), min(h_img, y + h)
                             crop = img_array[y1:y2, x1:x2]
                             if crop.size > 0:
                                 pil_img = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
-                                vietocr_text, prob = self.vietocr_predictor.predict(pil_img, return_prob=True)
-                                vietocr_text = vietocr_text.strip()
-                                if len(vietocr_text) >= 2 and prob >= 0.4:
+                                
+                                # Tương thích cả bản VietOCR có return_prob và không có return_prob
+                                try:
+                                    vietocr_text, prob = self.vietocr_predictor.predict(pil_img, return_prob=True)
+                                except Exception:
+                                    vietocr_text = self.vietocr_predictor.predict(pil_img)
+                                    prob = 0.95
+                                    
+                                vietocr_text = str(vietocr_text).strip()
+                                if len(vietocr_text) >= 2:
                                     texts.append(vietocr_text)
-                                    confidences.append(prob)
+                                    confidences.append(float(prob))
                                     continue
-                    except Exception:
+                    except Exception as e:
                         pass
                 
-                # Fallback PaddleOCR text nếu không dùng VietOCR hoặc crop lỗi
-                if len(paddle_text) >= 2 and paddle_score >= 0.4:
+                # Fallback PaddleOCR text
+                if len(paddle_text) >= 2:
                     texts.append(paddle_text)
                     confidences.append(paddle_score)
 
             if texts:
                 return " | ".join(texts), round(sum(confidences) / len(confidences), 3)
         except Exception as e:
-            # Debug nếu cần
-            pass
+            print(f"[DEBUG OCR ERROR] {e}")
         return None, None
 
 def download_file(url_or_id, target_path, pkg_idx, total_pkgs):
