@@ -4,6 +4,7 @@ import time
 import zipfile
 import tempfile
 import os
+import requests
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -83,19 +84,38 @@ class VietnameseMaxAccuracyOCR:
             pass
         return None, None
 
-def download_file_from_drive(drive_url_or_id, target_path):
-    """Tải 1 file zip từ link/ID Google Drive về đường dẫn tạm thời"""
-    try:
-        import gdown
-    except ImportError:
-        print("[ERROR] Chưa cài gdown! Hãy chạy: pip install gdown")
-        sys.exit(1)
+def download_file(url_or_id, target_path):
+    """Tải 1 file zip tốc độ cao trực tiếp từ link máy chủ BTC (ledo.io.vn) hoặc Google Drive"""
+    print(f"\n📥 Đang tải: {url_or_id}")
+    
+    # 1. Link trực tiếp từ máy chủ BTC (ledo.io.vn) hoặc link HTTP trực tiếp
+    if "ledo.io.vn" in url_or_id or (url_or_id.startswith("http") and "drive.google.com" not in url_or_id):
+        response = requests.get(url_or_id, stream=True, timeout=60)
+        response.raise_for_status()
+        total_size = int(response.headers.get('content-length', 0))
+        block_size = 1024 * 1024  # 1MB chunk
         
-    print(f"\n📥 Đang tải file từ Drive: {drive_url_or_id}")
-    if "drive.google.com" in drive_url_or_id or "http" in drive_url_or_id:
-        gdown.download(url=drive_url_or_id, output=str(target_path), quiet=False, fuzzy=True)
+        with open(target_path, 'wb') as file, tqdm(
+            desc=Path(url_or_id).name,
+            total=total_size,
+            unit='iB',
+            unit_scale=True,
+            unit_divisor=1024,
+        ) as bar:
+            for data in response.iter_content(block_size):
+                size = file.write(data)
+                bar.update(size)
     else:
-        gdown.download(id=drive_url_or_id, output=str(target_path), quiet=False)
+        # 2. Link Google Drive
+        try:
+            import gdown
+        except ImportError:
+            print("[ERROR] Chưa cài gdown! Hãy chạy: pip install gdown")
+            sys.exit(1)
+        if "drive.google.com" in url_or_id:
+            gdown.download(url=url_or_id, output=str(target_path), quiet=False, fuzzy=True)
+        else:
+            gdown.download(id=url_or_id, output=str(target_path), quiet=False)
 
 def process_zip_archive(zpath, ocr_engine, frames_df):
     """Đọc trực tiếp luồng byte ảnh từ ZIP vào RAM và chạy OCR"""
@@ -136,11 +156,11 @@ def process_zip_archive(zpath, ocr_engine, frames_df):
     return records
 
 def main():
-    parser = argparse.ArgumentParser(description="Download from Drive Link -> In-Memory SOTA OCR -> Auto-Delete ZIP")
-    parser.add_argument("--drive_url", type=str, default=None,
-                        help="Single Google Drive Link or File ID of Keyframes_Lxx.zip")
-    parser.add_argument("--urls_file", type=str, default=None,
-                        help="Path to .txt file containing list of Google Drive Links (one per line)")
+    parser = argparse.ArgumentParser(description="Download from BTC/Drive Link -> In-Memory SOTA OCR -> Auto-Delete ZIP")
+    parser.add_argument("--url", type=str, default=None,
+                        help="Single direct link of Keyframes_Lxx.zip (e.g. from ledo.io.vn or Drive)")
+    parser.add_argument("--urls_file", type=str, default="config/drive_keyframes_urls.txt",
+                        help="Path to .txt file containing list of links (default: config/drive_keyframes_urls.txt)")
     parser.add_argument("--keyframes_dir", type=str, default="Keyframes",
                         help="Local folder containing Keyframes_Lxx.zip (if already downloaded)")
     parser.add_argument("--output_path", type=str, default="data/processed/ocr_results.parquet",
@@ -164,7 +184,7 @@ def main():
     out_file = Path(args.output_path)
     out_file.parent.mkdir(parents=True, exist_ok=True)
 
-    # Nếu đã có file parquet trước đó -> nạp lên để ghi tiếp (Resume)
+    # Resume checkpoint nếu có
     if out_file.exists():
         try:
             existing_df = pd.read_parquet(out_file)
@@ -173,24 +193,21 @@ def main():
         except Exception:
             pass
 
-    # Thu thập danh sách các mục tiêu cần xử lý
     targets = []
-    if args.drive_url:
-        targets.append(args.drive_url)
+    if args.url:
+        targets.append(args.url)
     elif args.urls_file and Path(args.urls_file).exists():
         with open(args.urls_file, "r", encoding="utf-8") as f:
             targets = [line.strip() for line in f if line.strip() and not line.startswith("#")]
-        print(f"Đã nạp {len(targets)} link Google Drive từ file {args.urls_file}")
+        print(f"Đã nạp {len(targets)} link từ file {args.urls_file}")
     else:
-        # Quét thư mục local
         kf_dir = Path(args.keyframes_dir)
         if kf_dir.exists():
             targets = sorted(list(kf_dir.glob("*.zip")) + list(kf_dir.glob("*/*.zip")))
             print(f"Đã tìm thấy {len(targets)} file ZIP trong thư mục local {kf_dir}")
 
     if not targets:
-        print("[ERROR] Không tìm thấy link Drive hoặc file ZIP nào để xử lý!")
-        print("Vui lòng cung cấp: --drive_url 'LINK_DRIVE' hoặc --urls_file 'config/drive_keyframes_urls.txt'")
+        print("[ERROR] Không tìm thấy link tải hoặc file ZIP nào để xử lý!")
         sys.exit(1)
 
     start_time = time.time()
@@ -200,14 +217,13 @@ def main():
         print(f"📦 Đang xử lý gói {idx}/{len(targets)}: {target}")
         print(f"========================================================")
 
-        is_drive_link = isinstance(target, str) and ("drive.google.com" in target or "http" in target or len(target) > 20 and not Path(target).exists())
+        is_remote_link = isinstance(target, str) and ("http" in target or "drive.google.com" in target or len(target) > 20 and not Path(target).exists())
         
-        if is_drive_link:
-            # Tải tạm 1 file zip từ Google Drive về thư mục temp
+        if is_remote_link:
             with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
                 temp_zip_path = tmp_zip.name
 
-            download_file_from_drive(target, temp_zip_path)
+            download_file(target, temp_zip_path)
             
             # Xử lý OCR trực tiếp trong RAM
             records = process_zip_archive(temp_zip_path, ocr_engine, frames_df)
@@ -218,7 +234,6 @@ def main():
                 os.remove(temp_zip_path)
                 print(f"🗑️ Đã xóa sạch file zip tạm thời trên server để bảo vệ dung lượng đĩa!")
         else:
-            # Xử lý file zip local
             records = process_zip_archive(target, ocr_engine, frames_df)
             all_ocr_records.extend(records)
 
