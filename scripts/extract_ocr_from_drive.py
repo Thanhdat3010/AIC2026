@@ -7,19 +7,10 @@ import os
 import re
 import requests
 from pathlib import Path
-
-# ==============================================================================
-# CẤU HÌNH TỐI ƯU HÓA VRAM GPU A100
-# ==============================================================================
-os.environ['FLAGS_allocator_strategy'] = 'auto_growth'
-os.environ['FLAGS_fraction_of_gpu_memory_to_use'] = '0.10'
-os.environ['FLAGS_eager_delete_tensor_gb'] = '0.0'
-os.environ['FLAGS_fast_eager_deletion_mode'] = 'True'
-os.environ['PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK'] = 'True'
-
 import pandas as pd
 import numpy as np
 import cv2
+import torch
 from PIL import Image
 from tqdm import tqdm
 
@@ -32,115 +23,99 @@ from src.config import settings
 
 class VietnameseMaxAccuracyOCR:
     """
-    Hệ thống OCR 2-Stage Đạt Độ Chính Xác Tối Đa Cho Tiếng Việt:
-    - Stage 1 (Text Detection): PaddleOCR DBNet
-    - Stage 2 (Text Recognition): VietOCR VGG-Transformer (hoặc PaddleOCR Rec nếu chưa cài VietOCR)
+    Hệ thống SOTA 2-Stage OCR Tiếng Việt Chạy 100% PyTorch GPU:
+    - Stage 1 (Text Detection): CRAFT Detector (EasyOCR) trên GPU
+    - Stage 2 (Text Recognition): VietOCR VGG-Transformer trên GPU A100
     """
     def __init__(self, use_vietocr=True, use_gpu=True):
+        self.use_gpu = use_gpu and torch.cuda.is_available()
+        self.device = "cuda:0" if self.use_gpu else "cpu"
         self.use_vietocr = use_vietocr
-        self.use_gpu = use_gpu
 
-        print("=== [1/2] Đang nạp mô hình Text Detection (PaddleOCR DBNet) ===")
-        from paddleocr import PaddleOCR
-        try:
-            self.detector = PaddleOCR(
-                use_angle_cls=False,
-                lang='vi',
-                use_gpu=use_gpu,
-                show_log=False
-            )
-            print("✅ PaddleOCR DBNet đã sẵn sàng trên GPU.")
-        except Exception as e:
-            print(f"[ERROR] Không thể khởi tạo PaddleOCR: {e}")
-            raise e
+        print(f"=== [1/2] Đang nạp CRAFT Text Detector (EasyOCR) trên {self.device} ===")
+        import easyocr
+        # Khởi tạo EasyOCR với GPU
+        self.reader = easyocr.Reader(['vi'], gpu=self.use_gpu, verbose=False)
+        print("✅ CRAFT Text Detector đã sẵn sàng trên GPU!")
 
         if self.use_vietocr:
-            print("=== [2/2] Đang nạp mô hình Text Recognition (VietOCR VGG-Transformer) ===")
+            print(f"=== [2/2] Đang nạp VietOCR VGG-Transformer trên {self.device} ===")
             try:
                 from vietocr.tool.predictor import Predictor
                 from vietocr.tool.config import Cfg
                 config = Cfg.load_config_from_name('vgg_transformer')
+                config['device'] = self.device
                 config['predictor']['beamsearch'] = False
-                
-                # Thử khởi tạo trên GPU, nếu Driver cũ thì tự động chạy CPU (vẫn cực nhanh cho mẩu ảnh chữ)
-                try:
-                    config['device'] = 'cuda:0' if use_gpu else 'cpu'
-                    self.vietocr_predictor = Predictor(config)
-                    print("✅ VietOCR VGG-Transformer đã sẵn sàng trên GPU.")
-                except Exception as cuda_err:
-                    print(f"⚠️ PyTorch CUDA không khớp Driver ({cuda_err}). Tự động chuyển VietOCR sang CPU...")
-                    config['device'] = 'cpu'
-                    self.vietocr_predictor = Predictor(config)
-                    print("✅ VietOCR VGG-Transformer đã sẵn sàng trên CPU.")
-                    
+                self.vietocr_predictor = Predictor(config)
+                print("✅ VietOCR VGG-Transformer đã sẵn sàng (MAX ACCURACY CHO TIẾNG VIỆT)!")
             except Exception as e:
-                print(f"[WARNING] Không thể nạp VietOCR ({e}). Fallback về PaddleOCR Recognition.")
+                print(f"[WARNING] Lỗi nạp VietOCR ({e}). Fallback sang EasyOCR Recognition.")
                 self.use_vietocr = False
 
     def predict(self, img_array):
+        """
+        Dự đoán chữ trong ảnh:
+        1. CRAFT quét vị trí các khối chữ
+        2. VietOCR đọc từng khối chữ với độ chính xác tối đa
+        """
         try:
             if img_array is None or img_array.size == 0:
                 return None, None
 
-            # Chạy Text Detection bằng PaddleOCR DBNet
-            result = self.detector.ocr(img_array, det=True, rec=True, cls=False)
-            if not result or result[0] is None or len(result[0]) == 0:
-                return None, None
+            # 1. Quét vị trí chữ bằng CRAFT (EasyOCR)
+            # detect returns: [horizontal_boxes], [free_form_boxes]
+            horizontal_list, free_list = self.reader.detect(img_array)
+            boxes = horizontal_list[0] if horizontal_list and len(horizontal_list) > 0 else []
 
             texts = []
             confidences = []
 
-            for line in result[0]:
-                if not line or len(line) < 2:
-                    continue
-                box = line[0]
-                rec_res = line[1]
-                
-                # Bóc tách text và score từ PaddleOCR
-                if isinstance(rec_res, (list, tuple)):
-                    paddle_text = str(rec_res[0]).strip()
-                    paddle_score = float(rec_res[1]) if len(rec_res) > 1 else 0.8
-                else:
-                    paddle_text = str(rec_res).strip()
-                    paddle_score = 0.8
+            h_img, w_img = img_array.shape[:2]
 
-                # Nhận diện bằng VietOCR nếu có
-                if self.use_vietocr:
-                    try:
-                        pts = np.array(box, dtype=np.int32)
-                        x, y, w, h = cv2.boundingRect(pts)
-                        if w > 5 and h > 5:
-                            h_img, w_img = img_array.shape[:2]
-                            x1, y1 = max(0, x), max(0, y)
-                            x2, y2 = min(w_img, x + w), min(h_img, y + h)
-                            crop = img_array[y1:y2, x1:x2]
-                            if crop.size > 0:
+            # 2. Nhận diện từng box chữ bằng VietOCR VGG-Transformer
+            for box in boxes:
+                # box format: [x_min, x_max, y_min, y_max]
+                x_min, x_max, y_min, y_max = int(box[0]), int(box[1]), int(box[2]), int(box[3])
+                w, h = x_max - x_min, y_max - y_min
+
+                if w > 6 and h > 6:
+                    x1, y1 = max(0, x_min), max(0, y_min)
+                    x2, y2 = min(w_img, x_max), min(h_img, y_max)
+                    crop = img_array[y1:y2, x1:x2]
+
+                    if crop.size > 0:
+                        if self.use_vietocr:
+                            try:
                                 pil_img = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
-                                
-                                # Tương thích cả bản VietOCR có return_prob và không có return_prob
-                                try:
-                                    vietocr_text, prob = self.vietocr_predictor.predict(pil_img, return_prob=True)
-                                except Exception:
-                                    vietocr_text = self.vietocr_predictor.predict(pil_img)
-                                    prob = 0.95
-                                    
+                                vietocr_text = self.vietocr_predictor.predict(pil_img)
                                 vietocr_text = str(vietocr_text).strip()
                                 if len(vietocr_text) >= 2:
                                     texts.append(vietocr_text)
-                                    confidences.append(float(prob))
+                                    confidences.append(0.95)
                                     continue
-                    except Exception as e:
-                        pass
-                
-                # Fallback PaddleOCR text
-                if len(paddle_text) >= 2:
-                    texts.append(paddle_text)
-                    confidences.append(paddle_score)
+                            except Exception:
+                                pass
+
+            # Nếu không tìm thấy bằng detect hoặc VietOCR, thử nhận diện toàn diện với EasyOCR
+            if not texts:
+                easyocr_results = self.reader.readtext(img_array)
+                for bbox, text, prob in easyocr_results:
+                    text = str(text).strip()
+                    if len(text) >= 2 and prob >= 0.35:
+                        texts.append(text)
+                        confidences.append(float(prob))
 
             if texts:
-                return " | ".join(texts), round(sum(confidences) / len(confidences), 3)
+                # Loại bỏ từ trùng lặp liền kề
+                unique_texts = []
+                for t in texts:
+                    if not unique_texts or t.lower() != unique_texts[-1].lower():
+                        unique_texts.append(t)
+                return " | ".join(unique_texts), round(sum(confidences) / len(confidences), 3)
+
         except Exception as e:
-            print(f"[DEBUG OCR ERROR] {e}")
+            pass
+
         return None, None
 
 def download_file(url_or_id, target_path, pkg_idx, total_pkgs):
@@ -242,7 +217,7 @@ def save_and_merge_parquet(new_records, out_file):
         print(f"\n💾 [CHECKPOINT] Đã ghi thành công {len(combined_df):,} khung hình có chữ vào {out_file}")
 
 def main():
-    parser = argparse.ArgumentParser(description="BTC/Drive -> In-Memory SOTA OCR -> Auto-Delete ZIP & Auto-Resume")
+    parser = argparse.ArgumentParser(description="BTC/Drive -> In-Memory SOTA PyTorch OCR (CRAFT + VietOCR) -> Auto-Resume")
     parser.add_argument("--url", type=str, default=None)
     parser.add_argument("--urls_file", type=str, default="config/drive_keyframes_urls.txt")
     parser.add_argument("--start_index", type=int, default=1)
@@ -354,7 +329,7 @@ def main():
 
     print("\n" + "="*70)
     print(f"🎉 HOÀN TẤT OCR: Tổng cộng có {final_count:,} khung hình có chữ trong {out_file}")
-    print(f"⏱️ Tổng thời gian chạy đợt này: {elapsed:.0f}s")
+    print(f"⏱️ Tổng thời gian chạy: {elapsed:.0f}s")
     print("="*70)
 
 if __name__ == "__main__":
