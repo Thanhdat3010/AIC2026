@@ -1,47 +1,42 @@
 # ==============================================================================
 # AIC2026 - Multimodal Video Retrieval & Reasoning System
-# Dependency Specification for Production & Cloud Environments (Colab / Cloud GPU)
+# Production-Grade Pinned Dependencies (Tested on CUDA 12.1 / GPU A100 / Colab)
 # ==============================================================================
 
-# Core Data & Numerical Processing
-numpy>=1.24.0,<2.0.0
-pandas>=2.0.0
-pyarrow>=12.0.0
-scipy>=1.10.0
-scikit-learn>=1.2.0
-pillow>=9.5.0
-tqdm>=4.65.0
-pydantic>=2.0.0
-pyyaml>=6.0
+# Core Data & Numerical Processing (STRICTLY NUMPY 1.x TO PREVENT C-API ABI BREAKAGE)
+numpy==1.26.4
+pandas==2.2.2
+pyarrow==16.1.0
+scipy==1.13.1
+scikit-learn==1.5.0
+pillow==10.3.0
+tqdm==4.66.4
+pydantic==2.7.4
+pyyaml==6.0.1
 
-# Deep Learning & PyTorch Foundation
-torch>=2.1.0
-torchvision>=0.16.0
-torchaudio>=2.1.0
-
-# Natural Language & Multimodal Models (SigLIP / CLIP / Transformers)
-transformers>=4.44.0
-sentencepiece>=0.2.0
-protobuf>=4.25.0
-open_clip_torch>=2.20.0
-timm>=0.9.0
-huggingface_hub>=0.23.0
+# Natural Language & Multimodal Foundations
+transformers==4.44.2
+sentencepiece==0.2.0
+protobuf==4.25.3
+open_clip_torch==2.24.0
+timm==1.0.3
+huggingface_hub==0.23.4
 
 # SOTA OCR Engine (CRAFT Text Detection + VietOCR Transformer)
-vietocr>=0.3.8
-easyocr>=1.7.0
-opencv-python>=4.8.0
-einops>=0.6.0
+vietocr==0.3.8
+easyocr==1.7.1
+opencv-python-headless==4.9.0.80
+einops==0.8.0
 
 # SOTA ASR Engine (VinAI PhoWhisper Batch Pipeline)
-faster-whisper>=1.0.0
-ctranslate2>=4.0.0
+faster-whisper==1.0.3
+ctranslate2==4.4.0
 
-# Retrieval & Search Indexes
-faiss-cpu>=1.7.4
-rank_bm25>=0.2.2
+# Multimodal Retrieval & Indexes
+faiss-cpu==1.8.0.post1
+rank_bm25==0.2.2
 
-# Network, Web App & Utilities
-requests>=2.31.0
-gdown>=5.1.0
-streamlit>=1.25.0
+# Network, Web App & Cloud Utilities
+requests==2.32.3
+gdown==5.2.0
+streamlit==1.35.0
