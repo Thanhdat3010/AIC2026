@@ -25,9 +25,9 @@ from src.config import settings
 
 class FastBatchVietOCR:
     """
-    Bộ giải mã VietOCR Batch Tensor chuẩn hóa trực tiếp trên GPU A100:
-    - Gom 32 - 64 mẩu chữ vào tensor (B, 3, 32, max_w)
-    - Gọi trực tiếp translate(batch_tensor, model) giải mã song song
+    Bộ giải mã VietOCR Batch Tensor Vectorized 100% trên GPU A100:
+    - Giải mã song song toàn bộ B mẩu chữ cùng lúc (B = 16, 32, 64)
+    - Không vướng lỗi shape của thư viện cũ
     """
     def __init__(self, predictor):
         self.predictor = predictor
@@ -57,11 +57,11 @@ class FastBatchVietOCR:
         except Exception:
             return None
 
-    def predict_batch(self, crops_list, batch_size=32):
+    def predict_batch(self, crops_list, batch_size=32, max_seq_length=50, sos_token=1, eos_token=2):
         if not crops_list:
             return []
         
-        from vietocr.tool.translate import translate
+        self.model.eval()
         results = []
 
         for i in range(0, len(crops_list), batch_size):
@@ -84,20 +84,25 @@ class FastBatchVietOCR:
                 padded_tensors.append(t)
             
             batch_tensor = torch.stack(padded_tensors).to(self.device)
-            
+            B = batch_tensor.shape[0]
+
             with torch.no_grad():
-                try:
-                    # Giới hạn max_seq_length=50 giúp tăng tốc gấp đôi cho chữ tiêu đề/phụ đề
-                    translated_sentence, _ = translate(batch_tensor, self.model, max_seq_length=50)
-                    decoded_texts = self.vocab.decode(translated_sentence.tolist())
-                except Exception:
-                    decoded_texts = []
-                    for t in padded_tensors:
-                        try:
-                            s, _ = translate(t.unsqueeze(0).to(self.device), self.model, max_seq_length=50)
-                            decoded_texts.append(self.vocab.decode(s.tolist())[0])
-                        except Exception:
-                            decoded_texts.append("")
+                src = self.model.cnn(batch_tensor)
+                memory = self.model.transformer.forward_encoder(src)
+
+                translated = torch.full((B, 1), sos_token, dtype=torch.long, device=self.device)
+
+                for _ in range(max_seq_length):
+                    tgt_inp = translated.t()  # (seq_len, B)
+                    output, _ = self.model.transformer.forward_decoder(tgt_inp, memory)
+                    next_tokens = torch.argmax(output[-1, :, :], dim=-1)  # (B,)
+                    translated = torch.cat([translated, next_tokens.unsqueeze(1)], dim=1)
+
+                    # Dừng sớm nếu tất cả sequence đã sinh ra token kết thúc eos_token (2)
+                    if ((translated == eos_token).any(dim=1)).all():
+                        break
+
+                decoded_texts = self.vocab.decode(translated.cpu().tolist())
 
             batch_res = [""] * len(batch_crops)
             for vi, txt in zip(valid_indices, decoded_texts):
@@ -122,7 +127,7 @@ class UltraFastMaxAccuracyOCR:
         print("✅ CRAFT Text Detector đã sẵn sàng trên GPU!")
 
         if self.use_vietocr:
-            print(f"=== [2/2] Nạp True GPU Batch VietOCR trên {self.device} ===")
+            print(f"=== [2/2] Nạp Vectorized GPU Batch VietOCR trên {self.device} ===")
             try:
                 from vietocr.tool.predictor import Predictor
                 from vietocr.tool.config import Cfg
@@ -131,7 +136,7 @@ class UltraFastMaxAccuracyOCR:
                 config['predictor']['beamsearch'] = False
                 raw_predictor = Predictor(config)
                 self.batch_vietocr = FastBatchVietOCR(raw_predictor)
-                print("✅ True GPU Batch VietOCR đã sẵn sàng (Tốc độ tối đa trên A100)!")
+                print("✅ Vectorized GPU Batch VietOCR đã sẵn sàng (Tốc độ tối đa trên A100)!")
             except Exception as e:
                 print(f"[WARNING] Lỗi nạp VietOCR ({e}). Fallback sang EasyOCR.")
                 self.use_vietocr = False
@@ -167,7 +172,6 @@ class UltraFastMaxAccuracyOCR:
             for box in boxes:
                 x_min, x_max, y_min, y_max = int(box[0]), int(box[1]), int(box[2]), int(box[3])
                 w, h = x_max - x_min, y_max - y_min
-                # Lọc bỏ các box rác li ti
                 if w >= 14 and h >= 12:
                     x1, y1 = max(0, x_min), max(0, y_min)
                     x2, y2 = min(w_img, x_max), min(h_img, y_max)
@@ -327,7 +331,7 @@ def process_zip_archive(zpath, ocr_engine, frames_df, pkg_idx, total_pkgs, out_f
     return total_records_in_pkg
 
 def main():
-    parser = argparse.ArgumentParser(description="BTC/Drive -> SOTA PyTorch OCR (CRAFT + VietOCR True GPU Batch) -> Auto-Resume")
+    parser = argparse.ArgumentParser(description="BTC/Drive -> SOTA PyTorch OCR (CRAFT + VietOCR Vectorized GPU Batch) -> Auto-Resume")
     parser.add_argument("--url", type=str, default=None)
     parser.add_argument("--urls_file", type=str, default="config/drive_keyframes_urls.txt")
     parser.add_argument("--start_index", type=int, default=1)
