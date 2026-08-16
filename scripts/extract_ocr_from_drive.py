@@ -87,29 +87,40 @@ class FastBatchVietOCR:
             B = batch_tensor.shape[0]
 
             with torch.no_grad():
+                # 1. CNN feature extraction (batch) - shape: (B, d_model, H', W')
                 src = self.model.cnn(batch_tensor)
+
+                # 2. Transformer Encoder (batch) - memory shape: (src_len, B, d_model)
                 memory = self.model.transformer.forward_encoder(src)
 
+                # 3. Auto-regressive Decoder (batch vectorized)
                 translated = torch.full((B, 1), sos_token, dtype=torch.long, device=self.device)
 
                 for _ in range(max_seq_length):
-                    tgt_inp = translated.t()  # (seq_len, B)
-                    output, _ = self.model.transformer.forward_decoder(tgt_inp, memory)
-                    
-                    # Khớp đúng chiều batch B: (B, vocab_size)
-                    if output.shape[0] == B:
-                        logits = output[:, -1, :]
-                    else:
-                        logits = output[-1, :, :]
-                    
-                    next_tokens = torch.argmax(logits, dim=-1)  # (B,)
-                    translated = torch.cat([translated, next_tokens.unsqueeze(1)], dim=1)  # (B, seq_len + 1)
+                    # tgt_inp: (seq_len, B) - VietOCR transformer is NOT batch_first
+                    tgt_inp = translated.t()
 
-                    # Dừng sớm nếu tất cả sequence trong batch đã sinh ra eos_token
+                    # output: (seq_len, B, vocab_size), memory PHẢI truyền lại
+                    output, memory = self.model.transformer.forward_decoder(tgt_inp, memory)
+
+                    # Lấy dự đoán ở vị trí cuối cùng cho TẤT CẢ B mẩu chữ
+                    # output[-1] shape: (B, vocab_size)
+                    next_tokens = torch.argmax(output[-1], dim=-1)  # (B,)
+
+                    # Nối token mới vào chuỗi: (B, seq_len+1)
+                    translated = torch.cat([translated, next_tokens.unsqueeze(1)], dim=1)
+
+                    # Dừng sớm nếu TẤT CẢ B sequence đều đã sinh eos_token
                     if ((translated == eos_token).any(dim=1)).all():
                         break
 
-                decoded_texts = self.vocab.decode(translated.cpu().tolist())
+                # 4. Decode TỪNG sequence riêng lẻ (vocab.decode chỉ nhận 1D list)
+                decoded_texts = []
+                for seq in translated.cpu().tolist():
+                    try:
+                        decoded_texts.append(self.vocab.decode(seq))
+                    except Exception:
+                        decoded_texts.append("")
 
             batch_res = [""] * len(batch_crops)
             for vi, txt in zip(valid_indices, decoded_texts):
