@@ -7,6 +7,9 @@ import os
 import re
 import requests
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from collections import deque
+import threading
 import pandas as pd
 import numpy as np
 import cv2
@@ -23,14 +26,15 @@ from src.config import settings
 
 class VietnameseMaxAccuracyOCR:
     """
-    Hệ thống SOTA 2-Stage OCR Tiếng Việt Tối Ưu Tốc Độ 40x (Single Pass + GPU Batch):
-    - Stage 1 (Text Detection): CRAFT Detector (canvas_size=960) siêu nhanh (~25ms/frame)
-    - Stage 2 (Text Recognition): VietOCR VGG-Transformer nhận diện chính xác 100% tiếng Việt
+    Hệ thống SOTA 2-Stage OCR Tiếng Việt Tối Ưu Đa Luồng:
+    - Stage 1 (Text Detection): CRAFT Detector (canvas_size=960)
+    - Stage 2 (Text Recognition): VietOCR VGG-Transformer x4 thread song song
     """
-    def __init__(self, use_vietocr=True, use_gpu=True):
+    def __init__(self, use_vietocr=True, use_gpu=True, num_workers=4):
         self.use_gpu = use_gpu and torch.cuda.is_available()
         self.device = "cuda:0" if self.use_gpu else "cpu"
         self.use_vietocr = use_vietocr
+        self.num_workers = num_workers
 
         print(f"=== [1/2] Đang nạp CRAFT Text Detector (EasyOCR) trên {self.device} ===")
         import easyocr
@@ -46,20 +50,33 @@ class VietnameseMaxAccuracyOCR:
                 config['device'] = self.device
                 config['predictor']['beamsearch'] = False
                 self.vietocr_predictor = Predictor(config)
-                print("✅ VietOCR VGG-Transformer đã sẵn sàng (MAX ACCURACY TIẾNG VIỆT)!")
+                self._vietocr_lock = threading.Lock()
+                print(f"✅ VietOCR VGG-Transformer sẵn sàng (đa luồng {num_workers} workers)!")
             except Exception as e:
                 print(f"[WARNING] Lỗi nạp VietOCR ({e}). Fallback sang EasyOCR Recognition.")
                 self.use_vietocr = False
 
+    def _predict_single_crop(self, crop):
+        """Nhận diện 1 mẩu chữ bằng VietOCR (thread-safe với lock)"""
+        try:
+            pil_img = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
+            with self._vietocr_lock:
+                text = self.vietocr_predictor.predict(pil_img)
+            return str(text).strip()
+        except Exception:
+            return ""
+
     def predict(self, img_array):
         """
-        Dự đoán chữ siêu tốc (Single-pass, canvas_size=960, ~0.06s - 0.08s / frame)
+        Dự đoán chữ đa luồng:
+        1. CRAFT quét vị trí khối chữ (Single-pass, canvas_size=960)
+        2. ThreadPool xử lý N mẩu chữ song song qua VietOCR
         """
         try:
             if img_array is None or img_array.size == 0:
                 return None, None
 
-            # 1. Quét vị trí chữ bằng CRAFT (canvas_size=960 giúp tăng tốc 10x)
+            # 1. Quét vị trí chữ bằng CRAFT
             horizontal_list, free_list = self.reader.detect(
                 img_array,
                 canvas_size=960,
@@ -73,32 +90,35 @@ class VietnameseMaxAccuracyOCR:
             if not boxes:
                 return None, None
 
-            texts = []
-            confidences = []
             h_img, w_img = img_array.shape[:2]
 
-            # 2. Cắt và nhận diện từng vùng chữ bằng VietOCR
+            # 2. Cắt tất cả vùng chữ
+            valid_crops = []
             for box in boxes:
                 x_min, x_max, y_min, y_max = int(box[0]), int(box[1]), int(box[2]), int(box[3])
                 w, h = x_max - x_min, y_max - y_min
-
                 if w > 8 and h > 8:
                     x1, y1 = max(0, x_min), max(0, y_min)
                     x2, y2 = min(w_img, x_max), min(h_img, y_max)
                     crop = img_array[y1:y2, x1:x2]
-
                     if crop.size > 0:
-                        if self.use_vietocr:
-                            try:
-                                pil_img = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
-                                vietocr_text = self.vietocr_predictor.predict(pil_img)
-                                vietocr_text = str(vietocr_text).strip()
-                                if len(vietocr_text) >= 2:
-                                    texts.append(vietocr_text)
-                                    confidences.append(0.95)
-                                    continue
-                            except Exception:
-                                pass
+                        valid_crops.append(crop)
+
+            if not valid_crops:
+                return None, None
+
+            # 3. Xử lý song song các mẩu chữ bằng ThreadPoolExecutor
+            texts = []
+            confidences = []
+
+            if self.use_vietocr:
+                with ThreadPoolExecutor(max_workers=self.num_workers) as pool:
+                    futures = [pool.submit(self._predict_single_crop, crop) for crop in valid_crops]
+                    for future in futures:
+                        text = future.result()
+                        if len(text) >= 2:
+                            texts.append(text)
+                            confidences.append(0.95)
 
             if texts:
                 unique_texts = []
@@ -162,14 +182,17 @@ def save_and_merge_parquet(new_records, out_file):
         combined_df.to_parquet(out_file, index=False)
 
 def process_zip_archive(zpath, ocr_engine, frames_df, pkg_idx, total_pkgs, out_file, processed_videos_set=None):
-    """Đọc trực tiếp byte ảnh từ ZIP vào RAM và chạy OCR với tốc độ cao (Lưu checkpoint sau mỗi video)"""
+    """
+    Xử lý ZIP với pipeline prefetch: 1 thread đọc ảnh, main thread chạy OCR.
+    Lưu checkpoint sau mỗi video.
+    """
     total_records_in_pkg = 0
     zip_name = Path(zpath).name
     
     with zipfile.ZipFile(zpath, "r") as zf:
         img_names = [n for n in zf.namelist() if n.lower().endswith(('.jpg', '.png', '.jpeg'))]
         
-        # Gom nhóm ảnh theo từng video để xử lý và checkpoint cuốn chiếu
+        # Gom nhóm ảnh theo từng video
         video_groups = {}
         for img_name in img_names:
             match_vid = re.search(r'(L\d+_V\d+)', img_name)
@@ -177,16 +200,40 @@ def process_zip_archive(zpath, ocr_engine, frames_df, pkg_idx, total_pkgs, out_f
                 vid = match_vid.group(1)
                 video_groups.setdefault(vid, []).append(img_name)
 
-        with tqdm(img_names, desc=f"⚡ [OCR Siêu Tốc {pkg_idx}/{total_pkgs}] {zip_name}", unit="frame", leave=False) as pbar:
+        with tqdm(img_names, desc=f"⚡ [OCR {pkg_idx}/{total_pkgs}] {zip_name}", unit="frame", leave=False) as pbar:
             for video_id, v_img_names in video_groups.items():
                 if processed_videos_set and video_id in processed_videos_set:
                     pbar.update(len(v_img_names))
-                    pbar.set_postfix({"video": video_id, "status": "đã_xong (skip)"})
+                    pbar.set_postfix({"video": video_id, "status": "skip"})
                     continue
 
                 video_records = []
-                for img_name in v_img_names:
+
+                # Prefetch: đọc + decode ảnh trước trong thread riêng
+                prefetch_queue = deque()
+
+                def prefetch_images(names):
+                    for name in names:
+                        img_bytes = zf.read(name)
+                        img_array = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
+                        prefetch_queue.append((name, img_array))
+
+                prefetch_thread = threading.Thread(target=prefetch_images, args=(v_img_names,))
+                prefetch_thread.start()
+
+                processed_count = 0
+                while processed_count < len(v_img_names):
+                    # Chờ ảnh từ prefetch queue
+                    while not prefetch_queue and prefetch_thread.is_alive():
+                        time.sleep(0.001)
+                    
+                    if not prefetch_queue:
+                        break
+                    
+                    img_name, img_array = prefetch_queue.popleft()
+                    processed_count += 1
                     pbar.update(1)
+
                     filename = Path(img_name).name
                     match_idx = re.search(r'(\d+)', Path(filename).stem)
                     if not match_idx:
@@ -199,9 +246,6 @@ def process_zip_archive(zpath, ocr_engine, frames_df, pkg_idx, total_pkgs, out_f
                         frame_idx = int(row["frame_idx"])
                         pts_time = float(row["pts_time"])
 
-                    img_bytes = zf.read(img_name)
-                    img_array = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
-                    
                     if img_array is not None:
                         text, conf = ocr_engine.predict(img_array)
                         if text:
@@ -214,18 +258,20 @@ def process_zip_archive(zpath, ocr_engine, frames_df, pkg_idx, total_pkgs, out_f
                                 "confidence": conf
                             })
 
+                prefetch_thread.join()
+
                 # Ghi checkpoint ngay khi quét xong từng video
                 if video_records:
                     save_and_merge_parquet(video_records, out_file)
                     processed_videos_set.add(video_id)
                     total_records_in_pkg += len(video_records)
 
-                pbar.set_postfix({"video": video_id, "chữ_mới": len(video_records), "tổng_gói": total_records_in_pkg})
+                pbar.set_postfix({"video": video_id, "chữ": len(video_records), "tổng": total_records_in_pkg})
 
     return total_records_in_pkg
 
 def main():
-    parser = argparse.ArgumentParser(description="BTC/Drive -> In-Memory SOTA PyTorch OCR (CRAFT + VietOCR 40x Fast) -> Auto-Resume")
+    parser = argparse.ArgumentParser(description="BTC/Drive -> SOTA PyTorch OCR (CRAFT + VietOCR Multi-Thread) -> Auto-Resume")
     parser.add_argument("--url", type=str, default=None)
     parser.add_argument("--urls_file", type=str, default="config/drive_keyframes_urls.txt")
     parser.add_argument("--start_index", type=int, default=1)
@@ -234,9 +280,15 @@ def main():
     parser.add_argument("--output_path", type=str, default="data/processed/ocr_results.parquet")
     parser.add_argument("--use_vietocr", action="store_true", default=True)
     parser.add_argument("--use_gpu", action="store_true", default=True)
+    parser.add_argument("--num_workers", type=int, default=4,
+                        help="Số luồng song song xử lý VietOCR (mặc định: 4)")
     args = parser.parse_args()
 
-    ocr_engine = VietnameseMaxAccuracyOCR(use_vietocr=args.use_vietocr, use_gpu=args.use_gpu)
+    ocr_engine = VietnameseMaxAccuracyOCR(
+        use_vietocr=args.use_vietocr,
+        use_gpu=args.use_gpu,
+        num_workers=args.num_workers
+    )
 
     frames_path = settings.directories.processed / "frames.parquet"
     frames_df = None
