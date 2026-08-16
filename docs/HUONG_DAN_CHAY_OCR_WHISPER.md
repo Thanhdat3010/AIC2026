@@ -30,7 +30,7 @@ pip install easyocr vietocr faster-whisper requests gdown "numpy<2.0.0" "setupto
 ```bash
 tmux new -s ocr
 conda activate AIC2026
-python scripts/extract_ocr_from_drive.py --urls_file config/drive_keyframes_urls.txt --output_path data/processed/ocr_results.parquet --use_vietocr --use_gpu
+python scripts/extract_ocr_from_drive.py --urls_file config/drive_keyframes_urls.txt --output_path data/batch_1/processed/ocr_results.parquet --use_vietocr --use_gpu
 ```
 *(Thoát ra ngoài: Nhấn `Ctrl + B` rồi bấm `D`)*.
 
@@ -40,7 +40,7 @@ python scripts/extract_ocr_from_drive.py --urls_file config/drive_keyframes_urls
 ```bash
 tmux new -s asr
 conda activate AIC2026
-python scripts/extract_asr_from_drive.py --urls_file config/drive_videos_urls.txt --output_path data/processed/transcripts.parquet --model_size vinai/PhoWhisper-large --batch_size 16 --beam_size 5 --device cuda
+python scripts/extract_asr_from_drive.py --urls_file config/drive_videos_urls.txt --output_path data/batch_1/processed/transcripts.parquet --model_size vinai/PhoWhisper-large --batch_size 16 --beam_size 5 --device cuda
 ```
 *(Thoát ra ngoài: Nhấn `Ctrl + B` rồi bấm `D`)*.
 
