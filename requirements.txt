@@ -1,13 +1,47 @@
-numpy>=1.24.0
+# ==============================================================================
+# AIC2026 - Multimodal Video Retrieval & Reasoning System
+# Dependency Specification for Production & Cloud Environments (Colab / Cloud GPU)
+# ==============================================================================
+
+# Core Data & Numerical Processing
+numpy>=1.24.0,<2.0.0
 pandas>=2.0.0
 pyarrow>=12.0.0
-faiss-cpu>=1.7.4
-torch>=2.0.0
-transformers>=4.30.0
-open_clip_torch>=2.20.0
-streamlit>=1.25.0
-pydantic>=2.0.0
-pyyaml>=6.0
-tqdm>=4.65.0
+scipy>=1.10.0
 scikit-learn>=1.2.0
 pillow>=9.5.0
+tqdm>=4.65.0
+pydantic>=2.0.0
+pyyaml>=6.0
+
+# Deep Learning & PyTorch Foundation
+torch>=2.1.0
+torchvision>=0.16.0
+torchaudio>=2.1.0
+
+# Natural Language & Multimodal Models (SigLIP / CLIP / Transformers)
+transformers>=4.44.0
+sentencepiece>=0.2.0
+protobuf>=4.25.0
+open_clip_torch>=2.20.0
+timm>=0.9.0
+huggingface_hub>=0.23.0
+
+# SOTA OCR Engine (CRAFT Text Detection + VietOCR Transformer)
+vietocr>=0.3.8
+easyocr>=1.7.0
+opencv-python>=4.8.0
+einops>=0.6.0
+
+# SOTA ASR Engine (VinAI PhoWhisper Batch Pipeline)
+faster-whisper>=1.0.0
+ctranslate2>=4.0.0
+
+# Retrieval & Search Indexes
+faiss-cpu>=1.7.4
+rank_bm25>=0.2.2
+
+# Network, Web App & Utilities
+requests>=2.31.0
+gdown>=5.1.0
+streamlit>=1.25.0
