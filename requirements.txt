@@ -1,35 +1,34 @@
 # ==============================================================================
-# AIC2026 - Multimodal Video Retrieval & Reasoning System
-# Production-Grade Dependencies (Compatible with Python 3.10 / 3.11 / 3.12 on Kaggle & Colab)
+# AIC2026 - Exact Working Environment from Server A100
+# Cloned 100% from Production GPU Server
 # ==============================================================================
 
-# Core Data & Numerical Processing (STRICTLY NUMPY 1.x)
-numpy>=1.24.0,<2.0.0
+# Core Data Processing
 pandas>=2.0.0
 pyarrow>=12.0.0
 scipy>=1.10.0
 scikit-learn>=1.2.0
-pillow>=9.5.0
+pillow>=10.0.0
 tqdm>=4.65.0
 pydantic>=2.0.0
 pyyaml>=6.0
 
-# Deep Learning & Multimodal Foundations
-transformers>=4.40.0
+# Natural Language & Multimodal Foundations
+transformers==4.44.2
 sentencepiece>=0.2.0
-protobuf>=3.20.0,<5.0.0
 open_clip_torch>=2.20.0
 timm>=0.9.0
 huggingface_hub>=0.20.0
 
-# Computer Vision & OCR Engines
-easyocr>=1.7.0
+# SOTA OCR Engine (Exact Server Match)
+vietocr==0.3.13
+easyocr==1.7.2
+einops==0.2.0
 opencv-python-headless>=4.8.0
-einops>=0.6.0
 
-# SOTA ASR Engine (VinAI PhoWhisper Batch Pipeline)
-faster-whisper>=1.0.0
-ctranslate2>=4.0.0
+# SOTA ASR Engine (Exact Server Match)
+faster-whisper==1.2.1
+ctranslate2==4.8.1
 
 # Multimodal Retrieval & Indexes
 faiss-cpu>=1.7.4
@@ -37,5 +36,5 @@ rank_bm25>=0.2.2
 
 # Network, Web App & Cloud Utilities
 requests>=2.31.0
-gdown>=4.4.0
+gdown==4.4.0
 streamlit>=1.25.0
