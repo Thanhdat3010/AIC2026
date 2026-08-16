@@ -14,7 +14,7 @@ tqdm>=4.65.0
 pydantic>=2.0.0
 pyyaml>=6.0
 
-# Natural Language & Multimodal Foundations
+# Deep Learning & Multimodal Foundations
 transformers>=4.40.0
 sentencepiece>=0.2.0
 protobuf>=3.20.0,<5.0.0
@@ -22,10 +22,10 @@ open_clip_torch>=2.20.0
 timm>=0.9.0
 huggingface_hub>=0.20.0
 
-# SOTA OCR Engine (VietOCR + CRAFT)
-vietocr>=0.3.8
+# Computer Vision & OCR Engines
 easyocr>=1.7.0
 opencv-python-headless>=4.8.0
+einops>=0.6.0
 
 # SOTA ASR Engine (VinAI PhoWhisper Batch Pipeline)
 faster-whisper>=1.0.0
@@ -37,5 +37,5 @@ rank_bm25>=0.2.2
 
 # Network, Web App & Cloud Utilities
 requests>=2.31.0
-gdown>=5.1.0
+gdown>=4.4.0
 streamlit>=1.25.0
