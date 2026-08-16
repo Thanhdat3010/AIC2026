@@ -7,17 +7,25 @@ from pathlib import Path
 # Force UTF-8 stdout
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
+# Add project root to sys.path
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.append(str(PROJECT_ROOT))
+
+from src.config import settings
+
 def build_unified_multimodal_view():
     print("=" * 85)
     print("🌐 HỆ THỐNG LIÊN KẾT ĐA PHƯƠNG THỨC 360° (MULTIMODAL 360 LINKAGE)")
     print("=" * 85)
     
+    proc_dir = settings.directories.processed
     # 1. Nạp tất cả các nguồn dữ liệu
-    frames_df = pd.read_parquet("data/processed/frames.parquet")
-    videos_df = pd.read_parquet("data/processed/videos.parquet") if Path("data/processed/videos.parquet").exists() else None
-    objects_df = pd.read_parquet("data/processed/object_summary.parquet") if Path("data/processed/object_summary.parquet").exists() else None
-    ocr_df = pd.read_parquet("data/processed/ocr_results.parquet") if Path("data/processed/ocr_results.parquet").exists() else None
-    asr_df = pd.read_parquet("data/processed/transcripts.parquet") if Path("data/processed/transcripts.parquet").exists() else None
+    frames_df = pd.read_parquet(proc_dir / "frames.parquet")
+    videos_df = pd.read_parquet(proc_dir / "videos.parquet") if (proc_dir / "videos.parquet").exists() else None
+    objects_df = pd.read_parquet(proc_dir / "object_summary.parquet") if (proc_dir / "object_summary.parquet").exists() else None
+    ocr_df = pd.read_parquet(proc_dir / "ocr_results.parquet") if (proc_dir / "ocr_results.parquet").exists() else None
+    asr_df = pd.read_parquet(proc_dir / "transcripts.parquet") if (proc_dir / "transcripts.parquet").exists() else None
 
     # Merge frames với objects
     full_df = frames_df.copy()

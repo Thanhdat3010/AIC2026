@@ -357,8 +357,8 @@ def main():
     parser.add_argument("--urls_file", type=str, default="config/drive_keyframes_urls.txt")
     parser.add_argument("--start_index", type=int, default=1)
     parser.add_argument("--start_from", type=str, default=None)
-    parser.add_argument("--keyframes_dir", type=str, default="Keyframes")
-    parser.add_argument("--output_path", type=str, default="data/processed/ocr_results.parquet")
+    parser.add_argument("--keyframes_dir", type=str, default="raw/batch_1/Keyframes")
+    parser.add_argument("--output_path", type=str, default="data/batch_1/processed/ocr_results.parquet")
     parser.add_argument("--use_vietocr", action="store_true", default=True)
     parser.add_argument("--use_gpu", action="store_true", default=True)
     parser.add_argument("--crop_batch_size", type=int, default=32,

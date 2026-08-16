@@ -6,11 +6,19 @@ from pathlib import Path
 # Force UTF-8 stdout
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
+# Add project root to sys.path
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.append(str(PROJECT_ROOT))
+
+from src.config import settings
+
 print("=" * 70)
 print("🔍 BÁO CÁO TOÀN DIỆN DỮ LIỆU ĐÃ TRÍCH XUẤT (OCR & TRANSCRIPTS)")
 print("=" * 70)
 
-ocr_path = Path("data/processed/ocr_results.parquet")
+proc_dir = settings.directories.processed
+ocr_path = proc_dir / "ocr_results.parquet"
 if ocr_path.exists():
     ocr_df = pd.read_parquet(ocr_path)
     print(f"\n🖼️ [1. DỮ LIỆU OCR (CRAFT + VietOCR)]")
@@ -25,7 +33,7 @@ if ocr_path.exists():
 else:
     print("\n❌ Không tìm thấy data/processed/ocr_results.parquet")
 
-asr_path = Path("data/processed/transcripts.parquet")
+asr_path = proc_dir / "transcripts.parquet"
 if asr_path.exists():
     asr_df = pd.read_parquet(asr_path)
     print(f"\n🎙️ [2. DỮ LIỆU TRANSCRIPTS (VinAI PhoWhisper-large)]")

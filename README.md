@@ -31,22 +31,35 @@ AIC2026/
 ├── config/
 │   └── config.yaml              # File cấu hình trung tâm (đường dẫn, model, trọng số)
 ├── docs/                        # Tài liệu thể lệ và cấu trúc dữ liệu của BTC
-├── raw/                         # [QUAN TRỌNG] Nơi đặt các file nén dữ liệu từ BTC
-│   ├── clip-features-32-aic25-b1.zip
-│   ├── map-keyframes-aic25-b1.zip
-│   ├── media-info-aic25-b1.zip
-│   └── objects-aic25-b1.zip
+├── raw/                         # Nơi đặt dữ liệu thô từ BTC (chia theo batch)
+│   ├── batch_1/
+│   │   ├── Keyframes/           # Các file ZIP keyframes
+│   │   ├── Videos/              # Các file ZIP videos
+│   │   ├── clip-features-32-aic25-b1.zip
+│   │   ├── map-keyframes-aic25-b1.zip
+│   │   ├── media-info-aic25-b1.zip
+│   │   └── objects-aic25-b1.zip
+│   └── batch_2/                 # (Sẵn sàng khi BTC phát hành)
 ├── data/
-│   └── processed/               # Nơi lưu Parquet & NumPy sau khi tiền xử lý (tự sinh)
-│       ├── frames.parquet       # Bảng ánh xạ 177.321 keyframes sang frame_idx gốc
-│       ├── videos.parquet       # Bảng metadata 873 video YouTube
-│       └── clip_features.npy    # Ma trận vector CLIP (177321, 512)
+│   ├── batch_1/
+│   │   └── processed/           # Nơi lưu Parquet & NumPy sau khi tiền xử lý (tự sinh)
+│   │       ├── frames.parquet   # Bảng ánh xạ 177.321 keyframes sang frame_idx gốc
+│   │       ├── videos.parquet   # Bảng metadata 873 video YouTube
+│   │       ├── ocr_results.parquet # Kết quả trích xuất CRAFT + VietOCR
+│   │       ├── transcripts.parquet # Kết quả gỡ băng VinAI PhoWhisper
+│   │       └── clip_features.npy # Ma trận vector CLIP (177321, 512)
+│   └── batch_2/                 # (Sẵn sàng khi có batch 2)
 ├── indexes/
 │   └── clip.faiss               # Vector Database FAISS IndexFlatIP (tự sinh)
 ├── query/                       # Chứa các file câu hỏi truy vấn của BTC
-│   └── query-p1-groupA/         # Tập câu hỏi mẫu (*-kis.txt, *-qa.txt, *-trake.txt)
+│   ├── batch_1/
+│   │   └── query-p1-groupA/     # Tập câu hỏi mẫu (*-kis.txt, *-qa.txt, *-trake.txt)
+│   └── batch_2/                 # (Sẵn sàng khi có batch 2)
 ├── outputs/
-│   └── submission/              # Nơi tự động xuất các file CSV nộp bài (*.csv)
+│   ├── batch_1/
+│   │   └── submission/          # Nơi tự động xuất các file CSV nộp bài (*.csv)
+│   └── batch_2/
+│       └── submission/          # (Sẵn sàng khi có batch 2)
 ├── scripts/                     # Các script thực thi dòng lệnh (pre-processing, indexing, search)
 ├── src/                         # Mã nguồn module hóa cốt lõi (query, retrieval, reranking, submission)
 ├── tasks/                       # Quản lý runner cho 3 task riêng biệt: KIS, QA, TRAKE
@@ -123,16 +136,16 @@ Hệ thống hỗ trợ chạy hàng loạt toàn bộ file câu hỏi và tự 
 
 ```bash
 # Chạy riêng Task 1 (Textual KIS)
-python scripts/run_task.py --task kis --query_dir query/query-p1-groupA
+python scripts/run_task.py --task kis --query_dir query/batch_1/query-p1-groupA
 
 # Chạy riêng Task 2 (Visual QA)
-python scripts/run_task.py --task qa --query_dir query/query-p1-groupA
+python scripts/run_task.py --task qa --query_dir query/batch_1/query-p1-groupA
 
 # Chạy riêng Task 3 (TRAKE)
-python scripts/run_task.py --task trake --query_dir query/query-p1-groupA
+python scripts/run_task.py --task trake --query_dir query/batch_1/query-p1-groupA
 
 # Hoặc chạy toàn bộ cả 3 Task cùng lúc
-python scripts/run_task.py --task all --query_dir query/query-p1-groupA
+python scripts/run_task.py --task all --query_dir query/batch_1/query-p1-groupA
 ```
 
 ---

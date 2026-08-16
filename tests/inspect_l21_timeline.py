@@ -7,17 +7,25 @@ from pathlib import Path
 # Force UTF-8 stdout
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
+# Add project root to sys.path
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.append(str(PROJECT_ROOT))
+
+from src.config import settings
+
 def inspect_video_timeline(video_id="L21_V001"):
     print("=" * 90)
     print(f"🎬 ĐỐI CHIẾU DÒNG THỜI GIAN CHI TIẾT (FULL TIMELINE ALIGNMENT) CHO VIDEO: {video_id}")
     print("=" * 90)
 
+    proc_dir = settings.directories.processed
     # 1. Nạp dữ liệu
-    frames_df = pd.read_parquet("data/processed/frames.parquet")
-    videos_df = pd.read_parquet("data/processed/videos.parquet") if Path("data/processed/videos.parquet").exists() else None
-    objects_df = pd.read_parquet("data/processed/object_summary.parquet") if Path("data/processed/object_summary.parquet").exists() else None
-    ocr_df = pd.read_parquet("data/processed/ocr_results.parquet") if Path("data/processed/ocr_results.parquet").exists() else None
-    asr_df = pd.read_parquet("data/processed/transcripts.parquet") if Path("data/processed/transcripts.parquet").exists() else None
+    frames_df = pd.read_parquet(proc_dir / "frames.parquet")
+    videos_df = pd.read_parquet(proc_dir / "videos.parquet") if (proc_dir / "videos.parquet").exists() else None
+    objects_df = pd.read_parquet(proc_dir / "object_summary.parquet") if (proc_dir / "object_summary.parquet").exists() else None
+    ocr_df = pd.read_parquet(proc_dir / "ocr_results.parquet") if (proc_dir / "ocr_results.parquet").exists() else None
+    asr_df = pd.read_parquet(proc_dir / "transcripts.parquet") if (proc_dir / "transcripts.parquet").exists() else None
 
     # Lấy thông tin video
     if videos_df is not None:

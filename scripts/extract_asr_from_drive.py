@@ -187,9 +187,9 @@ def main():
                         help="Bắt đầu chạy từ gói số N (1-indexed, ví dụ: --start_index 5)")
     parser.add_argument("--start_from", type=str, default=None,
                         help="Bắt đầu chạy từ file cụ thể (ví dụ: --start_from Videos_L25_a.zip)")
-    parser.add_argument("--videos_dir", type=str, default="Videos",
+    parser.add_argument("--videos_dir", type=str, default="raw/batch_1/Videos",
                         help="Thư mục video ZIP local")
-    parser.add_argument("--output_path", type=str, default="data/processed/transcripts.parquet",
+    parser.add_argument("--output_path", type=str, default="data/batch_1/processed/transcripts.parquet",
                         help="Nơi lưu file kết quả lời thoại parquet")
     parser.add_argument("--model_size", type=str, default="vinai/PhoWhisper-large",
                         help="Mô hình: 'vinai/PhoWhisper-large' hoặc 'large-v3'")

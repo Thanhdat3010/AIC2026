@@ -12,6 +12,7 @@ class SubmissionWriter:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         
     def write(self, query_id: str, results: List[Dict[str, Any]], top_k: int = 100) -> Path:
+        self.output_dir.mkdir(parents=True, exist_ok=True)
         output_path = self.output_dir / f"{query_id}.csv"
         
         # Take the top K results (or fewer if we don't have K)

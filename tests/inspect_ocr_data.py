@@ -1,9 +1,17 @@
+import sys
 import pandas as pd
 from pathlib import Path
 
-p = Path("data/processed/ocr_results.parquet")
+# Add project root to sys.path
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.append(str(PROJECT_ROOT))
+
+from src.config import settings
+
+p = settings.directories.processed / "ocr_results.parquet"
 if not p.exists():
-    print("FILE_NOT_FOUND")
+    print(f"FILE_NOT_FOUND: {p}")
 else:
     df = pd.read_parquet(p)
     print("=" * 60)

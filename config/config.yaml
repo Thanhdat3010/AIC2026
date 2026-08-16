@@ -1,10 +1,10 @@
 # Configuration for AIC 2026 KIS System
 
 directories:
-  raw: "raw"
-  processed: "data/processed"
+  raw: "raw/batch_1"
+  processed: "data/batch_1/processed"
   indexes: "indexes"
-  outputs: "outputs/submission"
+  outputs: "outputs/batch_1/submission"
 
 data:
   clip_dim: 512

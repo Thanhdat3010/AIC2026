@@ -13,25 +13,26 @@ __pycache__/
 *.gz
 
 # Ignore data folder contents but preserve structure via .gitkeep
-raw/*
+raw/**
 !raw/.gitkeep
-!raw/AIC2026_BTC_Data_Structure.md
+!raw/**/.gitkeep
+!raw/**/AIC2026_BTC_Data_Structure.md
 
-data/*
+data/**
 !data/.gitkeep
-data/processed/*
-!data/processed/.gitkeep
+!data/**/.gitkeep
 
-indexes/*
+indexes/**
 !indexes/.gitkeep
+!indexes/**/.gitkeep
 
-outputs/*
+outputs/**
 !outputs/.gitkeep
-outputs/submission/*
-!outputs/submission/.gitkeep
+!outputs/**/.gitkeep
 
-backups/*
+backups/**
 !backups/.gitkeep
+!backups/**/.gitkeep
 
 # Large Media & Keyframe Folders added by user
 Keyframes/

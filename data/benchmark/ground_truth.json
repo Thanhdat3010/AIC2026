@@ -1,7 +1,7 @@
 {
   "benchmark_version": "1.0",
   "created_by": "Team AIC 2026",
-  "total_queries": 3,
+  "total_queries": 4,
   "test_cases": [
     {
       "query_id": "test-kis-01",
@@ -31,6 +31,20 @@
         "video_id": "L26_V112",
         "frame_idx": 4520,
         "answer": "Khánh Bình"
+      }
+    },
+    {
+      "query_id": "test-trake-01",
+      "task_type": "trake",
+      "query_text": "Tìm 4 khoảnh khắc chính khi vận động viên thực hiện cú nhảy: (1) giậm nhảy, (2) bay qua xà, (3) tiếp đất, (4) đứng dậy.",
+      "ground_truth": {
+        "video_id": "L10_V010",
+        "events": [
+          {"start_frame": 95, "end_frame": 105},
+          {"start_frame": 145, "end_frame": 155},
+          {"start_frame": 195, "end_frame": 205},
+          {"start_frame": 245, "end_frame": 255}
+        ]
       }
     }
   ]

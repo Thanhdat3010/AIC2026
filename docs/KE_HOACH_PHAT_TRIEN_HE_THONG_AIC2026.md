@@ -1,89 +1,60 @@
-# 🚀 LỘ TRÌNH PHÁT TRIỂN HỆ THỐNG AIC2026 TRÊN NỀN TẢNG DỮ LIỆU ĐA PHƯƠNG THỨC 360°
+# 🚀 KẾ HOẠCH PHÁT TRIỂN HỆ THỐNG AIC2026
 
-> **Mục tiêu:** Tận dụng 100% kho dữ liệu đa phương thức hoàn chỉnh (*177.321 Keyframes + VietOCR tiếng Việt + PhoWhisper Transcripts + YOLO Objects + CLIP Embeddings + Metadata Video*) để xây dựng **Hệ thống Tìm kiếm Video & Hỏi Đáp Video (KIS & VideoQA) Đạt Top 1 Bảng Xếp Hạng**.
-
----
-
-## 🏛️ TỔNG QUAN KIẾN TRÚC HỆ THỐNG SẼ PHÁT TRIỂN
-
-```mermaid
-graph TD
-    UserQuery[🔍 Câu hỏi / Từ khóa của Người dùng] --> QueryRouter[🧠 Bộ Phân Tích & Định Tuyến Truy Vấn LLM Query Router]
-    
-    subgraph "TẦNG TRUY HỒI ĐA PHƯƠNG THỨC (HYBRID RETRIEVAL)"
-        QueryRouter -->|Visual Query| DenseSearch[🖼️ Dense Vector Search - FAISS / SigLIP 2]
-        QueryRouter -->|Keywords & Named Entities| BM25OCR[📝 Sparse Search BM25 - VietOCR Text]
-        QueryRouter -->|Spoken Words| BM25ASR[🎙️ Speech Search BM25 - PhoWhisper Transcripts]
-        QueryRouter -->|Entities & Count| ObjectFilter[👁️ Filter Engine - YOLO Objects & Person Count]
-    end
-
-    DenseSearch --> RRF[⚡ Reciprocal Rank Fusion & Time-Window Aggregator]
-    BM25OCR --> RRF
-    BM25ASR --> RRF
-    ObjectFilter --> RRF
-
-    subgraph "TẦNG TÁI XẾP HẠNG & LÝ LUẬN (RE-RANKING & REASONING)"
-        RRF --> TopCandidates[🏆 Top 50 Đoạn Video Tiềm Năng Nhất]
-        TopCandidates --> CrossEncoder[🎯 Cross-Encoder / ColPali Re-ranker]
-        TopCandidates --> VideoQAAgent[🤖 VideoQA Agent - VLM Suy Luận Trả Lời Câu Hỏi]
-    end
-
-    CrossEncoder --> FinalSubmission[📤 Xuất File Submission Chuẩn BTC: video_id, frame_idx]
-    VideoQAAgent --> WebUI[💻 Giao Diện Tương Tác Streamlit / Next.js Web App]
-```
+Dựa trên cấu trúc cuộc thi và luồng dữ liệu, hệ thống được thiết kế tách biệt hoàn toàn thành 2 luồng (Pipeline) chính: **Luồng Xử lý Dữ liệu (Làm Data - Chạy trước khi thi)** và **Luồng Sinh Kết Quả (Chạy Task - Chạy trong lúc thi)**. Việc tách biệt này giúp hệ thống gọn gàng, truy xuất siêu tốc và không bị nhầm lẫn.
 
 ---
 
-## 🛠️ CHI TIẾT 4 PHÂN HỆ CHÍNH CẦN PHÁT TRIỂN
+## 🏗️ LUỒNG 1: XỬ LÝ DỮ LIỆU & ĐÁNH CHỈ MỤC (OFFLINE DATA PIPELINE)
+Đây là khâu "nấu chín" toàn bộ dữ liệu thô do BTC cung cấp. Luồng này chạy cật lực trên GPU A100 và chỉ chạy 1 lần duy nhất trước ngày thi.
+
+**1. Trích xuất thông tin đa phương thức:**
+- **Văn bản trên hình (OCR) - ĐÃ XONG:** Đọc toàn bộ chữ trên khung hình bằng mô hình CRAFT + VietOCR. Kết quả lưu tại `data/batch_1/processed/ocr_results.parquet`.
+- **Lời thoại âm thanh (ASR) - ĐÃ XONG:** Nghe và chép lời toàn bộ video bằng VinAI PhoWhisper. Kết quả lưu tại `data/batch_1/processed/transcripts.parquet`.
+- **Đặc trưng hình ảnh (Visual Embeddings) - SẮP LÀM:** Dùng mô hình SigLIP quét qua tất cả keyframes. Kết quả lưu tại `data/batch_1/processed/siglip_features.npy`.
+- **Siêu dữ liệu (Metadata):** Đọc các file JSON trong `data/batch_1/processed/videos.parquet`.
+
+> [!NOTE]
+> **Cấu trúc Batch:** Toàn bộ dữ liệu hiện tại được gom trong `data/batch_1/`. Khi BTC phát hành đợt 2, hệ thống chỉ việc tạo thêm `data/batch_2/` và chạy tương tự mà không sợ bị ghi đè hay lẫn lộn dữ liệu!
+
+**2. Liên kết dữ liệu (Data Linking & Indexing):**
+- Đưa tất cả văn bản (chữ OCR, lời thoại ASR, Metadata) vào một kho dữ liệu chữ siêu tốc (như Elasticsearch).
+- Đưa các chuỗi số Vector của hình ảnh vào kho Vector (FAISS).
+- **Mục tiêu:** Tạo ra một "cây cầu" liên kết chéo giữa mốc thời gian -> lời nói -> chữ viết -> hình ảnh, sẵn sàng chờ truy vấn.
 
 ---
 
-### 1️⃣ Phân hệ 1: Bộ Chỉ Mục Tìm Kiếm Lai Hợp Nhất (Hybrid Multi-Modal Indexing)
-* **Xây dựng Inverted Index (BM25) nâng cao:**
-  * Đánh chỉ mục toàn văn tiếng Việt cho: `OCR Banners + Audio Transcripts + Video Metadata (Title, Description, Keywords)`.
-  * Áp dụng từ điển đồng nghĩa (Synonyms Expansion) chuyên biệt cho địa danh Việt Nam, từ viết tắt thời sự (ĐBSCL, TP.HCM, UBND, BOT, CSGT...).
-* **Xây dựng Dense Vector Index (FAISS GPU / HNSW):**
-  * Lưu trữ vector đặc trưng thị giác của toàn bộ 177.321 frames.
-  * Hỗ trợ tìm kiếm theo hình ảnh tương đồng (Image-to-Video Search) và văn bản miêu tả cảnh (Text-to-Video Search).
-* **Bộ lọc thuộc tính có cấu trúc (Structured Filters):**
-  * Lọc theo khoảng thời gian phát sóng, kênh truyền hình, số lượng người xuất hiện trong khung hình.
+## 🎯 LUỒNG 2: SINH KẾT QUẢ CHO CÁC TASK THI ĐẤU (ONLINE INFERENCE PIPELINE)
+Luồng này là "bộ não" thực sự, sẽ chạy trực tiếp trên máy tính lúc thi đấu. Khi có đề bài từ BTC, luồng này sẽ lấy thông tin từ "kho dữ liệu đã nấu chín" ở Luồng 1 để giải 3 bài toán (Task).
+
+### 📝 Task 1: Tìm kiếm Video (Textual KIS - Known-Item Search)
+- **Cách hoạt động:** Khi người dùng nhập một câu truy vấn (vd: "một chiếc xe máy ngã trước ngã tư lúc trời mưa").
+  1. Hệ thống tìm kiếm sẽ quét trong kho Vector hình ảnh xem hình nào giống miêu tả nhất.
+  2. Đồng thời quét trong kho chữ OCR và lời thoại ASR xem có thông tin liên quan không.
+  3. Gộp điểm lại để tìm ra cảnh quay chuẩn xác nhất.
+- **Đầu ra:** Xuất đúng định dạng `<video_id>,<frame_idx>` để nộp cho BTC.
+
+### 🗣️ Task 2: Hỏi Đáp Video (Video Q&A)
+- **Cách hoạt động:** Khi BTC hỏi một câu cần suy luận (vd: "Biển số xe của chiếc ô tô gây tai nạn là bao nhiêu?").
+  1. Hệ thống dùng luồng tìm kiếm (Task 1) để lôi ra đoạn video ngắn chứa vụ tai nạn.
+  2. Trích xuất toàn bộ Lời thoại + Chữ + Hình ảnh của đoạn đó.
+  3. Đưa toàn bộ vào một mô hình Trí tuệ Nhân tạo đa phương thức (VLM - Vision Language Model) để nó đóng vai trò "người xem video" và tự trả lời bằng chữ.
+- **Đầu ra:** Một đoạn văn bản (Text) trả lời chính xác câu hỏi.
+
+### 🔗 Task 3: Liên kết Dấu vết Thực thể (TRAKE)
+- **Cách hoạt động:** Tracking một đối tượng giao thông (ví dụ: truy tìm một chiếc xe tải cụ thể).
+  1. Hệ thống nhận diện đặc điểm phương tiện (màu sắc, loại xe, chữ trên thân xe, biển số).
+  2. Truy quét ngược lại toàn bộ kho dữ liệu (nhờ sự liên kết chéo ở Luồng 1) để bốc ra *tất cả* các đoạn video ở các thời điểm khác nhau có dính líu đến phương tiện này.
+- **Đầu ra:** Danh sách tập hợp các video và mốc thời gian chứa phương tiện.
 
 ---
 
-### 2️⃣ Phân hệ 2: Thuật Toán Dung Hợp & Gom Cụm Thời Gian (Rank Fusion & Temporal Windowing)
-* **Reciprocal Rank Fusion (RRF):**
-  * Kết hợp điểm số từ cả 4 luồng: $Score = \alpha \cdot Score_{CLIP} + \beta \cdot Score_{OCR} + \gamma \cdot Score_{ASR} + \delta \cdot Score_{Metadata}$.
-* **Gom cụm thời gian theo cảnh quay (Temporal Window Aggregation):**
-  * Khi phát thanh viên nói một câu dài 15 giây, hoặc một sự việc diễn ra qua nhiều góc quay, hệ thống tự động gom các keyframe liên tiếp thành **đoạn video (Scene Segment)**, cộng dồn điểm tin cậy để đẩy đoạn video đó lên Top 1 thay vì chỉ trả về 1 frame rời rạc.
+## 📅 LỘ TRÌNH PHÁT TRIỂN CỤ THỂ
 
----
-
-### 3️⃣ Phân hệ 3: AI Hỏi Đáp Video (VideoQA & Event Reasoning Agent)
-* **Phục vụ các câu hỏi phức tạp:**
-  * *Ví dụ: "Chiếc xe cứu thương xuất hiện ở phút thứ mấy và sau đó sự kiện gì xảy ra?"*
-  * *Ví dụ: "Tìm đoạn video phát biểu về sạt lở tại Cần Thơ và cho biết con số thiệt hại được nhắc tới là bao nhiêu?"*
-* **Cơ chế hoạt động:**
-  * Agent truy xuất các Keyframe + Đoạn hội thoại ASR tương ứng.
-  * Đưa toàn bộ ngữ cảnh (Hình ảnh + Chữ trên màn hình + Lời nói) vào mô hình Vision-Language (VLM) để sinh câu trả lời chính xác kèm dẫn chứng mốc giây/khung hình.
-
----
-
-### 4️⃣ Phân hệ 4: Giao Diện Điều Khiển & Xuất Báo Cáo Thi Đấu (Streamlit / Web App)
-* **Giao diện tìm kiếm thời gian thực (Interactive GUI):**
-  * Thanh tìm kiếm thông minh tự động nhận diện ý định (tìm theo chữ, theo giọng nói hay theo cảnh quan).
-  * Trình phát video (Video Player) với tính năng nhảy ngay tới đúng giây (Seek to Timestamp) của Keyframe tìm thấy.
-  * Bảng hiển thị thông tin 360° bên cạnh video: Lời thoại đang nói, chữ trên màn hình, vật thể nhận diện.
-* **Bộ xuất kết quả tự động (Auto Submission Generator):**
-  * Một cú click chuột tạo ngay file CSV/Parquet định dạng chuẩn theo đúng quy định của BTC AIC2026: `<video_id>,<frame_idx>`.
-
----
-
-## 📅 LỘ TRÌNH TRIỂN KHAI THEO TỪNG GIAI ĐOẠN
-
-| Giai đoạn | Nội dung công việc | Đầu ra (Deliverable) |
-| :--- | :--- | :--- |
-| **Giai đoạn 1** *(Hiện tại)* | Hoàn tất 100% việc trích xuất OCR & PhoWhisper trên A100. | `ocr_results.parquet` (14 gói) & `transcripts.parquet` |
-| **Giai đoạn 2** | Xây dựng Bộ chỉ mục lai BM25 + FAISS và thuật toán RRF. | Module `src/search/hybrid_search.py` |
-| **Giai đoạn 3** | Tích hợp Temporal Aggregator & Re-ranker tối ưu Top 1 KIS. | Module `src/search/reranker.py` & Benchmark Evaluator |
-| **Giai đoạn 4** | Xây dựng Agent VideoQA & Nâng cấp Giao diện Web Streamlit. | `app/app.py` hoàn chỉnh phục vụ thi đấu trực tiếp |
-| **Giai đoạn 5** | Mock Test toàn diện với bộ câu hỏi KIS và QA của các năm trước. | Báo cáo đánh giá mAP@K, Top-1 Accuracy & Submission Check |
+| Giai đoạn | Nhiệm vụ trọng tâm | Thuộc Luồng | Trạng thái |
+| :--- | :--- | :--- | :--- |
+| **Giai đoạn 1** | Hoàn thiện công cụ trích xuất siêu tốc OCR & ASR | Luồng 1 | ✅ Đã xong |
+| **Giai đoạn 2** | Trích xuất đặc trưng hình (CLIP Vector) & Metadata | Luồng 1 | 🚀 Tiếp theo |
+| **Giai đoạn 3** | Xây kho liên kết dữ liệu (Indexing chéo các thông tin) | Luồng 1 | ⏳ Chờ |
+| **Giai đoạn 4** | Phát triển bộ máy tìm kiếm KIS (Task 1) | Luồng 2 | ⏳ Chờ |
+| **Giai đoạn 5** | Tích hợp AI suy luận trả lời câu hỏi (Task 2 & 3) | Luồng 2 | ⏳ Chờ |
+| **Giai đoạn 6** | Đóng gói Giao diện tương tác (UI) phục vụ lúc thi đấu | Luồng 2 | ⏳ Chờ |

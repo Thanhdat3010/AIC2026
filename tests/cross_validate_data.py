@@ -6,15 +6,23 @@ from pathlib import Path
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
+# Add project root to sys.path
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.append(str(PROJECT_ROOT))
+
+from src.config import settings
+
 print("=" * 80)
 print("🔎 BÁO CÁO ĐỐI SOÁT CHÉO DỮ LIỆU (CROSS-VALIDATION ANALYSIS)")
 print("=" * 80)
 
+proc_dir = settings.directories.processed
 # 1. Nạp metadata chuẩn
-frames_df = pd.read_parquet("data/processed/frames.parquet")
-videos_df = pd.read_parquet("data/processed/videos.parquet") if Path("data/processed/videos.parquet").exists() else None
-ocr_df = pd.read_parquet("data/processed/ocr_results.parquet")
-asr_df = pd.read_parquet("data/processed/transcripts.parquet")
+frames_df = pd.read_parquet(proc_dir / "frames.parquet")
+videos_df = pd.read_parquet(proc_dir / "videos.parquet") if (proc_dir / "videos.parquet").exists() else None
+ocr_df = pd.read_parquet(proc_dir / "ocr_results.parquet") if (proc_dir / "ocr_results.parquet").exists() else None
+asr_df = pd.read_parquet(proc_dir / "transcripts.parquet") if (proc_dir / "transcripts.parquet").exists() else None
 
 print(f"📁 Metadata chuẩn:")
 print(f"  • frames.parquet   : {len(frames_df):,} keyframes")
