@@ -3,12 +3,12 @@
 # Cloned 100% from Production GPU Server
 # ==============================================================================
 
-# Core Data Processing
+# Core Data Processing (STRICTLY PILLOW < 11.0.0 TO PREVENT is_directory REMOVAL)
+pillow==10.2.0
 pandas>=2.0.0
 pyarrow>=12.0.0
 scipy>=1.10.0
 scikit-learn>=1.2.0
-pillow>=10.0.0
 tqdm>=4.65.0
 pydantic>=2.0.0
 pyyaml>=6.0
