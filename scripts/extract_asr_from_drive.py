@@ -5,8 +5,32 @@ import zipfile
 import tempfile
 import os
 import re
+import glob
+import ctypes
 import requests
 from pathlib import Path
+
+# ==============================================================================
+# TỰ ĐỘNG NẠP THƯ VIỆN NVIDIA CUDA / CUBLAS CHO CTRANSLATE2 TRÊN GPU
+# ==============================================================================
+def preload_nvidia_cuda_libs():
+    """Tự động tìm và nạp các file .so của nvidia-cublas, nvidia-cudnn vào tiến trình"""
+    for p in sys.path:
+        if "site-packages" in p:
+            nvidia_dir = os.path.join(p, "nvidia")
+            if os.path.exists(nvidia_dir):
+                for lib_so in glob.glob(os.path.join(nvidia_dir, "*", "lib", "*.so*")):
+                    try:
+                        ctypes.CDLL(lib_so)
+                    except Exception:
+                        pass
+                # Thêm vào LD_LIBRARY_PATH
+                for lib_dir in glob.glob(os.path.join(nvidia_dir, "*", "lib")):
+                    cur_ld = os.environ.get("LD_LIBRARY_PATH", "")
+                    if lib_dir not in cur_ld:
+                        os.environ["LD_LIBRARY_PATH"] = f"{lib_dir}:{cur_ld}"
+
+preload_nvidia_cuda_libs()
 
 import pandas as pd
 from tqdm import tqdm
