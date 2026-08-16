@@ -12,8 +12,13 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import torch
-from PIL import Image
-from tqdm import tqdm
+# Polyfill for PIL._util.is_directory (Removed in Pillow 11+, required by torchvision in Python 3.12)
+try:
+    import PIL._util
+    if not hasattr(PIL._util, "is_directory"):
+        PIL._util.is_directory = lambda f: isinstance(f, (str, bytes, os.PathLike)) and os.path.isdir(f)
+except Exception:
+    pass
 
 # Force UTF-8 stdout on Windows
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')

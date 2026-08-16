@@ -7,6 +7,15 @@ import os
 import re
 import requests
 from pathlib import Path
+
+# Polyfill for PIL._util.is_directory (Removed in Pillow 11+, required by torchvision/easyocr in Python 3.12)
+try:
+    import PIL._util
+    if not hasattr(PIL._util, "is_directory"):
+        PIL._util.is_directory = lambda f: isinstance(f, (str, bytes, os.PathLike)) and os.path.isdir(f)
+except Exception:
+    pass
+
 import pandas as pd
 import numpy as np
 import cv2
