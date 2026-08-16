@@ -23,44 +23,11 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.config import settings
 
-def true_gpu_batch_translate(img_batch, model, max_seq_length=64, sos_token=1, eos_token=2):
-    """
-    Giải mã Transformer Ma Trận Đa Luồng Thật Sự trên GPU A100:
-    - Xử lý cùng lúc B mẩu chữ (B = 16, 32, 64) trong 1 phép tính ma trận
-    - Không chạy for-loop tuần tự, nhanh gấp 50-80 lần
-    """
-    model.eval()
-    device = img_batch.device
-    B = img_batch.shape[0]
-
-    with torch.no_grad():
-        src = model.cnn(img_batch)
-        memory = model.transformer.encoder(src)
-
-        # (B, 1) khởi tạo với sos_token
-        translated_sentence = torch.full((B, 1), sos_token, dtype=torch.long, device=device)
-        is_finished = torch.zeros(B, dtype=torch.bool, device=device)
-
-        for _ in range(max_seq_length):
-            # tgt_inp: (seq_len, B)
-            tgt_inp = translated_sentence.transpose(0, 1)
-            output = model.transformer.decoder(tgt_inp, memory)
-            output = model.fc(output)  # (seq_len, B, vocab_size)
-
-            next_token_logits = output[-1, :, :]  # (B, vocab_size)
-            next_tokens = torch.argmax(next_token_logits, dim=-1)  # (B,)
-
-            translated_sentence = torch.cat([translated_sentence, next_tokens.unsqueeze(1)], dim=1)
-
-            is_finished |= (next_tokens == eos_token)
-            if is_finished.all():
-                break
-
-    return translated_sentence.cpu().numpy()
-
 class FastBatchVietOCR:
     """
-    Bộ giải mã VietOCR Batch Tensor chuẩn hóa cho GPU A100
+    Bộ giải mã VietOCR Batch Tensor chuẩn hóa trực tiếp trên GPU A100:
+    - Gom 32 - 64 mẩu chữ vào tensor (B, 3, 32, max_w)
+    - Gọi trực tiếp translate(batch_tensor, model) giải mã song song
     """
     def __init__(self, predictor):
         self.predictor = predictor
@@ -94,7 +61,9 @@ class FastBatchVietOCR:
         if not crops_list:
             return []
         
+        from vietocr.tool.translate import translate
         results = []
+
         for i in range(0, len(crops_list), batch_size):
             batch_crops = crops_list[i:i + batch_size]
             processed = [self.process_crop(c) for c in batch_crops]
@@ -116,20 +85,19 @@ class FastBatchVietOCR:
             
             batch_tensor = torch.stack(padded_tensors).to(self.device)
             
-            try:
-                # Giải mã ma trận thật sự trên GPU
-                s = true_gpu_batch_translate(batch_tensor, self.model, max_seq_length=64)
-                decoded_texts = self.vocab.decode(s.tolist())
-            except Exception:
-                # Dự phòng nếu có crop quá đặc biệt
-                decoded_texts = []
-                for img_c in batch_crops:
-                    try:
-                        pil_c = Image.fromarray(cv2.cvtColor(img_c, cv2.COLOR_BGR2RGB))
-                        txt = self.predictor.predict(pil_c)
-                        decoded_texts.append(str(txt).strip())
-                    except Exception:
-                        decoded_texts.append("")
+            with torch.no_grad():
+                try:
+                    # Giới hạn max_seq_length=50 giúp tăng tốc gấp đôi cho chữ tiêu đề/phụ đề
+                    translated_sentence, _ = translate(batch_tensor, self.model, max_seq_length=50)
+                    decoded_texts = self.vocab.decode(translated_sentence.tolist())
+                except Exception:
+                    decoded_texts = []
+                    for t in padded_tensors:
+                        try:
+                            s, _ = translate(t.unsqueeze(0).to(self.device), self.model, max_seq_length=50)
+                            decoded_texts.append(self.vocab.decode(s.tolist())[0])
+                        except Exception:
+                            decoded_texts.append("")
 
             batch_res = [""] * len(batch_crops)
             for vi, txt in zip(valid_indices, decoded_texts):
@@ -140,10 +108,7 @@ class FastBatchVietOCR:
 
 class UltraFastMaxAccuracyOCR:
     """
-    Pipeline OCR SOTA Tối Đa Công Suất trên GPU A100:
-    - CRAFT Detection
-    - True GPU Batch Tensor VietOCR
-    - Lọc sạch box rác
+    Pipeline OCR SOTA Tối Đa Công Suất trên GPU A100
     """
     def __init__(self, use_vietocr=True, use_gpu=True, batch_size=32):
         self.use_gpu = use_gpu and torch.cuda.is_available()
@@ -202,6 +167,7 @@ class UltraFastMaxAccuracyOCR:
             for box in boxes:
                 x_min, x_max, y_min, y_max = int(box[0]), int(box[1]), int(box[2]), int(box[3])
                 w, h = x_max - x_min, y_max - y_min
+                # Lọc bỏ các box rác li ti
                 if w >= 14 and h >= 12:
                     x1, y1 = max(0, x_min), max(0, y_min)
                     x2, y2 = min(w_img, x_max), min(h_img, y_max)
@@ -210,7 +176,7 @@ class UltraFastMaxAccuracyOCR:
                         crop_metadata.append(f_idx)
                         all_crops.append(crop)
 
-        # Giải mã ma trận song song toàn bộ mẩu chữ của cả lô khung hình
+        # Giải mã song song toàn bộ mẩu chữ của cả lô khung hình trên GPU A100
         if all_crops and self.use_vietocr:
             predicted_texts = self.batch_vietocr.predict_batch(all_crops, batch_size=self.batch_size)
         else:
