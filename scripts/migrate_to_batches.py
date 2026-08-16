@@ -15,13 +15,13 @@ def migrate():
         for item in old_proc.iterdir():
             dest = new_proc / item.name
             if not dest.exists():
-                shutil.move(str(item), str(dest))
-                print(f"  🚚 Đã chuyển: data/processed/{item.name} -> data/batch_1/processed/{item.name}")
-        # Xóa thư mục processed cũ nếu đã rỗng
-        try:
-            old_proc.rmdir()
-        except Exception:
-            pass
+                # Dùng copy thay vì move để không làm gián đoạn tiến trình OCR/Whisper đang chạy
+                if item.is_file():
+                    shutil.copy2(str(item), str(dest))
+                    print(f"  📋 Đã sao chép an toàn: data/processed/{item.name} -> data/batch_1/processed/{item.name}")
+                elif item.is_dir():
+                    shutil.copytree(str(item), str(dest), dirs_exist_ok=True)
+                    print(f"  📋 Đã sao chép thư mục: data/processed/{item.name} -> data/batch_1/processed/{item.name}")
 
     # 2. Di chuyển raw/ -> raw/batch_1/
     old_raw = root / "raw"
