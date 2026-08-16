@@ -232,27 +232,50 @@ class UltraFastMaxAccuracyOCR:
 
         return results_records
 
-def download_file(url_or_id, target_path, pkg_idx, total_pkgs):
-    """Tải file zip kèm thanh tiến trình tốc độ cao"""
+def download_file(url_or_id, target_path, pkg_idx, total_pkgs, max_retries=5):
+    """Tải file zip kèm thanh tiến trình tốc độ cao và TỰ ĐỘNG THỬ LẠI KHI ĐỨT MẠNG"""
     filename = Path(url_or_id).name if "http" in url_or_id else f"Package_{pkg_idx}.zip"
     
     if "ledo.io.vn" in url_or_id or (url_or_id.startswith("http") and "drive.google.com" not in url_or_id):
-        response = requests.get(url_or_id, stream=True, timeout=60)
-        response.raise_for_status()
-        total_size = int(response.headers.get('content-length', 0))
-        block_size = 1024 * 1024
-        
-        with open(target_path, 'wb') as file, tqdm(
-            desc=f"📥 [Tải {pkg_idx}/{total_pkgs}] {filename}",
-            total=total_size,
-            unit='B',
-            unit_scale=True,
-            unit_divisor=1024,
-            leave=False
-        ) as bar:
-            for data in response.iter_content(block_size):
-                size = file.write(data)
-                bar.update(size)
+        for attempt in range(1, max_retries + 1):
+            try:
+                response = requests.get(url_or_id, stream=True, timeout=(15, 180))
+                response.raise_for_status()
+                total_size = int(response.headers.get('content-length', 0))
+                block_size = 1024 * 1024
+                
+                with open(target_path, 'wb') as file, tqdm(
+                    desc=f"📥 [Tải {pkg_idx}/{total_pkgs}] {filename} (Lần {attempt})",
+                    total=total_size,
+                    unit='B',
+                    unit_scale=True,
+                    unit_divisor=1024,
+                    leave=False
+                ) as bar:
+                    for data in response.iter_content(block_size):
+                        if data:
+                            size = file.write(data)
+                            bar.update(size)
+                            
+                # Kiểm tra tính toàn vẹn sơ bộ của file zip
+                if os.path.exists(target_path) and os.path.getsize(target_path) > 0:
+                    try:
+                        with zipfile.ZipFile(target_path, 'r') as test_z:
+                            _ = test_z.namelist()
+                        return # Hoàn tất tải file hợp lệ
+                    except Exception:
+                        print(f"\n⚠️ File zip {filename} tải về chưa hoàn tất. Đang thử lại lần {attempt + 1}/{max_retries}...")
+                        if os.path.exists(target_path):
+                            os.remove(target_path)
+            except Exception as e:
+                print(f"\n⚠️ Mạng gián đoạn khi tải {filename} ({e}). Đang thử lại lần {attempt + 1}/{max_retries} sau 3 giây...")
+                time.sleep(3)
+                if os.path.exists(target_path):
+                    try:
+                        os.remove(target_path)
+                    except Exception:
+                        pass
+        raise RuntimeError(f"Không thể tải file {filename} sau {max_retries} lần thử lại!")
     else:
         try:
             import gdown
