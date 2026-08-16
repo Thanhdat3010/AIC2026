@@ -39,21 +39,20 @@ class FastBatchVietOCR:
         self.img_min_width = self.config['dataset']['image_min_width']
         self.img_max_width = self.config['dataset']['image_max_width']
         
-        self.transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
-        ])
-
     def process_crop(self, crop_bgr):
         try:
-            pil_img = Image.fromarray(cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2RGB))
+            if isinstance(crop_bgr, np.ndarray):
+                pil_img = Image.fromarray(cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2RGB))
+            else:
+                pil_img = crop_bgr.convert('RGB')
             w, h = pil_img.size
             if h <= 0 or w <= 0:
                 return None
             new_w = int(self.img_height * w / h)
             new_w = max(min(new_w, self.img_max_width), self.img_min_width)
             pil_img = pil_img.resize((new_w, self.img_height), Image.BILINEAR)
-            return self.transform(pil_img)
+            img_arr = np.asarray(pil_img).transpose(2, 0, 1) / 255.0
+            return torch.FloatTensor(img_arr)
         except Exception:
             return None
 
