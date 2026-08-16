@@ -99,6 +99,7 @@ def save_and_merge_parquet(new_records, out_file):
     if not combined_df.empty:
         # Khử trùng lặp theo (video_id, start_frame, end_frame)
         combined_df = combined_df.drop_duplicates(subset=["video_id", "start_frame", "end_frame"], keep="last")
+        out_file.parent.mkdir(parents=True, exist_ok=True)
         combined_df.to_parquet(out_file, index=False)
 
 def process_video_zip(zpath, batched_pipeline, beam_size, batch_size, video_fps_map, pkg_idx, total_pkgs, out_file, processed_videos_set):

@@ -279,6 +279,7 @@ def save_and_merge_parquet(new_records, out_file):
     
     if not combined_df.empty:
         combined_df = combined_df.drop_duplicates(subset=["video_id", "keyframe_index"], keep="last")
+        out_file.parent.mkdir(parents=True, exist_ok=True)
         combined_df.to_parquet(out_file, index=False)
 
 def process_zip_archive(zpath, ocr_engine, frames_df, pkg_idx, total_pkgs, out_file, processed_videos_set=None, frame_batch_size=8):
