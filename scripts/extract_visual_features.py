@@ -69,9 +69,13 @@ class VisualFeatureExtractor:
         self.model_name = model_name
         
         print(f"=== Khởi tạo Mô hình Thị giác: {model_name} trên {self.device} ===")
-        from transformers import AutoProcessor, AutoModel
-        
-        self.processor = AutoProcessor.from_pretrained(model_name)
+        try:
+            from transformers import AutoImageProcessor, AutoModel
+            self.processor = AutoImageProcessor.from_pretrained(model_name)
+        except Exception:
+            from transformers import AutoProcessor, AutoModel
+            self.processor = AutoProcessor.from_pretrained(model_name)
+            
         self.model = AutoModel.from_pretrained(model_name).to(self.device).eval()
         
         # Xác định số chiều vector (embedding dim)
