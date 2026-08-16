@@ -27,7 +27,7 @@ class FastBatchVietOCR:
     """
     Bộ giải mã VietOCR Batch Tensor Vectorized 100% trên GPU A100:
     - Giải mã song song toàn bộ B mẩu chữ cùng lúc (B = 16, 32, 64)
-    - Không vướng lỗi shape của thư viện cũ
+    - Tự động khớp chiều batch (B, vocab_size)
     """
     def __init__(self, predictor):
         self.predictor = predictor
@@ -95,10 +95,17 @@ class FastBatchVietOCR:
                 for _ in range(max_seq_length):
                     tgt_inp = translated.t()  # (seq_len, B)
                     output, _ = self.model.transformer.forward_decoder(tgt_inp, memory)
-                    next_tokens = torch.argmax(output[-1, :, :], dim=-1)  # (B,)
-                    translated = torch.cat([translated, next_tokens.unsqueeze(1)], dim=1)
+                    
+                    # Khớp đúng chiều batch B: (B, vocab_size)
+                    if output.shape[0] == B:
+                        logits = output[:, -1, :]
+                    else:
+                        logits = output[-1, :, :]
+                    
+                    next_tokens = torch.argmax(logits, dim=-1)  # (B,)
+                    translated = torch.cat([translated, next_tokens.unsqueeze(1)], dim=1)  # (B, seq_len + 1)
 
-                    # Dừng sớm nếu tất cả sequence đã sinh ra token kết thúc eos_token (2)
+                    # Dừng sớm nếu tất cả sequence trong batch đã sinh ra eos_token
                     if ((translated == eos_token).any(dim=1)).all():
                         break
 
