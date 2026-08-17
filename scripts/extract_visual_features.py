@@ -94,12 +94,13 @@ class VisualFeatureExtractor:
         print(f"=== Khởi tạo Mô hình Thị giác SOTA SigLIP 2: {model_name} trên {self.device} ===")
         try:
             from transformers import AutoProcessor, AutoModel
-            self.processor = AutoProcessor.from_pretrained(model_name)
-        except Exception:
+            self.processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
+            self.model = AutoModel.from_pretrained(model_name, trust_remote_code=True, torch_dtype=torch.float16 if self.device == "cuda" else torch.float32).to(self.device).eval()
+        except Exception as e_proc:
+            print(f"[INFO] AutoProcessor info: {e_proc}, thử AutoImageProcessor...")
             from transformers import AutoImageProcessor, AutoModel
-            self.processor = AutoImageProcessor.from_pretrained(model_name)
-            
-        self.model = AutoModel.from_pretrained(model_name).to(self.device).eval()
+            self.processor = AutoImageProcessor.from_pretrained(model_name, trust_remote_code=True)
+            self.model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to(self.device).eval()
         
         # Xác định số chiều vector (embedding dim)
         if hasattr(self.model.config, "vision_config") and hasattr(self.model.config.vision_config, "hidden_size"):
@@ -121,9 +122,12 @@ class VisualFeatureExtractor:
         with torch.no_grad():
             if hasattr(self.model, "get_image_features"):
                 feats = self.model.get_image_features(**inputs)
-            else:
+            elif hasattr(self.model, "vision_model"):
                 outputs = self.model.vision_model(**inputs)
-                feats = outputs.pooler_output
+                feats = outputs.pooler_output if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None else outputs.last_hidden_state[:, 0]
+            else:
+                outputs = self.model(**inputs)
+                feats = outputs.pooler_output if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None else outputs.last_hidden_state[:, 0]
                 
             # L2 Normalization
             feats = feats / feats.norm(dim=-1, keepdim=True)
