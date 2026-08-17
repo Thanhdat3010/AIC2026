@@ -15,12 +15,14 @@ if hasattr(sys.stdout, 'reconfigure'):
 if hasattr(sys.stderr, 'reconfigure'):
     sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
-# Import modules from src/
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE_DIR))
+
 from src.indexing.faiss_indexer import load_faiss_index
 from src.query.text_encoder import UnifiedTextEncoder
+from src.retrieval.hybrid_engine import HybridRetrievalEngine
 
-# Simple high-quality English translation dictionary for benchmark queries (zero-shot test)
+# Zero-shot simple English translation dictionary for baseline tests
 BENCHMARK_TRANSLATIONS = {
     "test-kis-01": "Inside a room, a woman wraps and adjusts an orange-yellow sarong around the waist of a man wearing a blue shirt.",
     "test-qa-02": "When two men are moving a motorcycle loaded with bamboo shoots, what is the person in front wearing on his head?",
@@ -38,11 +40,9 @@ BENCHMARK_TRANSLATIONS = {
 def evaluate_retrieval_ranking(predictions: list[dict], ground_truth: dict, task_type: str) -> dict:
     """
     Tính điểm R@1, R@5, R@20, R@50, R@100 theo chuẩn 100% BTC cho 1 query.
-    predictions: danh sách top 100 dict {'video_id': ..., 'frame_idx': ...}
     """
     K_VALUES = [1, 5, 20, 50, 100]
     r_scores = []
-
     target_video = ground_truth.get("video_id", "")
     
     if task_type in ["kis", "qa"]:
@@ -60,7 +60,6 @@ def evaluate_retrieval_ranking(predictions: list[dict], ground_truth: dict, task
     elif task_type == "trake":
         events = ground_truth.get("events", [])
         n_events = len(events)
-        # Trong baseline tìm kiếm frame đơn thuần, ta chấm điểm dựa trên việc bắt trúng bất kỳ frame sự kiện nào
         for p in predictions:
             v_pred = p.get("video_id", "")
             f_pred = p.get("frame_idx", 0)
@@ -75,19 +74,15 @@ def evaluate_retrieval_ranking(predictions: list[dict], ground_truth: dict, task
     else:
         r_scores = [0.0] * len(predictions)
 
-    # Đảm bảo đủ 100 kết quả
     if len(r_scores) < 100:
         r_scores.extend([0.0] * (100 - len(r_scores)))
 
-    # Tính R@k
     r_at_k = {}
     for k in K_VALUES:
         r_at_k[f"R@{k}"] = max(r_scores[:k]) if k <= len(r_scores) else 0.0
 
-    # Final Score trung bình cộng của 5 mốc
     final_score = sum(r_at_k.values()) / len(K_VALUES)
     
-    # Tìm rank trúng đầu tiên (1-based)
     first_hit_rank = -1
     for idx, sc in enumerate(r_scores):
         if sc > 0.0:
@@ -106,14 +101,10 @@ class DenseBaselinePipeline:
         self.engine = engine
         self.encoder = UnifiedTextEncoder(engine=engine)
         self.index, self.df_frames = load_faiss_index(engine=engine, batch=batch)
-        print(f"✅ Pipeline [{engine.upper()}] đã sẵn sàng với {self.index.ntotal:,} vectors!", flush=True)
 
     def search(self, query_text: str, top_k: int = 100) -> tuple[list[dict], float]:
         t0 = time.time()
-        # Mã hóa text query
         query_vec = self.encoder.encode_text(query_text)
-        
-        # FAISS search
         scores, indices = self.index.search(query_vec, top_k)
         latency_ms = (time.time() - t0) * 1000
 
@@ -130,13 +121,7 @@ class DenseBaselinePipeline:
         return results, latency_ms
 
 def run_ablation_experiment(config_id: int):
-    base_dir = Path(__file__).resolve().parent.parent
-    gt_file = base_dir / "data" / "benchmark" / "ground_truth.json"
-
-    if not gt_file.exists():
-        print(f"❌ Không tìm thấy ground truth tại: {gt_file}", flush=True)
-        return
-
+    gt_file = BASE_DIR / "data" / "benchmark" / "ground_truth.json"
     with open(gt_file, "r", encoding="utf-8") as f:
         gt_data = json.load(f)
 
@@ -145,19 +130,55 @@ def run_ablation_experiment(config_id: int):
     print(f"🧪 CHẠY THỬ NGHIỆM ABLATION: CẤU HÌNH {config_id}", flush=True)
     print("=" * 95, flush=True)
 
-    # Lựa chọn pipeline theo config_id
+    use_hybrid = False
+    use_multi_prompt = False
+    use_ocr = False
+    use_asr = False
+    use_dyn_weights = False
+    use_gemini_auto = False
+
     if config_id == 0:
         config_name = "Baseline 0: OpenAI CLIP ViT-B/32 (512d) + English Translation"
         pipeline = DenseBaselinePipeline(engine="clip")
     elif config_id == 1:
         config_name = "Baseline 1: Google SigLIP 2 SO400M (1152d) + English Translation"
         pipeline = DenseBaselinePipeline(engine="siglip2")
+    elif config_id == 2:
+        config_name = "Cấu hình 2: SigLIP 2 + BM25 OCR (Chữ trên khung hình)"
+        use_hybrid = True
+        use_ocr = True
+        pipeline = HybridRetrievalEngine(engine="siglip2")
+    elif config_id == 3:
+        config_name = "Cấu hình 3: SigLIP 2 + BM25 ASR (Lời thoại phát thanh)"
+        use_hybrid = True
+        use_asr = True
+        pipeline = HybridRetrievalEngine(engine="siglip2")
+    elif config_id == 4:
+        config_name = "Cấu hình 4: SigLIP 2 + RRF Hybrid Fusion (Dense + OCR + ASR)"
+        use_hybrid = True
+        use_ocr = True
+        use_asr = True
+        pipeline = HybridRetrievalEngine(engine="siglip2")
+    elif config_id == 6:
+        config_name = "Cấu hình 6: SigLIP 2 + Multi-Prompt Ensembling (3 Prompts từ Gemini 3.5 Flash Lite)"
+        use_hybrid = True
+        use_multi_prompt = True
+        use_gemini_auto = True
+        pipeline = HybridRetrievalEngine(engine="siglip2")
+    elif config_id == 7:
+        config_name = "Cấu hình 7: SigLIP 2 + Dynamic Query Weighting (Gemini 3.5 Flash Lite Full Hybrid)"
+        use_hybrid = True
+        use_multi_prompt = True
+        use_ocr = True
+        use_asr = True
+        use_dyn_weights = True
+        use_gemini_auto = True
+        pipeline = HybridRetrievalEngine(engine="siglip2")
     else:
-        print(f"⚠️ Cấu hình {config_id} sẽ được kích hoạt ở các pha tiếp theo!")
-        return
+        print(f"⚠️ Cấu hình {config_id} chưa được kích hoạt!")
+        return None
 
     print(f"[*] Đang đánh giá trên {len(test_cases)} test cases...\n", flush=True)
-    
     records = []
     latencies = []
     task_scores = {"kis": [], "qa": [], "trake": []}
@@ -168,12 +189,32 @@ def run_ablation_experiment(config_id: int):
         qtext = case["query_text"]
         gt = case["ground_truth"]
 
-        # Lấy bản dịch tiếng Anh
         en_query = BENCHMARK_TRANSLATIONS.get(qid, qtext)
 
-        preds, latency = pipeline.search(en_query, top_k=100)
-        latencies.append(latency)
+        if not use_hybrid:
+            preds, latency = pipeline.search(en_query, top_k=100)
+        else:
+            if use_gemini_auto:
+                preds, qinfo, latency = pipeline.search(
+                    raw_query=qtext,
+                    top_k=100,
+                    use_multi_prompt=use_multi_prompt,
+                    use_ocr=use_ocr,
+                    use_asr=use_asr,
+                    use_dynamic_weights=use_dyn_weights
+                )
+            else:
+                preds, qinfo, latency = pipeline.search(
+                    raw_query=qtext,
+                    top_k=100,
+                    use_multi_prompt=False,
+                    use_ocr=use_ocr,
+                    use_asr=use_asr,
+                    use_dynamic_weights=False,
+                    custom_en_query=en_query
+                )
 
+        latencies.append(latency)
         eval_res = evaluate_retrieval_ranking(preds, gt, ttype)
         fs = eval_res["final_score"]
         task_scores[ttype].append(fs)
@@ -202,12 +243,10 @@ def run_ablation_experiment(config_id: int):
             "Latency": f"{latency:.1f}ms"
         })
 
-    # In bảng chi tiết từng query
     df_res = pd.DataFrame(records)
     print(df_res.to_string(index=False))
     print("\n" + "-" * 95)
 
-    # Tính điểm tổng kết
     kis_avg = np.mean(task_scores["kis"]) if task_scores["kis"] else 0.0
     qa_avg = np.mean(task_scores["qa"]) if task_scores["qa"] else 0.0
     trake_avg = np.mean(task_scores["trake"]) if task_scores["trake"] else 0.0
@@ -233,28 +272,35 @@ def run_ablation_experiment(config_id: int):
 
 def main():
     parser = argparse.ArgumentParser(description="Chạy Ablation Benchmark trên tập 11 ground truth queries")
-    parser.add_argument("--config", type=int, default=None, help="ID cấu hình muốn chạy (0: CLIP BTC, 1: SigLIP 2 SOTA, ...)")
-    parser.add_argument("--compare_baselines", action="store_true", help="Chạy so sánh cả Baseline 0 (CLIP) và Baseline 1 (SigLIP 2)")
+    parser.add_argument("--config", type=int, default=None, help="ID cấu hình (0, 1, 2, 3, 4, 6, 7)")
+    parser.add_argument("--all_configs", action="store_true", help="Chạy toàn bộ các cấu hình đã triển khai để so sánh ma trận")
     args = parser.parse_args()
 
-    if args.compare_baselines or args.config is None:
-        print("\n🚀 BẮT ĐẦU SO SÁNH TRỰC DIỆN BASELINE 0 (CLIP BTC) VS BASELINE 1 (SIGLIP 2 SOTA)...")
-        res0 = run_ablation_experiment(0)
-        res1 = run_ablation_experiment(1)
+    if args.all_configs:
+        print("\n🚀 BẮT ĐẦU CHẠY TOÀN BỘ CÁC CẤU HÌNH THỬ NGHIỆM ABLATION STUDY...")
+        configs_to_test = [0, 1, 2, 3, 4, 6, 7]
+        results = []
+        for cid in configs_to_test:
+            res = run_ablation_experiment(cid)
+            if res:
+                results.append(res)
 
-        print("\n" + "🔥" * 40)
-        print("🏆 SO SÁNH KẾT QUẢ ĐỘT PHÁ BASELINE 0 VS BASELINE 1:")
-        print("🔥" * 40)
-        print(f"| Chỉ số | Baseline 0 (CLIP BTC 512d) | Baseline 1 (SigLIP 2 1152d) | Mức độ Tăng Trưởng |")
-        print(f"| :--- | :---: | :---: | :---: |")
-        print(f"| **KIS Score** | {res0['kis_score']:.4f} | {res1['kis_score']:.4f} | **+{((res1['kis_score']-res0['kis_score']))*100:+.2f}%** |")
-        print(f"| **QA Score** | {res0['qa_score']:.4f} | {res1['qa_score']:.4f} | **+{((res1['qa_score']-res0['qa_score']))*100:+.2f}%** |")
-        print(f"| **TRAKE Score** | {res0['trake_score']:.4f} | {res1['trake_score']:.4f} | **+{((res1['trake_score']-res0['trake_score']))*100:+.2f}%** |")
-        print(f"| 🏆 **FINAL SCORE** | **{res0['final_score']:.4f}** | **{res1['final_score']:.4f}** | **🔥 +{((res1['final_score']-res0['final_score']))*100:+.2f}%** |")
-        print(f"| **Độ trễ** | {res0['latency_ms']:.1f} ms | {res1['latency_ms']:.1f} ms | ~ |")
-        print("🔥" * 40 + "\n")
-    else:
+        print("\n" + "🔥" * 45)
+        print("🏆 MA TRẬN KẾT QUẢ ABLATION STUDY HOÀN CHỈNH (CHUẨN 100% BTC):")
+        print("🔥" * 45)
+        print(f"| # | Cấu hình Thử nghiệm | KIS | QA | TRAKE | 🏆 FINAL SCORE | Latency | Đột phá |")
+        print(f"| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :--- |")
+        base_score = results[0]["final_score"] if results else 0.0
+        for r in results:
+            gain = r["final_score"] - base_score
+            gain_str = f"+{gain*100:.2f}%" if gain >= 0 else f"{gain*100:.2f}%"
+            print(f"| {r['config_id']} | {r['config_name'][:40]}... | {r['kis_score']:.4f} | {r['qa_score']:.4f} | {r['trake_score']:.4f} | **{r['final_score']:.4f}** | {r['latency_ms']:.1f}ms | {gain_str} |")
+        print("🔥" * 45 + "\n")
+    elif args.config is not None:
         run_ablation_experiment(args.config)
+    else:
+        # Mặc định chạy Cấu hình 7 (Gemini 3.5 Flash Lite Full Hybrid)
+        run_ablation_experiment(7)
 
 if __name__ == "__main__":
     main()
