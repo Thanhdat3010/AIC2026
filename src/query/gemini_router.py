@@ -68,14 +68,40 @@ class APIKeyPool:
 
 class UnifiedLLMRouter:
     """
-    Bộ não điều hướng và làm giàu truy vấn:
+    Bộ não điều hướng và làm giàu truy vấn sử dụng Gemini 3.5 Flash Lite (hoặc Groq):
     - Multi-Prompt Ensembling: Sinh 3 câu tiếng Anh với 3 góc nhìn thị giác độc lập.
     - OCR / ASR Keyword Extraction: Bóc tách từ khóa biển báo và lời thoại.
     - Dynamic Weighting: Cân đối trọng số tự động giữa Visual, OCR, và ASR.
-    - Tự động ưu tiên Groq (siêu tốc 500 token/s) hoặc Gemini Flash.
     """
-    def __init__(self):
+    def __init__(self, model_name: str = "gemini-3.5-flash-lite"):
+        self.model_name = model_name
         self.key_pool = APIKeyPool()
+
+    def _call_gemini(self, prompt: str) -> Optional[str]:
+        if not self.key_pool.gemini_keys:
+            return None
+        keys = list(self.key_pool.gemini_keys)
+        random.shuffle(keys)
+        for key in keys:
+            try:
+                from google import genai
+                from google.genai import types
+                client = genai.Client(api_key=key)
+                
+                response = client.models.generate_content(
+                    model=self.model_name,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        temperature=0.2,
+                        response_mime_type="application/json"
+                    )
+                )
+                if response and response.text:
+                    return response.text.strip()
+            except Exception as e:
+                print(f"⚠️ Gemini Key (...{key[-6:]}) error: {e}, thử key kế tiếp...", flush=True)
+                time.sleep(0.3)
+        return None
 
     def _call_groq(self, prompt: str) -> Optional[str]:
         if not self.key_pool.groq_keys:
@@ -88,37 +114,16 @@ class UnifiedLLMRouter:
                 client = Groq(api_key=key)
                 chat_completion = client.chat.completions.create(
                     messages=[
-                        {"role": "system", "content": "You are a video retrieval query analyst. You MUST respond with ONLY a valid JSON object matching the requested schema without any markdown formatting."},
+                        {"role": "system", "content": "You are a video retrieval query analyst. Respond with ONLY valid JSON."},
                         {"role": "user", "content": prompt}
                     ],
-                    model="llama-3.3-70b-versatile",
+                    model="qwen/qwen3.6-27b",
                     temperature=0.2,
                     response_format={"type": "json_object"}
                 )
                 return chat_completion.choices[0].message.content
             except Exception as e:
                 print(f"⚠️ Groq Key (...{key[-6:]}) error: {e}, thử key kế tiếp...", flush=True)
-                time.sleep(0.3)
-        return None
-
-    def _call_gemini(self, prompt: str) -> Optional[str]:
-        if not self.key_pool.gemini_keys:
-            return None
-        keys = list(self.key_pool.gemini_keys)
-        random.shuffle(keys)
-        for key in keys:
-            try:
-                import google.generativeai as genai
-                genai.configure(api_key=key)
-                model = genai.GenerativeModel(
-                    model_name="gemini-2.5-flash",
-                    generation_config={"temperature": 0.2, "response_mime_type": "application/json"}
-                )
-                response = model.generate_content(prompt)
-                if response and response.text:
-                    return response.text.strip()
-            except Exception as e:
-                print(f"⚠️ Gemini Key (...{key[-6:]}) error: {e}, thử key kế tiếp...", flush=True)
                 time.sleep(0.3)
         return None
 
@@ -144,10 +149,10 @@ Respond with ONLY a JSON object with this EXACT structure:
   "temporal_hint": "early / middle / late / any"
 }}
 """
-        # Ưu tiên Groq nếu có keys (gsk_...) hoặc Gemini
-        res_str = self._call_groq(prompt)
+        # Ưu tiên Gemini 3.5 Flash Lite
+        res_str = self._call_gemini(prompt)
         if not res_str:
-            res_str = self._call_gemini(prompt)
+            res_str = self._call_groq(prompt)
 
         if res_str:
             try:
@@ -173,5 +178,5 @@ if __name__ == "__main__":
     sample = "Trong một căn nhà, người phụ nữ dùng hai tay quấn và chỉnh tấm xà rông màu vàng cam quanh eo người đàn ông mặc áo xanh."
     print(f"\n🔎 [TEST QUERY]: {sample}")
     res = router.transform_query(sample)
-    print("\n📊 [KẾT QUẢ PHÂN RÃ TỰ ĐỘNG]:")
+    print("\n📊 [KẾT QUẢ PHÂN RÃ TỰ ĐỘNG TỪ GEMINI 3.5 FLASH LITE]:")
     print(json.dumps(res, indent=2, ensure_ascii=False))
