@@ -45,14 +45,28 @@ class GeminiKeyPool:
         if single_gem and not single_gem.startswith("YOUR_") and single_gem not in self.gemini_keys:
             self.gemini_keys.append(single_gem)
 
+        self._curr_idx = 0
         print(f"🔑 [GEMINI KEY POOL] Đã nạp thành công {len(self.gemini_keys)} Google Gemini API Keys hoạt động!", flush=True)
+
+    def get_next_key(self) -> str:
+        """Lấy key kế tiếp theo vòng tròn Round-Robin."""
+        if not self.gemini_keys:
+            return ""
+        key = self.gemini_keys[self._curr_idx % len(self.gemini_keys)]
+        self._curr_idx += 1
+        return key
+
+    def get_random_key(self) -> str:
+        if not self.gemini_keys:
+            return ""
+        return random.choice(self.gemini_keys)
 
 class GeminiQueryRouter:
     """
     Bộ não điều hướng và làm giàu truy vấn thuần Google Gemini 3.5 Flash Lite:
-    - Multi-Prompt Ensembling: Sinh 3 câu tiếng Anh với 3 góc nhìn thị giác độc lập.
-    - OCR / ASR Keyword Extraction: Bóc tách từ khóa biển báo và lời thoại.
-    - Dynamic Weighting: Cân đối trọng số tự động giữa Visual, OCR, và ASR.
+    - Dominant Multi-Prompt Ensembling: Sinh 3 câu tiếng Anh (Chính 70%, Hành động 15%, Chi tiết 15%).
+    - Adaptive Modality Gating: Nhận diện chính xác có tín hiệu OCR/ASR hay không để khóa/mở cổng BM25.
+    - Task Identification: Tự động gắn cờ is_qa hoặc is_trake.
     """
     def __init__(self, model_name: str = "gemini-3.5-flash-lite"):
         self.model_name = model_name
@@ -73,7 +87,7 @@ class GeminiQueryRouter:
                     model=self.model_name,
                     contents=prompt,
                     config=types.GenerateContentConfig(
-                        temperature=0.2,
+                        temperature=0.1,
                         response_mime_type="application/json"
                     )
                 )
@@ -85,27 +99,39 @@ class GeminiQueryRouter:
                     print(f"⚠️ Gemini Key (...{key[-6:]}) bị chạm hạn ngạch, chuyển key khác...", flush=True)
                 else:
                     print(f"⚠️ Gemini Key (...{key[-6:]}) error: {e}, thử key kế tiếp...", flush=True)
-                time.sleep(0.3)
+                time.sleep(0.2)
         return None
 
     def transform_query(self, raw_query: str) -> dict:
         prompt = f"""
-Analyze this Vietnamese video retrieval query for AIC 2026:
+You are an expert Multimodal Video Retrieval AI System for AI Challenge 2026.
+Analyze this Vietnamese query:
 "{raw_query}"
+
+Rules for Modality Gating:
+1. has_ocr_signal: set to TRUE ONLY if the query mentions specific signs, banners, titles, text in quotes, license plates, written words, numbers. If purely visual, set to FALSE.
+2. has_asr_signal: set to TRUE ONLY if the query mentions spoken speech, dialogue quotes, interview answers, announcements. If purely visual, set to FALSE.
+3. is_qa: set to TRUE if the query is a Question asking for specific entity/action (starts with Khi nào, Ai, Cái gì, Ở đâu, Như thế nào, Bao nhiêu, etc.).
+4. is_trake: set to TRUE if the query describes a chronological sequence of multiple distinct consecutive actions (First... then... then...).
 
 Respond with ONLY a JSON object with this EXACT structure:
 {{
   "visual_prompts": [
-    "Sentence 1: Full descriptive scene caption in natural English",
-    "Sentence 2: English caption focusing strictly on the Main Subjects and their precise Actions",
-    "Sentence 3: English caption focusing on Salient Objects, Colors, Clothing, and Background Props"
+    "Sentence 1: Comprehensive natural English scene description (Dominant Prompt)",
+    "Sentence 2: English caption strictly focusing on Subjects and their Action dynamics",
+    "Sentence 3: English caption strictly focusing on Salient Objects, Colors, and Background Props"
   ],
-  "ocr_keywords": ["Any text, road signs, banner titles, names, numbers that might appear on screen"],
-  "asr_keywords": ["Any spoken words, dialogue phrases or voiceover quotes that might be heard"],
+  "has_ocr_signal": true or false,
+  "ocr_keywords": ["Specific keywords only if has_ocr_signal is true, else empty list"],
+  "has_asr_signal": true or false,
+  "asr_keywords": ["Specific spoken phrases only if has_asr_signal is true, else empty list"],
+  "is_qa": true or false,
+  "is_trake": true or false,
+  "trake_events": ["Event 1 English", "Event 2 English", "Event 3 English (if is_trake is true)"],
   "weights": {{
-    "visual": 0.8,
-    "ocr": 0.1,
-    "asr": 0.1
+    "visual": 1.0,
+    "ocr": 0.0,
+    "asr": 0.0
   }},
   "temporal_hint": "early / middle / late / any"
 }}
@@ -119,21 +145,41 @@ Respond with ONLY a JSON object with this EXACT structure:
                     cleaned = cleaned[7:]
                 if cleaned.endswith("```"):
                     cleaned = cleaned[:-3]
-                return json.loads(cleaned.strip())
+                parsed = json.loads(cleaned.strip())
+
+                # Áp dụng Adaptive Modality Gating an toàn tuyệt đối
+                if not parsed.get("has_ocr_signal", False):
+                    parsed["ocr_keywords"] = []
+                    parsed["weights"]["ocr"] = 0.0
+                else:
+                    parsed["weights"]["ocr"] = 0.3
+
+                if not parsed.get("has_asr_signal", False):
+                    parsed["asr_keywords"] = []
+                    parsed["weights"]["asr"] = 0.0
+                else:
+                    parsed["weights"]["asr"] = 0.3
+
+                return parsed
             except Exception as e:
                 print(f"⚠️ JSON parsing error: {e}", flush=True)
 
         return {
             "visual_prompts": [raw_query, raw_query, raw_query],
+            "has_ocr_signal": False,
             "ocr_keywords": [],
+            "has_asr_signal": False,
             "asr_keywords": [],
+            "is_qa": False,
+            "is_trake": False,
+            "trake_events": [],
             "weights": {"visual": 1.0, "ocr": 0.0, "asr": 0.0},
             "temporal_hint": "any"
         }
 
 if __name__ == "__main__":
     router = GeminiQueryRouter()
-    sample = "Trong một căn nhà, người phụ nữ dùng hai tay quấn và chỉnh tấm xà rông màu vàng cam quanh eo người đàn ông mặc áo xanh."
+    sample = "Khi 2 người đàn ông đang di chuyển chiếc xe máy chở nhiều măng le, người phía trước đội gì trên đầu?"
     print(f"\n🔎 [TEST QUERY]: {sample}")
     res = router.transform_query(sample)
     print("\n📊 [KẾT QUẢ PHÂN RÃ TỰ ĐỘNG TỪ GEMINI 3.5 FLASH LITE]:")
