@@ -237,22 +237,24 @@ def main():
                         help="Mô hình thị giác HuggingFace SOTA (Mặc định: SigLIP 2)")
     parser.add_argument("--output_path", type=str, default="data/batch_1/processed/siglip_features.npy",
                         help="Nơi lưu ma trận vector hoàn chỉnh")
+    parser.add_argument("--frames_path", type=str, default=str(settings.directories.processed / "frames.parquet"),
+                        help="Đường dẫn tới file frames.parquet")
     parser.add_argument("--batch_size", type=int, default=64,
-                        help="Kích thước batch trích xuất trên GPU A100 (64 hoặc 128)")
+                        help="Kích thước batch trích xuất trên GPU (64 hoặc 128)")
     parser.add_argument("--device", type=str, default="cuda",
                         help="Thiết bị chạy (cuda)")
     args = parser.parse_args()
 
     # 1. Nạp mapping từ frames.parquet
-    frames_path = settings.directories.processed / "frames.parquet"
+    frames_path = Path(args.frames_path)
     if not frames_path.exists():
-        print(f"[ERROR] Không tìm thấy {frames_path}. Hãy chắc chắn dữ liệu frames đã được chuẩn bị!")
+        print(f"[ERROR] Không tìm thấy {frames_path}. Hãy chắc chắn file frames.parquet tồn tại!")
         sys.exit(1)
         
     frames_df = pd.read_parquet(frames_path)
     total_frames = len(frames_df)
     frames_lookup = dict(zip(zip(frames_df["video_id"], frames_df["keyframe_index"]), frames_df["global_id"]))
-    print(f"✅ Đã nạp mapping {total_frames:,} keyframes từ frames.parquet.")
+    print(f"✅ Đã nạp mapping {total_frames:,} keyframes từ: {frames_path}")
 
     # 2. Khởi tạo mô hình
     extractor = VisualFeatureExtractor(model_name=args.model_name, device=args.device)
