@@ -1,16 +1,27 @@
-import argparse
+import os
 import sys
+import argparse
 import io
 import time
 import zipfile
 import tempfile
-import os
 import re
 import json
 import requests
 from pathlib import Path
 import pandas as pd
 import numpy as np
+
+# Polyfill for PIL._util in Python 3.12 / Pillow 11 compatibility with torchvision
+try:
+    import PIL._util
+    if not hasattr(PIL._util, "is_directory"):
+        PIL._util.is_directory = lambda f: isinstance(f, (str, bytes, os.PathLike)) and os.path.isdir(f)
+    if not hasattr(PIL._util, "is_path"):
+        PIL._util.is_path = lambda f: isinstance(f, (str, bytes, os.PathLike))
+except Exception:
+    pass
+
 import torch
 from PIL import Image
 from tqdm import tqdm
