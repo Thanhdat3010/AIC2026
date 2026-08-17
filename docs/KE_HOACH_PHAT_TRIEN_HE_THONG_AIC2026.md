@@ -109,9 +109,9 @@ $$Final\ Score = \frac{1}{5} \sum_{k \in \{1, 5, 20, 50, 100\}} R@k$$
 
 | # | Cấu hình Thử nghiệm (Ablation Setup) | KIS | QA | TRAKE | 🏆 BTC Final Score | Độ trễ (ms) | Đánh giá & Tác động |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **0** | **Baseline 0: BTC CLIP (512d) + Dịch cơ bản** | - | - | - | **Chờ đo** | ~100ms | Mốc cơ sở dữ liệu gốc BTC |
-| **1** | **Baseline 1: Google SigLIP 2 (1152d) + Dịch cơ bản** | - | - | - | **Chờ đo** | ~120ms | 📈 Đo mức vượt trội của SigLIP 2 |
-| **2** | **+ VietOCR (BM25)** | - | - | - | **Chờ đo** | ~130ms | 📈 Bắt trúng câu có biển hiệu, tin tức |
+| **0** | **Baseline 0: BTC CLIP (512d) + Dịch cơ bản** | 0.3143 | 0.3000 | 0.1400 | **0.2800** | 53.9ms | Mốc cơ sở dữ liệu gốc BTC |
+| **1** | **Baseline 1: Google SigLIP 2 (1152d) + Dịch cơ bản** | 0.6571 | 0.7000 | 0.0800 | **🔥 0.5600** | 309.6ms | 🚀 **Tăng gấp đôi (+28.00%) so với CLIP BTC** |
+| **2** | **+ VietOCR (BM25)** | - | - | - | **Chờ đo** | ~320ms | 📈 Bắt trúng câu có biển hiệu, tin tức |
 | **3** | **+ PhoWhisper ASR (BM25)** | - | - | - | **Chờ đo** | ~140ms | 📈 Bắt trúng câu hỏi thời sự, lời thoại |
 | **4** | **+ RRF Hybrid Fusion (Kết hợp 3 nguồn)** | - | - | - | **Chờ đo** | ~150ms | 📈 Cân bằng điểm số Dense + Sparse |
 | **5** | **+ Temporal Scene Window (Cửa sổ trượt ±3s)** | - | - | - | **Chờ đo** | ~170ms | 📈 Gom cụm phân cảnh video |
