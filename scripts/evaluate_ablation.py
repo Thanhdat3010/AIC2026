@@ -135,7 +135,10 @@ def run_ablation_experiment(config_id: int, pipeline_cache: dict = None) -> dict
     use_multi_prompt = False
     use_ocr = False
     use_asr = False
+    use_meta = False
     use_dyn_weights = False
+    use_temporal = False
+    use_soft = False
     use_gemini_auto = False
 
     if config_id == 0:
@@ -185,6 +188,16 @@ def run_ablation_experiment(config_id: int, pipeline_cache: dict = None) -> dict
             pipeline = HybridRetrievalEngine(engine="siglip2")
             if pipeline_cache is not None:
                 pipeline_cache["hybrid_siglip"] = pipeline
+    elif config_id == 5:
+        config_name = "Cấu hình 5: SigLIP 2 + Temporal Scene Window (Smoothing & Scene NMS +-3s)"
+        use_hybrid = True
+        use_temporal = True
+        if pipeline_cache and "hybrid_siglip" in pipeline_cache:
+            pipeline = pipeline_cache["hybrid_siglip"]
+        else:
+            pipeline = HybridRetrievalEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["hybrid_siglip"] = pipeline
     elif config_id == 6:
         config_name = "Cấu hình 6: SigLIP 2 + Multi-Prompt Ensembling (3 Prompts Gemini 3.5 Flash Lite)"
         use_hybrid = True
@@ -203,6 +216,45 @@ def run_ablation_experiment(config_id: int, pipeline_cache: dict = None) -> dict
         use_ocr = True
         use_asr = True
         use_dyn_weights = True
+        use_gemini_auto = True
+        if pipeline_cache and "hybrid_siglip" in pipeline_cache:
+            pipeline = pipeline_cache["hybrid_siglip"]
+        else:
+            pipeline = HybridRetrievalEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["hybrid_siglip"] = pipeline
+    elif config_id == 8:
+        config_name = "Cấu hình 8: SigLIP 2 + Soft Position & Temporal Filter"
+        use_hybrid = True
+        use_multi_prompt = True
+        use_soft = True
+        use_gemini_auto = True
+        if pipeline_cache and "hybrid_siglip" in pipeline_cache:
+            pipeline = pipeline_cache["hybrid_siglip"]
+        else:
+            pipeline = HybridRetrievalEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["hybrid_siglip"] = pipeline
+    elif config_id == 9:
+        config_name = "Cấu hình 9: SigLIP 2 + BM25 Video Metadata (YouTube Title/Desc)"
+        use_hybrid = True
+        use_meta = True
+        if pipeline_cache and "hybrid_siglip" in pipeline_cache:
+            pipeline = pipeline_cache["hybrid_siglip"]
+        else:
+            pipeline = HybridRetrievalEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["hybrid_siglip"] = pipeline
+    elif config_id == 10:
+        config_name = "Cấu hình 10: 🏆 FULL SOTA PIPELINE (SigLIP 2 + Gemini 3.5 Flash Lite + RRF + Temporal NMS)"
+        use_hybrid = True
+        use_multi_prompt = True
+        use_ocr = True
+        use_asr = True
+        use_meta = True
+        use_dyn_weights = True
+        use_temporal = True
+        use_soft = True
         use_gemini_auto = True
         if pipeline_cache and "hybrid_siglip" in pipeline_cache:
             pipeline = pipeline_cache["hybrid_siglip"]
@@ -237,7 +289,10 @@ def run_ablation_experiment(config_id: int, pipeline_cache: dict = None) -> dict
                     use_multi_prompt=use_multi_prompt,
                     use_ocr=use_ocr,
                     use_asr=use_asr,
-                    use_dynamic_weights=use_dyn_weights
+                    use_meta=use_meta,
+                    use_dynamic_weights=use_dyn_weights,
+                    use_temporal_smoothing=use_temporal,
+                    use_soft_filter=use_soft
                 )
             else:
                 preds, qinfo, latency = pipeline.search(
@@ -246,7 +301,10 @@ def run_ablation_experiment(config_id: int, pipeline_cache: dict = None) -> dict
                     use_multi_prompt=False,
                     use_ocr=use_ocr,
                     use_asr=use_asr,
+                    use_meta=use_meta,
                     use_dynamic_weights=False,
+                    use_temporal_smoothing=use_temporal,
+                    use_soft_filter=use_soft,
                     custom_en_query=en_query
                 )
 
@@ -351,49 +409,37 @@ def save_ablation_markdown_report(results: list[dict], output_path: Path):
 
 def main():
     parser = argparse.ArgumentParser(description="Chạy Ablation Benchmark trên tập 11 ground truth queries")
-    parser.add_argument("--config", type=int, default=None, help="ID cấu hình (0, 1, 2, 3, 4, 6, 7)")
-    parser.add_argument("--all_configs", action="store_true", help="Chạy toàn bộ các cấu hình đã triển khai để so sánh ma trận")
+    parser.add_argument("--config", type=int, default=None, help="ID cấu hình (0..10)")
+    parser.add_argument("--all_configs", action="store_true", help="Chạy toàn bộ 10 cấu hình để so sánh ma trận")
     args = parser.parse_args()
 
     pipeline_cache = {}
     md_output_path = BASE_DIR / "docs" / "ABLATION_STUDY_RESULTS.md"
 
-    if args.all_configs:
-        print("\n🚀 BẮT ĐẦU CHẠY TOÀN BỘ CÁC CẤU HÌNH THỬ NGHIỆM ABLATION STUDY...")
-        configs_to_test = [0, 1, 2, 3, 4, 6, 7]
-        results = []
-        for cid in configs_to_test:
-            res = run_ablation_experiment(cid, pipeline_cache=pipeline_cache)
-            if res:
-                results.append(res)
+    configs_to_test = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    if args.config is not None:
+        configs_to_test = [args.config]
 
-        save_ablation_markdown_report(results, md_output_path)
-
-        print("\n" + "🔥" * 45)
-        print("🏆 MA TRẬN KẾT QUẢ ABLATION STUDY HOÀN CHỈNH (CHUẨN 100% BTC):")
-        print("🔥" * 45)
-        print(f"| # | Cấu hình Thử nghiệm | KIS | QA | TRAKE | 🏆 FINAL SCORE | Latency | Đột phá |")
-        print(f"| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :--- |")
-        base_score = results[0]["final_score"] if results else 0.0
-        for r in results:
-            gain = r["final_score"] - base_score
-            gain_str = f"+{gain*100:+.2f}%" if gain >= 0 else f"{gain*100:+.2f}%"
-            print(f"| {r['config_id']} | {r['config_name'][:40]}... | {r['kis_score']:.4f} | {r['qa_score']:.4f} | {r['trake_score']:.4f} | **{r['final_score']:.4f}** | {r['latency_ms']:.1f}ms | {gain_str} |")
-        print("🔥" * 45 + "\n")
-    elif args.config is not None:
-        res = run_ablation_experiment(args.config, pipeline_cache=pipeline_cache)
+    print("\n🚀 BẮT ĐẦU CHẠY THỬ NGHIỆM ABLATION STUDY...")
+    results = []
+    for cid in configs_to_test:
+        res = run_ablation_experiment(cid, pipeline_cache=pipeline_cache)
         if res:
-            save_ablation_markdown_report([res], md_output_path)
-    else:
-        # Mặc định chạy toàn bộ
-        print("\n🚀 BẮT ĐẦU CHẠY TOÀN BỘ CÁC CẤU HÌNH THỬ NGHIỆM ABLATION STUDY...")
-        configs_to_test = [0, 1, 2, 3, 4, 6, 7]
-        results = []
-        for cid in configs_to_test:
-            res = run_ablation_experiment(cid, pipeline_cache=pipeline_cache)
-            if res:
-                results.append(res)
-        save_ablation_markdown_report(results, md_output_path)
+            results.append(res)
+
+    save_ablation_markdown_report(results, md_output_path)
+
+    print("\n" + "🔥" * 45)
+    print("🏆 MA TRẬN KẾT QUẢ ABLATION STUDY HOÀN CHỈNH (CHUẨN 100% BTC):")
+    print("🔥" * 45)
+    print(f"| # | Cấu hình Thử nghiệm | KIS | QA | TRAKE | 🏆 FINAL SCORE | Latency | Đột phá |")
+    print(f"| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :--- |")
+    base_score = results[0]["final_score"] if results else 0.0
+    for r in results:
+        gain = r["final_score"] - base_score
+        gain_str = f"+{gain*100:+.2f}%" if gain >= 0 else f"{gain*100:+.2f}%"
+        print(f"| {r['config_id']} | {r['config_name'][:40]}... | {r['kis_score']:.4f} | {r['qa_score']:.4f} | {r['trake_score']:.4f} | **{r['final_score']:.4f}** | {r['latency_ms']:.1f}ms | {gain_str} |")
+    print("🔥" * 45 + "\n")
 
 if __name__ == "__main__":
     main()

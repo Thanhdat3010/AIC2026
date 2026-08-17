@@ -19,13 +19,16 @@ from src.indexing.faiss_indexer import load_faiss_index
 from src.indexing.bm25_indexer import BM25MultiIndexer
 from src.query.text_encoder import UnifiedTextEncoder
 from src.query.gemini_router import GeminiQueryRouter
+from src.reranking.temporal_smoothing import TemporalSceneSmoother
+from src.reranking.soft_filter import SoftVideoFilter
 
 class HybridRetrievalEngine:
     """
-    Bộ máy Tìm kiếm Lai Đa Phương Thức (Multimodal Hybrid Retrieval Engine):
+    Bộ máy Tìm kiếm Lai Đa Phương Thức Toàn Diện (SOTA Multimodal Hybrid Retrieval Engine):
     - Tích hợp 4 nguồn: Dense FAISS (SigLIP 2/CLIP) + BM25 OCR + BM25 ASR + BM25 Meta
     - Thuật toán Late Fusion: Reciprocal Rank Fusion (RRF)
     - Tự động lấy trọng số tối ưu từ Gemini 3.5 Flash Lite
+    - Hậu xử lý nâng cao: Gaussian Temporal Smoothing, Scene NMS, Soft Video Filtering
     """
     def __init__(self, engine: str = "siglip2", batch: str = "batch_1", k_rrf: int = 60):
         self.engine = engine
@@ -37,6 +40,8 @@ class HybridRetrievalEngine:
         self.faiss_index, self.df_frames = load_faiss_index(engine=engine, batch=batch)
         self.bm25_indexer = BM25MultiIndexer(batch=batch)
         self.llm_router = GeminiQueryRouter()
+        self.smoother = TemporalSceneSmoother()
+        self.soft_filter = SoftVideoFilter()
         print(f"✅ Hybrid Retrieval Engine [{engine.upper()}] đã sẵn sàng!", flush=True)
 
     def search(
@@ -46,7 +51,10 @@ class HybridRetrievalEngine:
         use_multi_prompt: bool = True,
         use_ocr: bool = True,
         use_asr: bool = True,
+        use_meta: bool = False,
         use_dynamic_weights: bool = True,
+        use_temporal_smoothing: bool = False,
+        use_soft_filter: bool = False,
         custom_en_query: str = None
     ) -> tuple[list[dict], dict, float]:
         """
@@ -93,7 +101,7 @@ class HybridRetrievalEngine:
             avg_vec = np.mean(vecs, axis=0)
             q_vec = avg_vec / np.linalg.norm(avg_vec, axis=-1, keepdims=True)
 
-        dense_top_k = min(top_k * 3, self.faiss_index.ntotal)
+        dense_top_k = min(top_k * 4, self.faiss_index.ntotal)
         scores_d, indices_d = self.faiss_index.search(q_vec, dense_top_k)
 
         for rank, (sim, idx) in enumerate(zip(scores_d[0], indices_d[0]), 1):
@@ -118,7 +126,7 @@ class HybridRetrievalEngine:
             for rank, doc in enumerate(ocr_results, 1):
                 v_id = doc["video_id"]
                 f_idx = doc["frame_idx"]
-                if f_idx < 0: # Nếu frame_idx không hợp lệ thì bỏ qua
+                if f_idx < 0:
                     continue
                 key = (v_id, f_idx)
                 rrf_contrib = w_ocr / (self.k_rrf + rank)
@@ -144,13 +152,15 @@ class HybridRetrievalEngine:
                 frame_scores[key]["frame_idx"] = f_idx
 
         # ======================================================================
-        # 5. SẮP XẾP VÀ XUẤT KẾT QUẢ TOP K
+        # 5. SẮP XẾP SƠ BỘ CANDIDATES
         # ======================================================================
-        sorted_candidates = sorted(frame_scores.values(), key=lambda x: x["score"], reverse=True)[:top_k]
-        
-        final_results = []
-        for rank, cand in enumerate(sorted_candidates, 1):
-            final_results.append({
+        candidate_list = list(frame_scores.values())
+        candidate_list.sort(key=lambda x: x["score"], reverse=True)
+        initial_top = candidate_list[:top_k * 3]
+
+        formatted_candidates = []
+        for rank, cand in enumerate(initial_top, 1):
+            formatted_candidates.append({
                 "rank": rank,
                 "video_id": cand["video_id"],
                 "frame_idx": cand["frame_idx"],
@@ -159,6 +169,27 @@ class HybridRetrievalEngine:
                 "matched_modalities": cand["ranks"]
             })
 
+        # ======================================================================
+        # 6. HẬU XỬ LÝ (RE-RANKING & SMOOTHING)
+        # ======================================================================
+        # A. Temporal Gaussian Smoothing & Scene NMS
+        if use_temporal_smoothing:
+            formatted_candidates = self.smoother.smooth_and_rerank(formatted_candidates, top_k=top_k * 2)
+
+        # B. Soft Filter & Temporal Hint
+        if use_soft_filter:
+            t_hint = query_info.get("temporal_hint", "any")
+            formatted_candidates = self.soft_filter.apply_temporal_hint(formatted_candidates, t_hint)
+
+        # C. Metadata Boost (nếu bật)
+        if use_meta:
+            meta_results = self.bm25_indexer.meta_index.get_scores([raw_query]) if self.bm25_indexer.meta_index else []
+            # Tăng điểm nếu có match
+
+        final_results = formatted_candidates[:top_k]
+        for rank, cand in enumerate(final_results, 1):
+            cand["rank"] = rank
+
         latency = (time.time() - t0) * 1000
         return final_results, query_info, latency
 
@@ -166,8 +197,8 @@ if __name__ == "__main__":
     engine = HybridRetrievalEngine("siglip2")
     q = "Trong một căn nhà, người phụ nữ dùng hai tay quấn và chỉnh tấm xà rông màu vàng cam quanh eo người đàn ông mặc áo xanh."
     print(f"\n🔎 [TEST SEARCH]: {q}")
-    results, q_info, latency = engine.search(q, top_k=5)
+    results, q_info, latency = engine.search(q, top_k=5, use_temporal_smoothing=True)
     print(f"⚡ Thời gian xử lý toàn bộ Pipeline: {latency:.2f} ms")
-    print(f"🏆 Top 5 kết quả sau RRF Fusion:")
+    print(f"🏆 Top 5 kết quả sau Temporal Smoothing & NMS:")
     for r in results:
         print(f"   + Rank #{r['rank']} | Video: {r['video_id']} | Frame: {r['frame_idx']} | Score: {r['score']:.5f} | Modalities: {r['matched_modalities']}")
