@@ -105,12 +105,18 @@ $$Final\ Score = \frac{1}{5} \sum_{k \in \{1, 5, 20, 50, 100\}} R@k$$
 
 ### 2. Bảng Thử Nghiệm Tác Động Từng Thành Phần (Ablation Study Matrix):
 *Công cụ: `scripts/evaluate_ablation.py` đối chiếu tự động với `data/benchmark/ground_truth.json`.*
+*Quản lý 2 file FAISS độc lập: `indexes/batch_1/clip_btc.faiss` (512d) & `indexes/batch_1/siglip2.faiss` (1152d).*
 
-| Cấu hình Thử nghiệm (Ablation Setup) | R@1 | R@5 | R@20 | R@50 | R@100 | 🏆 BTC Final Score | Độ trễ (ms) | Đánh giá & Tác động |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **(1) Baseline (CLIP OpenAI + Dịch cơ bản)** | 0.35 | 0.55 | 0.65 | 0.72 | 0.78 | **0.610** | ~120ms | Điểm xuất phát cơ sở |
-| **(2) + VietOCR (BM25)** | 0.48 | 0.68 | 0.75 | 0.80 | 0.84 | **0.710** | ~140ms | 📈 Bắt trúng câu có biển hiệu, tin tức |
-| **(3) + PhoWhisper ASR (BM25)** | 0.56 | 0.76 | 0.82 | 0.86 | 0.89 | **0.778** | ~160ms | 📈 Bắt trúng câu hỏi thời sự, lời thoại |
-| **(4) + SigLIP SOTA (Thay CLIP cũ)** | 0.67 | 0.84 | 0.90 | 0.92 | 0.94 | **0.854** | ~190ms | 📈 Bắt chi tiết hình ảnh nhỏ, phức tạp |
-| **(5) + Gemini Multi-Query & Expansion** | 0.74 | 0.89 | 0.93 | 0.95 | 0.96 | **0.894** | ~350ms | 📈 Đa dạng hóa từ đồng nghĩa, chống lệch từ |
-| **(6) + Temporal Scene Window (Full Pipeline)** | **0.82** | **0.94** | **0.97** | **0.98** | **0.99** | **🔥 0.940** | **~380ms** | 🏆 **Cấu hình SOTA tối ưu điểm R-Score** |
+| # | Cấu hình Thử nghiệm (Ablation Setup) | KIS | QA | TRAKE | 🏆 BTC Final Score | Độ trễ (ms) | Đánh giá & Tác động |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **0** | **Baseline 0: BTC CLIP (512d) + Dịch cơ bản** | - | - | - | **Chờ đo** | ~100ms | Mốc cơ sở dữ liệu gốc BTC |
+| **1** | **Baseline 1: Google SigLIP 2 (1152d) + Dịch cơ bản** | - | - | - | **Chờ đo** | ~120ms | 📈 Đo mức vượt trội của SigLIP 2 |
+| **2** | **+ VietOCR (BM25)** | - | - | - | **Chờ đo** | ~130ms | 📈 Bắt trúng câu có biển hiệu, tin tức |
+| **3** | **+ PhoWhisper ASR (BM25)** | - | - | - | **Chờ đo** | ~140ms | 📈 Bắt trúng câu hỏi thời sự, lời thoại |
+| **4** | **+ RRF Hybrid Fusion (Kết hợp 3 nguồn)** | - | - | - | **Chờ đo** | ~150ms | 📈 Cân bằng điểm số Dense + Sparse |
+| **5** | **+ Temporal Scene Window (Cửa sổ trượt ±3s)** | - | - | - | **Chờ đo** | ~170ms | 📈 Gom cụm phân cảnh video |
+| **6** | **+ Multi-Prompt Ensembling (Gemini 3.5 Flash Lite)** | - | - | - | **Chờ đo** | ~280ms | 📈 Đa dạng hóa 3 góc nhìn truy vấn |
+| **7** | **+ Dynamic Query Weighting** | - | - | - | **Chờ đo** | ~290ms | 📈 Tự động cấp trọng số theo loại câu |
+| **8** | **+ Soft Object & Position Filter** | - | - | - | **Chờ đo** | ~300ms | 📈 Lọc vị trí video & số lượng người |
+| **9** | **+ BM25 Metadata (YouTube Title/Desc)** | - | - | - | **Chờ đo** | ~310ms | 📈 Đo tác động siêu dữ liệu |
+| **10**| 🏆 **FULL SOTA PIPELINE (Cấu hình thi đấu)** | - | - | - | **Chờ đo** | ~320ms | 🏆 **Cấu hình tối ưu điểm Final Score** |
