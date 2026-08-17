@@ -104,13 +104,13 @@ class VisualFeatureExtractor:
         
         print(f"=== Khởi tạo Mô hình Thị giác SOTA SigLIP 2: {model_name} trên {self.device} ===")
         try:
-            from transformers import AutoProcessor, AutoModel
-            self.processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
-            self.model = AutoModel.from_pretrained(model_name, trust_remote_code=True, torch_dtype=torch.float16 if self.device == "cuda" else torch.float32).to(self.device).eval()
-        except Exception as e_proc:
-            print(f"[INFO] AutoProcessor info: {e_proc}, thử AutoImageProcessor...")
             from transformers import AutoImageProcessor, AutoModel
             self.processor = AutoImageProcessor.from_pretrained(model_name, trust_remote_code=True)
+            self.model = AutoModel.from_pretrained(model_name, trust_remote_code=True, torch_dtype=torch.float16 if self.device == "cuda" else torch.float32).to(self.device).eval()
+        except Exception as e_proc:
+            print(f"[INFO] AutoImageProcessor info: {e_proc}, thử AutoProcessor...")
+            from transformers import AutoProcessor, AutoModel
+            self.processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
             self.model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to(self.device).eval()
         
         # Xác định số chiều vector (embedding dim)
