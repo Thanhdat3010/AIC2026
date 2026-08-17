@@ -130,18 +130,19 @@ class VisualFeatureExtractor:
             return np.empty((0, self.dim), dtype=np.float16)
             
         inputs = self.processor(images=pil_images_list, return_tensors="pt").to(self.device)
-        with torch.no_grad():
-            if hasattr(self.model, "get_image_features"):
-                feats = self.model.get_image_features(**inputs)
-            elif hasattr(self.model, "vision_model"):
-                outputs = self.model.vision_model(**inputs)
-                feats = outputs.pooler_output if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None else outputs.last_hidden_state[:, 0]
-            else:
-                outputs = self.model(**inputs)
-                feats = outputs.pooler_output if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None else outputs.last_hidden_state[:, 0]
-                
-            # L2 Normalization
-            feats = feats / feats.norm(dim=-1, keepdim=True)
+        with torch.inference_mode():
+            with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=(self.device == "cuda")):
+                if hasattr(self.model, "get_image_features"):
+                    feats = self.model.get_image_features(**inputs)
+                elif hasattr(self.model, "vision_model"):
+                    outputs = self.model.vision_model(**inputs)
+                    feats = outputs.pooler_output if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None else outputs.last_hidden_state[:, 0]
+                else:
+                    outputs = self.model(**inputs)
+                    feats = outputs.pooler_output if hasattr(outputs, "pooler_output") and outputs.pooler_output is not None else outputs.last_hidden_state[:, 0]
+                    
+                # L2 Normalization
+                feats = feats / feats.norm(dim=-1, keepdim=True)
             
         return feats.cpu().to(torch.float16).numpy()
 
@@ -239,8 +240,8 @@ def main():
                         help="Nơi lưu ma trận vector hoàn chỉnh")
     parser.add_argument("--frames_path", type=str, default=str(settings.directories.processed / "frames.parquet"),
                         help="Đường dẫn tới file frames.parquet")
-    parser.add_argument("--batch_size", type=int, default=64,
-                        help="Kích thước batch trích xuất trên GPU (64 hoặc 128)")
+    parser.add_argument("--batch_size", type=int, default=32,
+                        help="Kích thước batch trích xuất trên GPU (Mặc định: 32)")
     parser.add_argument("--device", type=str, default="cuda",
                         help="Thiết bị chạy (cuda)")
     args = parser.parse_args()
