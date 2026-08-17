@@ -1,0 +1,5 @@
+# Danh sách 4 gói cần bù ASR cho 24 video bị OOM
+https://aic-data.ledo.io.vn/Videos_L24_a.zip
+https://aic-data.ledo.io.vn/Videos_L28_a.zip
+https://aic-data.ledo.io.vn/Videos_L29_a.zip
+https://aic-data.ledo.io.vn/Videos_L30_a.zip
