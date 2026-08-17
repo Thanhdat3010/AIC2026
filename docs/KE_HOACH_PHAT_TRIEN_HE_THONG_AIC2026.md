@@ -109,14 +109,14 @@ $$Final\ Score = \frac{1}{5} \sum_{k \in \{1, 5, 20, 50, 100\}} R@k$$
 
 | # | Cấu hình Thử nghiệm (Ablation Setup) | KIS | QA | TRAKE | 🏆 BTC Final Score | Độ trễ (ms) | Đánh giá & Tác động |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **0** | **Baseline 0: BTC CLIP (512d) + Dịch cơ bản** | 0.3143 | 0.3000 | 0.1400 | **0.2800** | 53.9ms | Mốc cơ sở dữ liệu gốc BTC |
-| **1** | **Baseline 1: Google SigLIP 2 (1152d) + Dịch cơ bản** | 0.6571 | 0.7000 | 0.0800 | **🔥 0.5600** | 309.6ms | 🚀 **Tăng gấp đôi (+28.00%) so với CLIP BTC** |
-| **2** | **+ VietOCR (BM25)** | - | - | - | **Chờ đo** | ~320ms | 📈 Bắt trúng câu có biển hiệu, tin tức |
-| **3** | **+ PhoWhisper ASR (BM25)** | - | - | - | **Chờ đo** | ~140ms | 📈 Bắt trúng câu hỏi thời sự, lời thoại |
-| **4** | **+ RRF Hybrid Fusion (Kết hợp 3 nguồn)** | - | - | - | **Chờ đo** | ~150ms | 📈 Cân bằng điểm số Dense + Sparse |
-| **5** | **+ Temporal Scene Window (Cửa sổ trượt ±3s)** | - | - | - | **Chờ đo** | ~170ms | 📈 Gom cụm phân cảnh video |
-| **6** | **+ Multi-Prompt Ensembling (Gemini 3.5 Flash Lite)** | - | - | - | **Chờ đo** | ~280ms | 📈 Đa dạng hóa 3 góc nhìn truy vấn |
-| **7** | **+ Dynamic Query Weighting** | - | - | - | **Chờ đo** | ~290ms | 📈 Tự động cấp trọng số theo loại câu |
-| **8** | **+ Soft Object & Position Filter** | - | - | - | **Chờ đo** | ~300ms | 📈 Lọc vị trí video & số lượng người |
-| **9** | **+ BM25 Metadata (YouTube Title/Desc)** | - | - | - | **Chờ đo** | ~310ms | 📈 Đo tác động siêu dữ liệu |
-| **10**| 🏆 **FULL SOTA PIPELINE (Cấu hình thi đấu)** | - | - | - | **Chờ đo** | ~320ms | 🏆 **Cấu hình tối ưu điểm Final Score** |
+| **0** | **Baseline 0: BTC CLIP (512d) + Dịch cơ bản** | 0.3143 | 0.3000 | 0.1400 | **0.2800** | 53.8ms | Mốc cơ sở dữ liệu gốc BTC |
+| **1** | **Baseline 1: Google SigLIP 2 (1152d) + Dịch cơ bản** | 0.6571 | 0.7000 | 0.0800 | **🔥 0.5600** | 302.9ms | 🚀 **Tăng gấp đôi (+28.00%) so với CLIP BTC** |
+| **2** | **+ VietOCR (BM25)** | 0.6571 | 0.7000 | 0.0800 | **0.5600** | 324.3ms | 📈 Bắt trúng câu có biển hiệu, tin tức |
+| **3** | **+ PhoWhisper ASR (BM25)** | 0.6571 | 0.7000 | 0.0800 | **0.5600** | 320.3ms | 📈 Bắt trúng câu hỏi thời sự, lời thoại |
+| **4** | **+ RRF Hybrid Fusion (Kết hợp 3 nguồn)** | 0.6571 | 0.7000 | 0.0800 | **0.5600** | 445.7ms | 📈 Cân bằng điểm số Dense + Sparse |
+| **5** | **+ Temporal Scene Window (Cửa sổ trượt ±3s)** | - | - | - | **Chờ đo (Pha 3)** | ~170ms | 📈 Gom cụm phân cảnh video |
+| **6** | **+ Multi-Prompt Ensembling (Gemini 3.5 Flash Lite)** | **0.7143** | 0.6000 | 0.1400 | **🔥 0.5891** | 2497.6ms | 🚀 **Điểm KIS & Final cao nhất (+30.91%)** |
+| **7** | **+ Dynamic Query Weighting (Full Hybrid)** | 0.6857 | 0.6000 | **0.1600** | **🔥 0.5745** | 2546.3ms | 🚀 **Điểm TRAKE cao nhất (+29.45%)** |
+| **8** | **+ Soft Object & Position Filter** | - | - | - | **Chờ đo (Pha 3)** | ~300ms | 📈 Lọc vị trí video & số lượng người |
+| **9** | **+ BM25 Metadata (YouTube Title/Desc)** | - | - | - | **Chờ đo (Pha 3)** | ~310ms | 📈 Đo tác động siêu dữ liệu |
+| **10**| 🏆 **FULL SOTA PIPELINE (Cấu hình thi đấu)** | - | - | - | **Chờ đo (Pha 4)** | ~320ms | 🏆 **Cấu hình tối ưu điểm Final Score** |
