@@ -106,7 +106,7 @@ class VisualFeatureExtractor:
         try:
             from transformers import AutoImageProcessor, AutoModel
             self.processor = AutoImageProcessor.from_pretrained(model_name, trust_remote_code=True)
-            self.model = AutoModel.from_pretrained(model_name, trust_remote_code=True, torch_dtype=torch.float16 if self.device == "cuda" else torch.float32).to(self.device).eval()
+            self.model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to(self.device).eval()
         except Exception as e_proc:
             print(f"[INFO] AutoImageProcessor info: {e_proc}, thử AutoProcessor...")
             from transformers import AutoProcessor, AutoModel
