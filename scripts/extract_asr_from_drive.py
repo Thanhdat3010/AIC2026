@@ -125,11 +125,12 @@ def save_and_merge_parquet(new_records, out_file):
         out_file.parent.mkdir(parents=True, exist_ok=True)
         combined_df.to_parquet(out_file, index=False)
 
-def process_video_zip(zpath, batched_pipeline, beam_size, batch_size, video_fps_map, pkg_idx, total_pkgs, out_file, processed_videos_set):
+def process_video_zip(zpath, batched_pipeline, beam_size, batch_size, video_fps_map, pkg_idx, total_pkgs, out_file, processed_videos_set, target_videos_set=None):
     """
     Trích xuất ASR theo cơ chế Checkpoint Từng Video:
     - Xong video nào ghi đĩa ngay video đó (không sợ mất mát)
     - Dùng BatchedInferencePipeline để tăng tốc 3-4x trên GPU A100
+    - Hỗ trợ lọc chỉ chạy đúng danh sách target_videos_set nếu có
     """
     total_records_in_pkg = 0
     zip_name = Path(zpath).name
@@ -144,6 +145,10 @@ def process_video_zip(zpath, batched_pipeline, beam_size, batch_size, video_fps_
                     video_id = match_vid.group(1)
                 else:
                     video_id = Path(mp4_name).stem
+
+                # 0. Nếu có danh sách chỉ định: Bỏ qua các video không nằm trong danh sách
+                if target_videos_set and video_id not in target_videos_set:
+                    continue
 
                 # 1. Bỏ qua nếu video này đã có trong dữ liệu trước đó
                 if processed_videos_set and video_id in processed_videos_set:
@@ -241,7 +246,14 @@ def main():
                         help="Beam search size (5)")
     parser.add_argument("--compute_type", type=str, default="float16",
                         help="Compute type: float16 (nhanh & nhẹ VRAM)")
+    parser.add_argument("--target_videos", type=str, default=None,
+                        help="Danh sách video cần chạy (ngăn cách bằng dấu phẩy, VD: 'L24_V008,L24_V013')")
     args = parser.parse_args()
+
+    target_videos_set = None
+    if args.target_videos:
+        target_videos_set = {v.strip() for v in args.target_videos.split(",") if v.strip()}
+        print(f"🎯 [CHẾ ĐỘ MỤC TIÊU] Chỉ xử lý đúng {len(target_videos_set)} video được chỉ định: {sorted(list(target_videos_set))[:5]}...")
 
     # Nạp mapping FPS thực tế
     frames_path = settings.directories.processed / "frames.parquet"
@@ -332,12 +344,12 @@ def main():
                     temp_zip_path = tmp_zip.name
 
                 download_file(target, temp_zip_path, pkg_idx, total_pkgs)
-                process_video_zip(temp_zip_path, batched_pipeline, args.beam_size, args.batch_size, video_fps_map, pkg_idx, total_pkgs, out_file, processed_videos_set)
+                process_video_zip(temp_zip_path, batched_pipeline, args.beam_size, args.batch_size, video_fps_map, pkg_idx, total_pkgs, out_file, processed_videos_set, target_videos_set=target_videos_set)
 
                 if os.path.exists(temp_zip_path):
                     os.remove(temp_zip_path)
             else:
-                process_video_zip(target, batched_pipeline, args.beam_size, args.batch_size, video_fps_map, pkg_idx, total_pkgs, out_file, processed_videos_set)
+                process_video_zip(target, batched_pipeline, args.beam_size, args.batch_size, video_fps_map, pkg_idx, total_pkgs, out_file, processed_videos_set, target_videos_set=target_videos_set)
 
             # Cập nhật tổng số dòng hiện có
             try:
