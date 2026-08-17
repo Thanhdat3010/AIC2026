@@ -1,50 +1,170 @@
 {
   "benchmark_version": "1.0",
   "created_by": "Team AIC 2026",
-  "total_queries": 4,
+  "total_queries": 11,
   "test_cases": [
     {
       "query_id": "test-kis-01",
       "task_type": "kis",
-      "query_text": "Tìm đoạn clip có cảnh người phụ nữ đang ngồi ăn bên bàn gỗ.",
+      "query_text": "Trong một căn nhà, người phụ nữ dùng hai tay quấn và chỉnh tấm xà rông màu vàng cam quanh eo người đàn ông mặc áo xanh.",
       "ground_truth": {
-        "video_id": "L21_V001",
-        "start_frame": 240,
-        "end_frame": 280
+        "video_id": "L28_V009",
+        "start_frame": 15866,
+        "end_frame": 15977
       }
     },
     {
-      "query_id": "test-kis-02",
-      "task_type": "kis",
-      "query_text": "Một con chó màu vàng đang chạy trên cỏ.",
-      "ground_truth": {
-        "video_id": "L22_V025",
-        "start_frame": 21900,
-        "end_frame": 22500
-      }
-    },
-    {
-      "query_id": "test-qa-01",
+      "query_id": "test-qa-02",
       "task_type": "qa",
-      "query_text": "Trong đoạn video trao quà từ thiện của CLB FANA tại Khánh Hòa, hỏi xã này có tên là gì?",
+      "query_text": "Khi hai người đàn ông cùng di chuyển chiếc xe máy chở đầy măng, người ở phía trước đội gì trên đầu?",
       "ground_truth": {
-        "video_id": "L26_V112",
-        "frame_idx": 4520,
-        "answer": "Khánh Bình"
+        "video_id": "L27_V002",
+        "start_frame": 910,
+        "end_frame": 959,
+        "frame_idx": 934,
+        "answer": "mũ bảo hiểm"
       }
     },
     {
-      "query_id": "test-trake-01",
+      "query_id": "test-trake-03",
       "task_type": "trake",
-      "query_text": "Tìm 4 khoảnh khắc chính khi vận động viên thực hiện cú nhảy: (1) giậm nhảy, (2) bay qua xà, (3) tiếp đất, (4) đứng dậy.",
+      "query_text": "Hãy tìm các đoạn trong video có chuỗi hành động nấu ăn theo đúng thứ tự: đầu bếp đổ hành tây thái hạt lựu vào chảo, cho thịt bò bằm vào, lần lượt thêm đậu Hà Lan rồi cà rốt thái hạt lựu, sau đó cho mì Ý đã luộc vào cùng chảo.",
       "ground_truth": {
-        "video_id": "L10_V010",
+        "video_id": "L26_V008",
         "events": [
-          {"start_frame": 95, "end_frame": 105},
-          {"start_frame": 145, "end_frame": 155},
-          {"start_frame": 195, "end_frame": 205},
-          {"start_frame": 245, "end_frame": 255}
+          {
+            "event_id": "E1",
+            "start_frame": 3977,
+            "end_frame": 4023
+          },
+          {
+            "event_id": "E2",
+            "start_frame": 4208,
+            "end_frame": 4221
+          },
+          {
+            "event_id": "E3",
+            "start_frame": 4661,
+            "end_frame": 4675
+          },
+          {
+            "event_id": "E4",
+            "start_frame": 4714,
+            "end_frame": 4729
+          },
+          {
+            "event_id": "E5",
+            "start_frame": 4841,
+            "end_frame": 4902
+          }
         ]
+      }
+    },
+    {
+      "query_id": "test-kis-04",
+      "task_type": "kis",
+      "query_text": "Trong cảnh cận cảnh, người đầu bếp dùng đôi găng tay lót nồi kẻ caro để nghiêng nồi thủy tinh màu nâu, rót hỗn hợp thạch matcha màu xanh vào khuôn sứ trắng hình chữ nhật.",
+      "ground_truth": {
+        "video_id": "L26_V355",
+        "start_frame": 4662,
+        "end_frame": 4727
+      }
+    },
+    {
+      "query_id": "test-kis-05",
+      "task_type": "kis",
+      "query_text": "Cận cảnh một bàn tay dùng dụng cụ cán gỗ phết hỗn hợp màu hồng lên mặt trong của một lá trầu.",
+      "ground_truth": {
+        "video_id": "L27_V012",
+        "start_frame": 11686,
+        "end_frame": 11732
+      }
+    },
+    {
+      "query_id": "test-kis-06",
+      "task_type": "kis",
+      "query_text": "Cận cảnh đôi đũa gỗ gấp đôi chiếc bánh xèo màu vàng để phủ lên phần nhân trong chảo.",
+      "ground_truth": {
+        "video_id": "L27_V013",
+        "start_frame": 10112,
+        "end_frame": 10140
+      }
+    },
+    {
+      "query_id": "test-qa-07",
+      "task_type": "qa",
+      "query_text": "Trong cuộc trò chuyện dưới giàn nho, khi người dẫn chương trình hỏi mỗi ngày chủ vườn bắt đầu công việc từ thời điểm nào và đến bao giờ mới xong, chủ vườn trả lời như thế nào?",
+      "ground_truth": {
+        "video_id": "L29_V013",
+        "start_frame": 21438,
+        "end_frame": 22339,
+        "frame_idx": 21888,
+        "answer": "Bắt đầu khoảng 4–5 giờ sáng và kết thúc vào khoảng 9 giờ tối."
+      }
+    },
+    {
+      "query_id": "test-kis-08",
+      "task_type": "kis",
+      "query_text": "Trong cảnh quay cận, một nữ sinh mặc đồng phục xanh trắng, trùm khăn trắng và đeo kính râm cầm chiếc điện thoại màu tím sát mặt rồi dùng ngón tay chạm vào màn hình.",
+      "ground_truth": {
+        "video_id": "L22_V003",
+        "start_frame": 17762,
+        "end_frame": 17787
+      }
+    },
+    {
+      "query_id": "test-trake-09",
+      "task_type": "trake",
+      "query_text": "Đầu tiên, lực lượng chức năng kiểm tra một căn phòng chật kín thùng carton và sách; tiếp theo, những đôi tay lần lượt mở và đối chiếu các cuốn sách lấy từ hộp; sau đó, một người đàn ông đeo kính ngồi trước các thùng hàng để xem một cuốn sách; kế đến, một người đàn ông mặc áo sơ mi trắng được phỏng vấn cạnh chậu cây xanh; cuối cùng, máy quay cận cảnh nhiều chồng sách giáo khoa trên kệ và bàn.",
+      "ground_truth": {
+        "video_id": "L22_V006",
+        "events": [
+          {
+            "event_id": "E1",
+            "start_frame": 32918,
+            "end_frame": 32969
+          },
+          {
+            "event_id": "E2",
+            "start_frame": 32970,
+            "end_frame": 33163
+          },
+          {
+            "event_id": "E3",
+            "start_frame": 33164,
+            "end_frame": 33255
+          },
+          {
+            "event_id": "E4",
+            "start_frame": 34006,
+            "end_frame": 34229
+          },
+          {
+            "event_id": "E5",
+            "start_frame": 34230,
+            "end_frame": 34475
+          }
+        ]
+      }
+    },
+    {
+      "query_id": "test-kis-10",
+      "task_type": "kis",
+      "query_text": "Trong một phóng sự, một người đàn ông đội mũ và đeo kính dùng máy đánh chữ cổ điển để tạo các bức tranh chân dung và phong cảnh từ hàng nghìn ký tự, xen kẽ cảnh anh gõ phím, hình vẽ cuộn trên máy và các tác phẩm hoàn thiện.",
+      "ground_truth": {
+        "video_id": "L22_V001",
+        "start_frame": 14158,
+        "end_frame": 15797
+      }
+    },
+    {
+      "query_id": "test-kis-11",
+      "task_type": "kis",
+      "query_text": "Cảnh quay từ trên cao (góc nhìn flycam nhìn thẳng xuống) một nhóm 4 vận động viên đua xe đạp nối đuôi nhau chạy trên đường nhựa đi ngang qua một cây hoa giấy màu tím nở rộ ở lề đường bên phải.",
+      "ground_truth": {
+        "video_id": "L23_V017",
+        "start_frame": 347,
+        "end_frame": 410
       }
     }
   ]

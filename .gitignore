@@ -21,6 +21,7 @@ raw/**
 data/**
 !data/.gitkeep
 !data/**/.gitkeep
+!data/benchmark/**
 
 indexes/**
 !indexes/.gitkeep
