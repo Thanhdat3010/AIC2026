@@ -87,17 +87,17 @@ class VisualFeatureExtractor:
     - Tự động chuẩn hóa L2 (L2 Normalize)
     - Xuất float16 tiết kiệm bộ nhớ
     """
-    def __init__(self, model_name="google/siglip-so400m-patch14-384", device="cuda"):
+    def __init__(self, model_name="google/siglip2-so400m-patch14-384", device="cuda"):
         self.device = device if torch.cuda.is_available() and device == "cuda" else "cpu"
         self.model_name = model_name
         
-        print(f"=== Khởi tạo Mô hình Thị giác: {model_name} trên {self.device} ===")
+        print(f"=== Khởi tạo Mô hình Thị giác SOTA SigLIP 2: {model_name} trên {self.device} ===")
         try:
-            from transformers import AutoImageProcessor, AutoModel
-            self.processor = AutoImageProcessor.from_pretrained(model_name)
-        except Exception:
             from transformers import AutoProcessor, AutoModel
             self.processor = AutoProcessor.from_pretrained(model_name)
+        except Exception:
+            from transformers import AutoImageProcessor, AutoModel
+            self.processor = AutoImageProcessor.from_pretrained(model_name)
             
         self.model = AutoModel.from_pretrained(model_name).to(self.device).eval()
         
@@ -218,8 +218,8 @@ def main():
                         help="Bắt đầu chạy từ file cụ thể (ví dụ: --start_from Keyframes_L25.zip)")
     parser.add_argument("--keyframes_dir", type=str, default="raw/batch_1/Keyframes",
                         help="Thư mục keyframes ZIP local")
-    parser.add_argument("--model_name", type=str, default="google/siglip-so400m-patch14-384",
-                        help="Mô hình thị giác HuggingFace SOTA")
+    parser.add_argument("--model_name", type=str, default="google/siglip2-so400m-patch14-384",
+                        help="Mô hình thị giác HuggingFace SOTA (Mặc định: SigLIP 2)")
     parser.add_argument("--output_path", type=str, default="data/batch_1/processed/siglip_features.npy",
                         help="Nơi lưu ma trận vector hoàn chỉnh")
     parser.add_argument("--batch_size", type=int, default=64,
