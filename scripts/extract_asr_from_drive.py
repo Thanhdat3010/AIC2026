@@ -265,18 +265,25 @@ def main():
 
     actual_model_id = get_actual_model_id(args.model_size)
 
-    print(f"=== [1/2] Khởi tạo Mô Hình VinAI PhoWhisper: {actual_model_id} trên GPU {args.device} ({args.compute_type}) ===")
     try:
         from faster_whisper import WhisperModel, BatchedInferencePipeline
     except ImportError:
         print("[ERROR] faster-whisper chưa được cài đặt! Hãy chạy: pip install faster-whisper")
         sys.exit(1)
 
-    model = WhisperModel(actual_model_id, device=args.device, compute_type=args.compute_type)
+    try:
+        model = WhisperModel(actual_model_id, device=args.device, compute_type=args.compute_type)
+    except Exception as e_init:
+        print(f"[WARNING] Khởi tạo với compute_type='{args.compute_type}' lỗi ({e_init}) -> Tự động fallback sang compute_type='default'...")
+        try:
+            model = WhisperModel(actual_model_id, device=args.device, compute_type="default")
+        except Exception:
+            print(f"[WARNING] GPU {args.device} không khả dụng -> Tự động fallback sang CPU ('int8')...")
+            model = WhisperModel(actual_model_id, device="cpu", compute_type="int8")
     
-    print(f"=== [2/2] Bật BatchedInferencePipeline (Batch Size = {args.batch_size}) để tăng tốc 3-4x ===")
+    print(f"=== [2/2] Bật BatchedInferencePipeline (Batch Size = {args.batch_size}) để tăng tốc ===")
     batched_pipeline = BatchedInferencePipeline(model=model)
-    print("✅ Hệ thống VinAI PhoWhisper Batch Pipeline đã sẵn sàng trên GPU A100!")
+    print("✅ Hệ thống VinAI PhoWhisper Batch Pipeline đã sẵn sàng!")
 
     out_file = Path(args.output_path)
     out_file.parent.mkdir(parents=True, exist_ok=True)
