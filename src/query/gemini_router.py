@@ -17,65 +17,46 @@ if hasattr(sys.stderr, 'reconfigure'):
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / ".env")
 
-class APIKeyPool:
+class GeminiKeyPool:
     """
-    Hồ chứa và quản lý đa API Keys (Hỗ trợ cả Google Gemini 'AIza...' và Groq 'gsk_...'):
-    - Tự động nhận diện loại Key (Gemini hay Groq).
+    Hồ chứa và quản lý đa Google Gemini API Keys:
     - Random / Round-robin đảo key giữa các request để phân tải.
     - Tự động chuyển key khác nếu 1 key bị Rate Limit (HTTP 429).
     """
     def __init__(self):
         self.gemini_keys: list[str] = []
-        self.groq_keys: list[str] = []
         
-        # 1. Đọc từ GEMINI_API_KEYS / GROQ_API_KEYS (dạng phẩy)
+        # 1. Đọc từ GEMINI_API_KEYS (dạng phẩy)
         raw_gemini = os.environ.get("GEMINI_API_KEYS", "")
         if raw_gemini:
             for k in raw_gemini.split(","):
                 k_clean = k.strip("\"' \t\r\n")
                 if k_clean and not k_clean.startswith("YOUR_"):
-                    if k_clean.startswith("gsk_"):
-                        self.groq_keys.append(k_clean)
-                    else:
-                        self.gemini_keys.append(k_clean)
+                    self.gemini_keys.append(k_clean)
 
-        # 2. Đọc từ GEMINI_API_KEY_1..9 / GROQ_API_KEY_1..9
+        # 2. Đọc từ GEMINI_API_KEY_1..9
         for i in range(1, 10):
             k = os.environ.get(f"GEMINI_API_KEY_{i}", "").strip("\"' \t\r\n")
-            if k and not k.startswith("YOUR_"):
-                if k.startswith("gsk_") and k not in self.groq_keys:
-                    self.groq_keys.append(k)
-                elif not k.startswith("gsk_") and k not in self.gemini_keys:
-                    self.gemini_keys.append(k)
+            if k and not k.startswith("YOUR_") and k not in self.gemini_keys:
+                self.gemini_keys.append(k)
 
-            k_g = os.environ.get(f"GROQ_API_KEY_{i}", "").strip("\"' \t\r\n")
-            if k_g and not k_g.startswith("YOUR_") and k_g not in self.groq_keys:
-                self.groq_keys.append(k_g)
-
-        # 3. Đọc từ GEMINI_API_KEY / GROQ_API_KEY đơn lẻ
+        # 3. Đọc từ GEMINI_API_KEY đơn lẻ
         single_gem = os.environ.get("GEMINI_API_KEY", "").strip("\"' \t\r\n")
-        if single_gem and not single_gem.startswith("YOUR_"):
-            if single_gem.startswith("gsk_") and single_gem not in self.groq_keys:
-                self.groq_keys.append(single_gem)
-            elif not single_gem.startswith("gsk_") and single_gem not in self.gemini_keys:
-                self.gemini_keys.append(single_gem)
+        if single_gem and not single_gem.startswith("YOUR_") and single_gem not in self.gemini_keys:
+            self.gemini_keys.append(single_gem)
 
-        single_groq = os.environ.get("GROQ_API_KEY", "").strip("\"' \t\r\n")
-        if single_groq and not single_groq.startswith("YOUR_") and single_groq not in self.groq_keys:
-            self.groq_keys.append(single_groq)
+        print(f"🔑 [GEMINI KEY POOL] Đã nạp thành công {len(self.gemini_keys)} Google Gemini API Keys hoạt động!", flush=True)
 
-        print(f"🔑 [API KEY POOL] Đã nạp {len(self.gemini_keys)} Gemini Keys & {len(self.groq_keys)} Groq Keys!", flush=True)
-
-class UnifiedLLMRouter:
+class GeminiQueryRouter:
     """
-    Bộ não điều hướng và làm giàu truy vấn sử dụng Gemini 3.5 Flash Lite (hoặc Groq):
+    Bộ não điều hướng và làm giàu truy vấn thuần Google Gemini 3.5 Flash Lite:
     - Multi-Prompt Ensembling: Sinh 3 câu tiếng Anh với 3 góc nhìn thị giác độc lập.
     - OCR / ASR Keyword Extraction: Bóc tách từ khóa biển báo và lời thoại.
     - Dynamic Weighting: Cân đối trọng số tự động giữa Visual, OCR, và ASR.
     """
     def __init__(self, model_name: str = "gemini-3.5-flash-lite"):
         self.model_name = model_name
-        self.key_pool = APIKeyPool()
+        self.key_pool = GeminiKeyPool()
 
     def _call_gemini(self, prompt: str) -> Optional[str]:
         if not self.key_pool.gemini_keys:
@@ -99,31 +80,11 @@ class UnifiedLLMRouter:
                 if response and response.text:
                     return response.text.strip()
             except Exception as e:
-                print(f"⚠️ Gemini Key (...{key[-6:]}) error: {e}, thử key kế tiếp...", flush=True)
-                time.sleep(0.3)
-        return None
-
-    def _call_groq(self, prompt: str) -> Optional[str]:
-        if not self.key_pool.groq_keys:
-            return None
-        keys = list(self.key_pool.groq_keys)
-        random.shuffle(keys)
-        for key in keys:
-            try:
-                from groq import Groq
-                client = Groq(api_key=key)
-                chat_completion = client.chat.completions.create(
-                    messages=[
-                        {"role": "system", "content": "You are a video retrieval query analyst. Respond with ONLY valid JSON."},
-                        {"role": "user", "content": prompt}
-                    ],
-                    model="qwen/qwen3.6-27b",
-                    temperature=0.2,
-                    response_format={"type": "json_object"}
-                )
-                return chat_completion.choices[0].message.content
-            except Exception as e:
-                print(f"⚠️ Groq Key (...{key[-6:]}) error: {e}, thử key kế tiếp...", flush=True)
+                err_str = str(e).lower()
+                if "429" in err_str or "quota" in err_str:
+                    print(f"⚠️ Gemini Key (...{key[-6:]}) bị chạm hạn ngạch, chuyển key khác...", flush=True)
+                else:
+                    print(f"⚠️ Gemini Key (...{key[-6:]}) error: {e}, thử key kế tiếp...", flush=True)
                 time.sleep(0.3)
         return None
 
@@ -149,10 +110,7 @@ Respond with ONLY a JSON object with this EXACT structure:
   "temporal_hint": "early / middle / late / any"
 }}
 """
-        # Ưu tiên Gemini 3.5 Flash Lite
         res_str = self._call_gemini(prompt)
-        if not res_str:
-            res_str = self._call_groq(prompt)
 
         if res_str:
             try:
@@ -174,7 +132,7 @@ Respond with ONLY a JSON object with this EXACT structure:
         }
 
 if __name__ == "__main__":
-    router = UnifiedLLMRouter()
+    router = GeminiQueryRouter()
     sample = "Trong một căn nhà, người phụ nữ dùng hai tay quấn và chỉnh tấm xà rông màu vàng cam quanh eo người đàn ông mặc áo xanh."
     print(f"\n🔎 [TEST QUERY]: {sample}")
     res = router.transform_query(sample)

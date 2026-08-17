@@ -18,7 +18,7 @@ sys.path.insert(0, str(BASE_DIR))
 from src.indexing.faiss_indexer import load_faiss_index
 from src.indexing.bm25_indexer import BM25MultiIndexer
 from src.query.text_encoder import UnifiedTextEncoder
-from src.query.gemini_router import UnifiedLLMRouter
+from src.query.gemini_router import GeminiQueryRouter
 
 class HybridRetrievalEngine:
     """
@@ -36,7 +36,7 @@ class HybridRetrievalEngine:
         self.text_encoder = UnifiedTextEncoder(engine=engine)
         self.faiss_index, self.df_frames = load_faiss_index(engine=engine, batch=batch)
         self.bm25_indexer = BM25MultiIndexer(batch=batch)
-        self.llm_router = UnifiedLLMRouter()
+        self.llm_router = GeminiQueryRouter()
         print(f"✅ Hybrid Retrieval Engine [{engine.upper()}] đã sẵn sàng!", flush=True)
 
     def search(
