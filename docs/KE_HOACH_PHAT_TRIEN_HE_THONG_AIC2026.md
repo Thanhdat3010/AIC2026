@@ -64,8 +64,8 @@ Xuất Top 100 Frames                 Two-Stage Context Injection & Generation
 ### 🔹 Bước 4: Generation / Reasoning (Sinh Kết Quả & Trả Lời Câu Hỏi)
 * **Đối với Task 1 (Textual KIS):** Lấy Top 100 khung hình sau khi Re-ranking xuất ra file CSV nộp bài.
 * **Đối với Task 2 (Visual QA):**
-  - *Giai đoạn 1 (Text-only RAG):* Nhồi toàn bộ ngữ cảnh OCR + ASR của đoạn video tìm được vào Gemini LLM để trả lời câu hỏi trực tiếp (siêu nhanh trong 0.2s).
-  - *Giai đoạn 2 (Multimodal VLM Fallback):* Nếu câu hỏi đòi hỏi nhìn màu sắc, đếm người $\rightarrow$ bốc 3-5 frame hình gửi lên Gemini 1.5 Pro Vision để "xem ảnh" và sinh câu trả lời.
+  - *Giai đoạn 1 (Text-only RAG):* Nhồi toàn bộ ngữ cảnh OCR + ASR của đoạn video tìm được vào Gemini 3.5 Flash Lite để trả lời câu hỏi trực tiếp (siêu nhanh trong 0.2s).
+  - *Giai đoạn 2 (Multimodal VLM Fallback):* Nếu câu hỏi đòi hỏi nhìn màu sắc, đếm người $\rightarrow$ bốc 3-5 frame hình gửi lên Gemini 3.5 Flash Lite (Vision) để "xem ảnh" và sinh câu trả lời.
 * **Đối với Task 3 (TRAKE):** Dùng thuật toán **Monotonic Alignment** ép chuỗi sự kiện phải xuất hiện theo đúng thứ tự thời gian tăng dần $Frame_1 < Frame_2 < \dots < Frame_n$.
 
 ---
@@ -75,12 +75,12 @@ Xuất Top 100 Frames                 Two-Stage Context Injection & Generation
 | Thuật ngữ RAG Chuẩn | Nhiệm vụ trong Hệ thống AIC2026 | Công nghệ / Model áp dụng |
 | :--- | :--- | :--- |
 | **Multimodal Chunking** | Băm nhỏ Video thành Frame + Lời thoại + Chữ | Keyframes + VietOCR + PhoWhisper |
-| **Vector Database (Dense)** | Lưu trữ và tìm kiếm vector đặc trưng hình ảnh | **FAISS GPU (IndexFlatIP)** |
+| **Vector Database (Dense)** | Lưu trữ và tìm kiếm vector đặc trưng hình ảnh | **FAISS (IndexFlatIP - 1152d)** |
 | **Keyword Index (Sparse)** | Đánh chỉ mục tìm kiếm chữ và giọng nói | **BM25 (Rank-BM25)** |
-| **Multi-Query / Expansion** | Phân rã câu hỏi, dịch ngữ cảnh & tạo biến thể | **Gemini 1.5 Flash / Pro API** |
-| **Hybrid Search** | Tìm kiếm đồng thời Hình + Chữ + Tiếng | **FAISS + BM25 Multi-Index** |
+| **Multi-Query / Expansion** | Phân rã câu hỏi, dịch ngữ cảnh & tạo biến thể | **Gemini 3.5 Flash Lite API (15 RPM, 500 RPD)** |
+| **Hybrid Search** | Tìm kiếm đồng thời Hình + Chữ + Tiếng | **FAISS (SigLIP 2) + BM25 Multi-Index** |
 | **Re-Ranking & Late Fusion** | Trộn điểm và gom cụm thời gian video | **RRF + Temporal Sliding Window** |
-| **Augmented Generation** | Trả lời câu hỏi Q&A và liên kết sự kiện TRAKE | **Two-Stage Gemini LLM + VLM** |
+| **Augmented Generation** | Trả lời câu hỏi Q&A và liên kết sự kiện TRAKE | **Two-Stage Gemini 3.5 Flash Lite LLM + VLM** |
 
 ---
 
