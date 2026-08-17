@@ -159,15 +159,31 @@ def process_video_zip(zpath, batched_pipeline, beam_size, batch_size, video_fps_
                 video_records = []
                 try:
                     # 2. Xử lý Batch Inference song song trên GPU
-                    segments, info = batched_pipeline.transcribe(
-                        tmp_path,
-                        language="vi",
-                        batch_size=batch_size,
-                        beam_size=beam_size,
-                        vad_filter=True,
-                        vad_parameters=dict(min_silence_duration_ms=500),
-                        condition_on_previous_text=True
-                    )
+                    try:
+                        segments, info = batched_pipeline.transcribe(
+                            tmp_path,
+                            language="vi",
+                            batch_size=batch_size,
+                            beam_size=beam_size,
+                            vad_filter=True,
+                            vad_parameters=dict(min_silence_duration_ms=500),
+                            condition_on_previous_text=True
+                        )
+                    except Exception as e_batch:
+                        if "out of memory" in str(e_batch).lower() or "cudaerror" in str(e_batch).lower():
+                            print(f"\n[INFO] Video {video_id} dài ngốn VRAM -> Tự động Fallback sang Sequential Inference an toàn...")
+                            if torch.cuda.is_available():
+                                torch.cuda.empty_cache()
+                            segments, info = batched_pipeline.model.transcribe(
+                                tmp_path,
+                                language="vi",
+                                beam_size=beam_size,
+                                vad_filter=True,
+                                vad_parameters=dict(min_silence_duration_ms=500),
+                                condition_on_previous_text=True
+                            )
+                        else:
+                            raise e_batch
                     
                     for seg in segments:
                         text = seg.text.strip()
