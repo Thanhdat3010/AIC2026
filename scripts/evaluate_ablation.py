@@ -121,141 +121,134 @@ class DenseBaselinePipeline:
             })
         return results, latency_ms
 
-def run_ablation_experiment(config_id: int, pipeline_cache: dict = None) -> dict:
+def run_ablation_experiment(config_code: str, pipeline_cache: dict = None) -> dict:
     gt_file = BASE_DIR / "data" / "benchmark" / "ground_truth.json"
     with open(gt_file, "r", encoding="utf-8") as f:
         gt_data = json.load(f)
 
     test_cases = gt_data["test_cases"]
     print("\n" + "=" * 95, flush=True)
-    print(f"🧪 CHẠY THỬ NGHIỆM ABLATION: CẤU HÌNH {config_id}", flush=True)
+    print(f"🧪 CHẠY THỬ NGHIỆM ABLATION: CẤU HÌNH {config_code}", flush=True)
     print("=" * 95, flush=True)
 
-    use_hybrid = False
+    use_hybrid = True
     use_multi_prompt = False
     use_ocr = False
     use_asr = False
-    use_meta = False
     use_dyn_weights = False
     use_temporal = False
     use_soft = False
-    use_gemini_auto = False
 
-    if config_id == 0:
-        config_name = "Baseline 0: OpenAI CLIP ViT-B/32 (512d) + Dịch cơ bản"
+    if config_code == "0":
+        config_name = "Baseline 0: BTC CLIP (512d) + Dịch từ điển cơ bản"
+        use_hybrid = False
         if pipeline_cache and "clip_dense" in pipeline_cache:
             pipeline = pipeline_cache["clip_dense"]
         else:
             pipeline = DenseBaselinePipeline(engine="clip")
             if pipeline_cache is not None:
                 pipeline_cache["clip_dense"] = pipeline
-    elif config_id == 1:
-        config_name = "Baseline 1: Google SigLIP 2 SO400M (1152d) + Dịch cơ bản"
+    elif config_code == "1":
+        config_name = "Baseline 1: Google SigLIP 2 (1152d) + Dịch từ điển cơ bản"
+        use_hybrid = False
         if pipeline_cache and "siglip_dense" in pipeline_cache:
             pipeline = pipeline_cache["siglip_dense"]
         else:
             pipeline = DenseBaselinePipeline(engine="siglip2")
             if pipeline_cache is not None:
                 pipeline_cache["siglip_dense"] = pipeline
-    elif config_id == 2:
-        config_name = "Cấu hình 2: SigLIP 2 + BM25 OCR (Chữ trên khung hình)"
+    elif config_code == "1b":
+        config_name = "Cấu hình 1b: SigLIP 2 + Single Gemini 3.5 Flash Lite Translation (1 câu dịch chuẩn)"
         use_hybrid = True
-        use_ocr = True
+        use_multi_prompt = False
         if pipeline_cache and "hybrid_siglip" in pipeline_cache:
             pipeline = pipeline_cache["hybrid_siglip"]
         else:
             pipeline = HybridRetrievalEngine(engine="siglip2")
             if pipeline_cache is not None:
                 pipeline_cache["hybrid_siglip"] = pipeline
-    elif config_id == 3:
-        config_name = "Cấu hình 3: SigLIP 2 + BM25 ASR (Lời thoại phát thanh)"
-        use_hybrid = True
-        use_asr = True
-        if pipeline_cache and "hybrid_siglip" in pipeline_cache:
-            pipeline = pipeline_cache["hybrid_siglip"]
-        else:
-            pipeline = HybridRetrievalEngine(engine="siglip2")
-            if pipeline_cache is not None:
-                pipeline_cache["hybrid_siglip"] = pipeline
-    elif config_id == 4:
-        config_name = "Cấu hình 4: SigLIP 2 + RRF Hybrid Fusion (Dense + OCR + ASR)"
-        use_hybrid = True
-        use_ocr = True
-        use_asr = True
-        if pipeline_cache and "hybrid_siglip" in pipeline_cache:
-            pipeline = pipeline_cache["hybrid_siglip"]
-        else:
-            pipeline = HybridRetrievalEngine(engine="siglip2")
-            if pipeline_cache is not None:
-                pipeline_cache["hybrid_siglip"] = pipeline
-    elif config_id == 5:
-        config_name = "Cấu hình 5: SigLIP 2 + Temporal Scene Window (Smoothing & Scene NMS +-3s)"
-        use_hybrid = True
-        use_temporal = True
-        if pipeline_cache and "hybrid_siglip" in pipeline_cache:
-            pipeline = pipeline_cache["hybrid_siglip"]
-        else:
-            pipeline = HybridRetrievalEngine(engine="siglip2")
-            if pipeline_cache is not None:
-                pipeline_cache["hybrid_siglip"] = pipeline
-    elif config_id == 6:
-        config_name = "Cấu hình 6: SigLIP 2 + Multi-Prompt Ensembling (3 Prompts Gemini 3.5 Flash Lite)"
+    elif config_code == "2":
+        config_name = "Cấu hình 2: SigLIP 2 + Multi-Prompt Ensembling (3 Prompts từ Gemini 3.5 Flash Lite)"
         use_hybrid = True
         use_multi_prompt = True
-        use_gemini_auto = True
         if pipeline_cache and "hybrid_siglip" in pipeline_cache:
             pipeline = pipeline_cache["hybrid_siglip"]
         else:
             pipeline = HybridRetrievalEngine(engine="siglip2")
             if pipeline_cache is not None:
                 pipeline_cache["hybrid_siglip"] = pipeline
-    elif config_id == 7:
-        config_name = "Cấu hình 7: SigLIP 2 + Dynamic Weighting (Gemini 3.5 Flash Lite Full Hybrid)"
+    elif config_code == "3":
+        config_name = "Cấu hình 3: SigLIP 2 + Multi-Prompt + BM25 OCR (Chữ bóc tách từ Gemini)"
+        use_hybrid = True
+        use_multi_prompt = True
+        use_ocr = True
+        if pipeline_cache and "hybrid_siglip" in pipeline_cache:
+            pipeline = pipeline_cache["hybrid_siglip"]
+        else:
+            pipeline = HybridRetrievalEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["hybrid_siglip"] = pipeline
+    elif config_code == "4":
+        config_name = "Cấu hình 4: SigLIP 2 + Multi-Prompt + BM25 ASR (Lời thoại bóc tách từ Gemini)"
+        use_hybrid = True
+        use_multi_prompt = True
+        use_asr = True
+        if pipeline_cache and "hybrid_siglip" in pipeline_cache:
+            pipeline = pipeline_cache["hybrid_siglip"]
+        else:
+            pipeline = HybridRetrievalEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["hybrid_siglip"] = pipeline
+    elif config_code == "5":
+        config_name = "Cấu hình 5: SigLIP 2 + Multi-Prompt + OCR + ASR + Dynamic Weights (Full RRF)"
         use_hybrid = True
         use_multi_prompt = True
         use_ocr = True
         use_asr = True
         use_dyn_weights = True
-        use_gemini_auto = True
         if pipeline_cache and "hybrid_siglip" in pipeline_cache:
             pipeline = pipeline_cache["hybrid_siglip"]
         else:
             pipeline = HybridRetrievalEngine(engine="siglip2")
             if pipeline_cache is not None:
                 pipeline_cache["hybrid_siglip"] = pipeline
-    elif config_id == 8:
-        config_name = "Cấu hình 8: SigLIP 2 + Soft Position & Temporal Filter"
-        use_hybrid = True
-        use_multi_prompt = True
-        use_soft = True
-        use_gemini_auto = True
-        if pipeline_cache and "hybrid_siglip" in pipeline_cache:
-            pipeline = pipeline_cache["hybrid_siglip"]
-        else:
-            pipeline = HybridRetrievalEngine(engine="siglip2")
-            if pipeline_cache is not None:
-                pipeline_cache["hybrid_siglip"] = pipeline
-    elif config_id == 9:
-        config_name = "Cấu hình 9: SigLIP 2 + BM25 Video Metadata (YouTube Title/Desc)"
-        use_hybrid = True
-        use_meta = True
-        if pipeline_cache and "hybrid_siglip" in pipeline_cache:
-            pipeline = pipeline_cache["hybrid_siglip"]
-        else:
-            pipeline = HybridRetrievalEngine(engine="siglip2")
-            if pipeline_cache is not None:
-                pipeline_cache["hybrid_siglip"] = pipeline
-    elif config_id == 10:
-        config_name = "Cấu hình 10: 🏆 FULL SOTA PIPELINE (SigLIP 2 + Gemini 3.5 Flash Lite + RRF + Temporal NMS)"
+    elif config_code == "6":
+        config_name = "Cấu hình 6: SigLIP 2 + Multi-Prompt + Full RRF + Temporal Context Smoothing"
         use_hybrid = True
         use_multi_prompt = True
         use_ocr = True
         use_asr = True
-        use_meta = True
+        use_dyn_weights = True
+        use_temporal = True
+        if pipeline_cache and "hybrid_siglip" in pipeline_cache:
+            pipeline = pipeline_cache["hybrid_siglip"]
+        else:
+            pipeline = HybridRetrievalEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["hybrid_siglip"] = pipeline
+    elif config_code == "7":
+        config_name = "Cấu hình 7: SigLIP 2 + Multi-Prompt + Full RRF + Soft Temporal Filter"
+        use_hybrid = True
+        use_multi_prompt = True
+        use_ocr = True
+        use_asr = True
+        use_dyn_weights = True
+        use_soft = True
+        if pipeline_cache and "hybrid_siglip" in pipeline_cache:
+            pipeline = pipeline_cache["hybrid_siglip"]
+        else:
+            pipeline = HybridRetrievalEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["hybrid_siglip"] = pipeline
+    elif config_code == "8":
+        config_name = "Cấu hình 8: 🏆 FULL SOTA PIPELINE (SigLIP 2 + Gemini 3.5 Flash Lite Multi-Prompt + OCR + ASR + Smoothing + Filter)"
+        use_hybrid = True
+        use_multi_prompt = True
+        use_ocr = True
+        use_asr = True
         use_dyn_weights = True
         use_temporal = True
         use_soft = True
-        use_gemini_auto = True
         if pipeline_cache and "hybrid_siglip" in pipeline_cache:
             pipeline = pipeline_cache["hybrid_siglip"]
         else:
@@ -263,7 +256,7 @@ def run_ablation_experiment(config_id: int, pipeline_cache: dict = None) -> dict
             if pipeline_cache is not None:
                 pipeline_cache["hybrid_siglip"] = pipeline
     else:
-        print(f"⚠️ Cấu hình {config_id} chưa được kích hoạt!")
+        print(f"⚠️ Cấu hình {config_code} chưa được kích hoạt!")
         return None
 
     print(f"[*] Đang đánh giá trên {len(test_cases)} test cases...\n", flush=True)
@@ -282,31 +275,16 @@ def run_ablation_experiment(config_id: int, pipeline_cache: dict = None) -> dict
         if not use_hybrid:
             preds, latency = pipeline.search(en_query, top_k=100)
         else:
-            if use_gemini_auto:
-                preds, qinfo, latency = pipeline.search(
-                    raw_query=qtext,
-                    top_k=100,
-                    use_multi_prompt=use_multi_prompt,
-                    use_ocr=use_ocr,
-                    use_asr=use_asr,
-                    use_meta=use_meta,
-                    use_dynamic_weights=use_dyn_weights,
-                    use_temporal_smoothing=use_temporal,
-                    use_soft_filter=use_soft
-                )
-            else:
-                preds, qinfo, latency = pipeline.search(
-                    raw_query=qtext,
-                    top_k=100,
-                    use_multi_prompt=False,
-                    use_ocr=use_ocr,
-                    use_asr=use_asr,
-                    use_meta=use_meta,
-                    use_dynamic_weights=False,
-                    use_temporal_smoothing=use_temporal,
-                    use_soft_filter=use_soft,
-                    custom_en_query=en_query
-                )
+            preds, qinfo, latency = pipeline.search(
+                raw_query=qtext,
+                top_k=100,
+                use_multi_prompt=use_multi_prompt,
+                use_ocr=use_ocr,
+                use_asr=use_asr,
+                use_dynamic_weights=use_dyn_weights,
+                use_temporal_smoothing=use_temporal,
+                use_soft_filter=use_soft
+            )
 
         latencies.append(latency)
         eval_res = evaluate_retrieval_ranking(preds, gt, ttype)
@@ -347,7 +325,7 @@ def run_ablation_experiment(config_id: int, pipeline_cache: dict = None) -> dict
     overall_final = np.mean([r for scores in task_scores.values() for r in scores])
     avg_latency = np.mean(latencies)
 
-    print(f"📊 BẢNG TỔNG KẾT CẤU HÌNH {config_id}: {config_name}")
+    print(f"📊 BẢNG TỔNG KẾT CẤU HÌNH {config_code}: {config_name}")
     print(f"   • KIS Score (6 queries)   : {kis_avg:.4f}")
     print(f"   • QA Score (2 queries)    : {qa_avg:.4f}")
     print(f"   • TRAKE Score (2 queries) : {trake_avg:.4f}")
@@ -355,7 +333,7 @@ def run_ablation_experiment(config_id: int, pipeline_cache: dict = None) -> dict
     print(f"   • ⚡ Average Query Latency: {avg_latency:.2f} ms")
     print("=" * 95 + "\n")
     return {
-        "config_id": config_id,
+        "config_code": config_code,
         "config_name": config_name,
         "kis_score": kis_avg,
         "qa_score": qa_avg,
@@ -366,9 +344,6 @@ def run_ablation_experiment(config_id: int, pipeline_cache: dict = None) -> dict
     }
 
 def save_ablation_markdown_report(results: list[dict], output_path: Path):
-    """
-    Lưu toàn bộ báo cáo kết quả Ablation Study chi tiết ra file Markdown.
-    """
     timestamp_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     base_score = results[0]["final_score"] if results else 0.0
 
@@ -386,13 +361,13 @@ def save_ablation_markdown_report(results: list[dict], output_path: Path):
     for r in results:
         gain = r["final_score"] - base_score
         gain_str = f"**+{gain*100:+.2f}%**" if gain > 0 else (f"{gain*100:+.2f}%" if gain < 0 else "Baseline Mốc")
-        lines.append(f"| **{r['config_id']}** | {r['config_name']} | {r['kis_score']:.4f} | {r['qa_score']:.4f} | {r['trake_score']:.4f} | **{r['final_score']:.4f}** | {r['latency_ms']:.1f}ms | {gain_str} |")
+        lines.append(f"| **{r['config_code']}** | {r['config_name']} | {r['kis_score']:.4f} | {r['qa_score']:.4f} | {r['trake_score']:.4f} | **{r['final_score']:.4f}** | {r['latency_ms']:.1f}ms | {gain_str} |")
 
     lines.append("\n---\n")
     lines.append("## 🔍 2. CHI TIẾT KẾT QUẢ TỪNG CẤU HÌNH THÍ NGHIỆM\n")
 
     for r in results:
-        lines.append(f"### 🧪 Cấu hình {r['config_id']}: {r['config_name']}\n")
+        lines.append(f"### 🧪 Cấu hình {r['config_code']}: {r['config_name']}\n")
         lines.append(f"- **KIS Score:** `{r['kis_score']:.4f}` | **QA Score:** `{r['qa_score']:.4f}` | **TRAKE Score:** `{r['trake_score']:.4f}`")
         lines.append(f"- **Final Score:** `{r['final_score']:.4f}` | **Độ trễ trung bình:** `{r['latency_ms']:.1f} ms`\n")
 
@@ -409,18 +384,18 @@ def save_ablation_markdown_report(results: list[dict], output_path: Path):
 
 def main():
     parser = argparse.ArgumentParser(description="Chạy Ablation Benchmark trên tập 11 ground truth queries")
-    parser.add_argument("--config", type=int, default=None, help="ID cấu hình (0..10)")
-    parser.add_argument("--all_configs", action="store_true", help="Chạy toàn bộ 10 cấu hình để so sánh ma trận")
+    parser.add_argument("--config", type=str, default=None, help="Mã cấu hình ('0', '1', '1b', '2', '3', '4', '5', '6', '7', '8')")
+    parser.add_argument("--all_configs", action="store_true", help="Chạy toàn bộ các cấu hình để so sánh ma trận")
     args = parser.parse_args()
 
     pipeline_cache = {}
     md_output_path = BASE_DIR / "docs" / "ABLATION_STUDY_RESULTS.md"
 
-    configs_to_test = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    configs_to_test = ["0", "1", "1b", "2", "3", "4", "5", "6", "7", "8"]
     if args.config is not None:
         configs_to_test = [args.config]
 
-    print("\n🚀 BẮT ĐẦU CHẠY THỬ NGHIỆM ABLATION STUDY...")
+    print("\n🚀 BẮT ĐẦU CHẠY THỬ NGHIỆM ABLATION STUDY (GEMINI-POWERED PIPELINE)...")
     results = []
     for cid in configs_to_test:
         res = run_ablation_experiment(cid, pipeline_cache=pipeline_cache)
@@ -438,7 +413,7 @@ def main():
     for r in results:
         gain = r["final_score"] - base_score
         gain_str = f"+{gain*100:+.2f}%" if gain >= 0 else f"{gain*100:+.2f}%"
-        print(f"| {r['config_id']} | {r['config_name'][:40]}... | {r['kis_score']:.4f} | {r['qa_score']:.4f} | {r['trake_score']:.4f} | **{r['final_score']:.4f}** | {r['latency_ms']:.1f}ms | {gain_str} |")
+        print(f"| {r['config_code']} | {r['config_name'][:40]}... | {r['kis_score']:.4f} | {r['qa_score']:.4f} | {r['trake_score']:.4f} | **{r['final_score']:.4f}** | {r['latency_ms']:.1f}ms | {gain_str} |")
     print("🔥" * 45 + "\n")
 
 if __name__ == "__main__":

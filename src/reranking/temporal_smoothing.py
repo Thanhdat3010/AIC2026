@@ -3,20 +3,18 @@ from collections import defaultdict
 
 class TemporalSceneSmoother:
     """
-    Bộ làm mịn và gom cụm không gian - thời gian (Temporal Smoothing & Scene NMS):
-    1. Gaussian Temporal Smoothing: Tích lũy điểm cho các khung hình lân cận trong cùng phân cảnh (+-3s).
-    2. Scene Non-Maximum Suppression (NMS): Loại bỏ các frame trùng lặp liên tiếp trong cùng 1 phân cảnh 
-       để đa dạng hóa Top 100 nộp bài, giúp tăng mạnh xác suất phủ trúng đáp án ở các mốc R@5, R@20, R@50, R@100.
+    Bộ làm mịn theo dòng thời gian video (Temporal Gaussian Context Smoothing):
+    - Tích lũy điểm cho các khung hình thuộc cùng phân cảnh lân cận (+-3 giây).
+    - Bảo toàn toàn bộ các khung hình trong phân cảnh (không dùng hard-suppression làm mất frame đáp án).
     """
-    def __init__(self, fps: float = 25.0, window_sec: float = 3.0, sigma_sec: float = 1.5, nms_window_sec: float = 2.0):
+    def __init__(self, fps: float = 25.0, window_sec: float = 3.0, sigma_sec: float = 1.5):
         self.fps = fps
         self.window_frames = int(fps * window_sec)
         self.sigma_frames = fps * sigma_sec
-        self.nms_window_frames = int(fps * nms_window_sec)
 
-    def smooth_and_rerank(self, candidates: list[dict], top_k: int = 100, alpha: float = 0.4) -> list[dict]:
+    def smooth_and_rerank(self, candidates: list[dict], top_k: int = 100, alpha: float = 0.3) -> list[dict]:
         """
-        Làm mịn điểm theo dòng thời gian video và áp dụng NMS.
+        Cộng hưởng điểm số theo phân cảnh lân cận và xếp hạng lại Top K.
         """
         if not candidates:
             return []
@@ -47,46 +45,15 @@ class TemporalSceneSmoother:
                 c_copy["score"] = float(new_scores[i])
                 smoothed_candidates.append(c_copy)
 
-        # 3. Sắp xếp sơ bộ theo điểm đã làm mịn
+        # 3. Sắp xếp lại danh sách theo điểm số đã làm mịn
         smoothed_candidates.sort(key=lambda x: x["score"], reverse=True)
 
-        # 4. Áp dụng Non-Maximum Suppression (Scene NMS) để chọn đại diện ưu tú nhất từng phân cảnh
-        selected = []
-        suppressed_keys = defaultdict(list)
-
-        for cand in smoothed_candidates:
-            v_id = cand["video_id"]
-            f_idx = cand["frame_idx"]
-            
-            # Kiểm tra xem frame này có quá gần một frame đã được chọn trước đó trong cùng video không
-            is_suppressed = False
-            for prev_f in suppressed_keys[v_id]:
-                if abs(f_idx - prev_f) <= self.nms_window_frames:
-                    is_suppressed = True
-                    break
-
-            if not is_suppressed:
-                selected.append(cand)
-                suppressed_keys[v_id].append(f_idx)
-                if len(selected) >= top_k:
-                    break
-
-        # Nếu danh sách sau NMS chưa đủ top_k, chèn thêm các frame còn lại
-        if len(selected) < top_k:
-            selected_set = {(c["video_id"], c["frame_idx"]) for c in selected}
-            for cand in smoothed_candidates:
-                key = (cand["video_id"], cand["frame_idx"])
-                if key not in selected_set:
-                    selected.append(cand)
-                    selected_set.add(key)
-                    if len(selected) >= top_k:
-                        break
-
-        # Cập nhật lại thứ hạng rank từ 1 đến len(selected)
-        for rank, cand in enumerate(selected, 1):
+        # 4. Cập nhật lại thứ hạng rank
+        final_top = smoothed_candidates[:top_k]
+        for rank, cand in enumerate(final_top, 1):
             cand["rank"] = rank
 
-        return selected[:top_k]
+        return final_top
 
 if __name__ == "__main__":
     smoother = TemporalSceneSmoother()
@@ -94,9 +61,8 @@ if __name__ == "__main__":
         {"rank": 1, "video_id": "L28_V009", "frame_idx": 16228, "score": 0.0131},
         {"rank": 2, "video_id": "L28_V009", "frame_idx": 16230, "score": 0.0129},
         {"rank": 3, "video_id": "L28_V009", "frame_idx": 16662, "score": 0.0127},
-        {"rank": 4, "video_id": "L28_V009", "frame_idx": 15866, "score": 0.0125},
     ]
     res = smoother.smooth_and_rerank(sample_cands, top_k=3)
-    print("Kết quả sau Temporal Smoothing & NMS:")
+    print("Kết quả sau Temporal Smoothing:")
     for r in res:
         print(f"Rank #{r['rank']} | Video: {r['video_id']} | Frame: {r['frame_idx']} | Score: {r['score']:.5f}")
