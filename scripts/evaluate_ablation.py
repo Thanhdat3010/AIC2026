@@ -15,10 +15,10 @@ if hasattr(sys.stdout, 'reconfigure'):
 if hasattr(sys.stderr, 'reconfigure'):
     sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
-# Import modules from scripts/
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from indexing.build_faiss_indexes import load_faiss_index
-from query.text_encoder import UnifiedTextEncoder
+# Import modules from src/
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from src.indexing.faiss_indexer import load_faiss_index
+from src.query.text_encoder import UnifiedTextEncoder
 
 # Simple high-quality English translation dictionary for benchmark queries (zero-shot test)
 BENCHMARK_TRANSLATIONS = {
