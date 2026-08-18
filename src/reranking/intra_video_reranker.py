@@ -223,6 +223,28 @@ class IntraVideoTemporalReranker:
         return asr_scores, ocr_scores, obj_scores
 
     # =========================================================================
+    # EERCF TIB (Text-Gated Interaction Block)
+    # =========================================================================
+    def compute_eercf_tib_score(self, query_vec: np.ndarray, video_feats: np.ndarray, tau: float = 0.05) -> tuple[float, np.ndarray]:
+        """Tính điểm video_score (TIB) và frame_scores (s_i) theo EERCF-Lite."""
+        q_flat = query_vec.flatten().astype(np.float32)
+        # 1. Tính s_i
+        s = np.dot(video_feats, q_flat)
+        
+        # 2. Softmax Attention a_i
+        s_scaled = s / tau
+        s_scaled -= np.max(s_scaled) # Chống tràn số (overflow)
+        a = np.exp(s_scaled) / np.sum(np.exp(s_scaled))
+        
+        # 3. Tạo v_frame
+        v_frame = np.dot(a, video_feats)
+        
+        # 4. Tính điểm TIB cho Video
+        tib_score = float(np.dot(v_frame, q_flat))
+        
+        return tib_score, s
+
+    # =========================================================================
     # RESCORE TOÀN DIỆN MỘT CANDIDATE VIDEO
     # =========================================================================
     def rescore_candidate_video(
@@ -259,9 +281,8 @@ class IntraVideoTemporalReranker:
         # 1. Trích xuất ma trận đặc trưng SigLIP của video (cast sang float32): (n_frames, 1152)
         video_feats = self.siglip_features[row_indices].astype(np.float32)
 
-        # 2. Tính điểm Dense Similarity cơ bản
-        q_flat = main_query_vec.flatten().astype(np.float32)
-        raw_dense_scores = np.dot(video_feats, q_flat)
+        # 2. EERCF TIB: Tính Dense Similarity (s) và Video Score (tib_score)
+        tib_score, raw_dense_scores = self.compute_eercf_tib_score(main_query_vec, video_feats, tau=0.05)
 
         # 3. E1: Neighbor Temporal Smoothing
         if use_neighbor:
@@ -290,6 +311,10 @@ class IntraVideoTemporalReranker:
         else:
             multi_bonus = np.zeros(n_frames, dtype=np.float32)
 
+        # Tổng hợp điểm Video (TIB + Max Raw Score)
+        max_raw = float(np.max(raw_dense_scores))
+        video_score_final = 0.7 * tib_score + 0.3 * max_raw
+
         # 6. Tổng hợp điểm số cuối cùng cho từng Frame
         final_frame_scores = (
             alpha * raw_dense_scores +
@@ -308,7 +333,8 @@ class IntraVideoTemporalReranker:
                 "raw_score": float(raw_dense_scores[i]),
                 "neighbor_score": float(neighbor_scores[i]),
                 "cue_score": float(cue_coverage_scores[i]),
-                "final_score": float(final_frame_scores[i])
+                "final_score": float(final_frame_scores[i]),
+                "video_score": video_score_final
             })
 
         results.sort(key=lambda x: x["final_score"], reverse=True)
@@ -444,7 +470,7 @@ Chỉ trả về 1 số duy nhất từ 0.00 đến 1.00 (ví dụ: 0.95 hoặc 
                 try:
                     client = genai.Client(api_key=api_key)
                     resp = client.models.generate_content(
-                        model="gemini-2.5-flash",
+                        model="gemini-3.5-flash-lite",
                         contents=[img, prompt]
                     )
                     text = resp.text.strip()

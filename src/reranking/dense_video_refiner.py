@@ -16,7 +16,7 @@ ZIP_MAP_CACHE = BASE_DIR / "data" / "batch_1" / "processed" / "video_zip_map.jso
 
 class VideoZipManager:
     """Quản lý và trích xuất on-demand các file MP4 từ các gói zip Videos_*.zip."""
-    def __init__(self, video_zip_dir: Path = VIDEO_ZIP_DIR, cache_dir: Path = VIDEO_CACHE_DIR, max_cached_files: int = 5):
+    def __init__(self, video_zip_dir: Path = VIDEO_ZIP_DIR, cache_dir: Path = VIDEO_CACHE_DIR, max_cached_files: int = 50):
         self.video_zip_dir = Path(video_zip_dir)
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -126,8 +126,11 @@ class DenseVideoRefiner:
 
         try:
             from transformers import AutoProcessor, AutoModel
+            import torch
             self.processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
-            self.model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to(self.device).eval()
+            dtype = torch.float16 if self.device == "cuda" else torch.float32
+            self.model = AutoModel.from_pretrained(model_name, torch_dtype=dtype, trust_remote_code=True).to(self.device).eval()
+            print(f"✅ Đã nạp xong Dense Vision Encoder ({dtype})!", flush=True)
         except Exception as e:
             print(f"⚠️ Lỗi nạp SigLIP 2 Vision: {e}")
 
@@ -135,7 +138,7 @@ class DenseVideoRefiner:
         self,
         video_path: Path,
         approx_frame_idx: int,
-        window_seconds: float = 2.5,
+        window_seconds: float = 1.5,
         step: int = 4
     ) -> List[Tuple[int, Image.Image]]:
         """
@@ -182,8 +185,8 @@ class DenseVideoRefiner:
         video_id: str,
         approx_frame_idx: int,
         query_vec: np.ndarray,
-        window_seconds: float = 2.0,
-        step: int = 1
+        window_seconds: float = 1.5,
+        step: int = 4
     ) -> Dict[str, Any]:
         """
         Tìm frame đỉnh cao nhất xung quanh approx_frame_idx.
@@ -229,32 +232,28 @@ class DenseVideoRefiner:
                 "reason": "Vision model unavailable"
             }
 
-        # Trích xuất vector cho toàn bộ dense frames theo batch
+        # Trích xuất vector theo mini-batch 16 ảnh siêu nhẹ
         images_list = [img for _, img in dense_frames]
         frame_indices = [idx for idx, _ in dense_frames]
+        all_feats_list = []
+        batch_size = 16
 
-        inputs = self.processor(images=images_list, return_tensors="pt").to(self.device)
         with torch.inference_mode():
             with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=(self.device == "cuda")):
-                if hasattr(self.model, "get_image_features"):
-                    out = self.model.get_image_features(**inputs)
-                    if isinstance(out, torch.Tensor):
-                        feats = out
-                    elif hasattr(out, "pooler_output") and out.pooler_output is not None:
-                        feats = out.pooler_output
+                for b_start in range(0, len(images_list), batch_size):
+                    batch_imgs = images_list[b_start:b_start + batch_size]
+                    inputs = self.processor(images=batch_imgs, return_tensors="pt").to(self.device)
+                    if hasattr(self.model, "get_image_features"):
+                        out = self.model.get_image_features(**inputs)
+                        feats = out if isinstance(out, torch.Tensor) else (out.pooler_output if hasattr(out, "pooler_output") and out.pooler_output is not None else out[0])
                     else:
-                        feats = out[0]
-                else:
-                    out = self.model(**inputs)
-                    if isinstance(out, torch.Tensor):
-                        feats = out
-                    elif hasattr(out, "pooler_output") and out.pooler_output is not None:
-                        feats = out.pooler_output
-                    else:
-                        feats = out.last_hidden_state[:, 0]
+                        out = self.model(**inputs)
+                        feats = out if isinstance(out, torch.Tensor) else (out.pooler_output if hasattr(out, "pooler_output") and out.pooler_output is not None else out.last_hidden_state[:, 0])
 
-                feats = feats / feats.norm(dim=-1, keepdim=True)
-                feats_np = feats.cpu().float().numpy()
+                    feats = feats / feats.norm(dim=-1, keepdim=True)
+                    all_feats_list.append(feats.cpu().float().numpy())
+
+        feats_np = np.concatenate(all_feats_list, axis=0)
 
         # Chuẩn hóa query_vec
         q_vec = query_vec.reshape(1, -1)

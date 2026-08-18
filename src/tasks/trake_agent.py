@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 from collections import defaultdict
 import numpy as np
+import pandas as pd
 
 # Force UTF-8 on Windows console
 if hasattr(sys.stdout, 'reconfigure'):
@@ -22,10 +23,9 @@ class TRAKEAlignmentAgent:
     """
     TRAKE Sequential Temporal Alignment Agent (SOTA Monotonic Sequence Dynamic Programming):
     - Phân rã chuỗi mô tả thành n sự kiện con: E_1 -> E_2 -> ... -> E_n.
-    - Tìm kiếm video mục tiêu có tổng điểm khớp cao nhất trên toàn bộ chuỗi sự kiện.
+    - Tính toán Ma trận tương đồng liên tục (Continuous Vectorized Cosine Similarity) trên toàn bộ keyframes của video.
     - Sử dụng thuật toán Quy hoạch động (Viterbi Monotonic Sequence DP) để tìm chuỗi khung hình tối ưu
       thỏa mãn điều kiện thời gian tăng dần nghiêm ngặt: t(E_1) < t(E_2) < ... < t(E_n).
-    - Cô lập hoàn toàn khỏi Gaussian smoothing của KIS để tránh hiện tượng nhòe thời gian giữa các bước.
     """
     def __init__(self, engine: str = "siglip2", batch: str = "batch_1", text_encoder=None):
         if text_encoder is not None:
@@ -36,6 +36,14 @@ class TRAKEAlignmentAgent:
         self.faiss_index, self.df_frames = load_faiss_index(engine=engine, batch=batch)
         self.df_frames["row_idx"] = np.arange(len(self.df_frames))
         
+        # Nạp Memory-mapped SigLIP features (đọc ngẫu nhiên tức thì <0.01ms)
+        siglip_path = BASE_DIR / "data" / batch / "processed" / "siglip_features.npy"
+        if siglip_path.exists():
+            n_total = len(self.df_frames)
+            self.siglip_features = np.memmap(siglip_path, dtype=np.float16, mode="r", shape=(n_total, 1152))
+        else:
+            self.siglip_features = None
+
         # Tạo sẵn mapping video -> keyframe data đã sắp xếp theo pts_time
         self.video_frames = {}
         for v_id, grp in self.df_frames.groupby("video_id"):
@@ -46,74 +54,98 @@ class TRAKEAlignmentAgent:
                 "pts_times": s_grp["pts_time"].to_numpy()
             }
 
-    def _solve_monotonic_dp(self, sim_matrix: np.ndarray, pts_times: np.ndarray, min_gap_sec: float = 0.5, max_gap_sec: float = 120.0) -> list[int]:
+    def _extract_temporal_nms_peaks(self, scores: np.ndarray, pts_times: np.ndarray, k: int = 3, nms_radius_sec: float = 2.0) -> list[float]:
+        """Trích xuất k đỉnh độc lập về mặt thời gian qua Temporal NMS."""
+        if len(scores) == 0:
+            return [0.0] * k
+        
+        sc_copy = scores.copy()
+        peaks = []
+        for _ in range(k):
+            max_idx = int(np.argmax(sc_copy))
+            max_val = float(sc_copy[max_idx])
+            if max_val <= -1e8:
+                break
+            peaks.append(max_val)
+            # Triệt tiêu các frame trong bán kính nms_radius_sec
+            t_peak = pts_times[max_idx]
+            suppress_mask = np.abs(pts_times - t_peak) <= nms_radius_sec
+            sc_copy[suppress_mask] = -1e9
+            
+        while len(peaks) < k:
+            peaks.append(peaks[-1] if peaks else 0.0)
+        return peaks[:k]
+
+    def _solve_monotonic_dp(
+        self,
+        sim_matrix: np.ndarray,
+        pts_times: np.ndarray,
+        max_gap_sec: float = 240.0
+    ) -> list[int]:
         """
-        Thuật toán Quy hoạch động Monotonic Sequence Dynamic Programming:
-        sim_matrix: (N_events, M_keyframes)
-        pts_times: (M_keyframes,)
-        Returns: list gồm N_events chỉ số keyframe [j_0, j_1, ..., j_{N-1}] tối ưu nhất.
+        Row-Normalized Monotonic Dynamic Programming Solver:
+        - Sử dụng Local Support 3-point [0.2, 0.6, 0.2] để chống spike mồ côi.
+        - Ràng buộc thứ tự nghiêm ngặt: t(E_1) < t(E_2) < ... < t(E_N).
         """
         N, M = sim_matrix.shape
         if M < N:
-            # Nếu số keyframe ít hơn số sự kiện, gán index tăng dần khả dĩ
             return list(range(min(N, M))) + [M - 1] * max(0, N - M)
 
-        # dp[i, j]: Điểm tối đa khi gán event i cho keyframe j
-        # parent[i, j]: Chỉ số keyframe của event i-1 được chọn
+        # 1. Local Temporal Support 3-point
+        S_smooth = np.zeros_like(sim_matrix)
+        for i in range(N):
+            row = sim_matrix[i]
+            left = np.pad(row[:-1], (1, 0), mode='edge')
+            right = np.pad(row[1:], (0, 1), mode='edge')
+            S_smooth[i] = 0.2 * left + 0.6 * row + 0.2 * right
+
+        # 2. Row Normalization (Min-Max per row)
+        S_norm = np.zeros_like(S_smooth)
+        for i in range(N):
+            r_min = np.min(S_smooth[i])
+            r_max = np.max(S_smooth[i])
+            if r_max - r_min > 1e-6:
+                S_norm[i] = (S_smooth[i] - r_min) / (r_max - r_min)
+            else:
+                S_norm[i] = S_smooth[i]
+
         dp = np.full((N, M), -1e9, dtype=np.float32)
         parent = np.full((N, M), -1, dtype=np.int32)
 
         # Khởi tạo cho Event 0
-        dp[0, :] = sim_matrix[0, :]
+        dp[0, :] = S_norm[0, :]
 
-        # Quy hoạch động cho Event 1 đến Event N-1
+        # Quy hoạch động cho Event 1 đến N-1
         for i in range(1, N):
             for j in range(i, M):
-                # j là keyframe cho event i -> tìm k < j tốt nhất cho event i-1
                 t_j = pts_times[j]
-                
-                # Xét tất cả k < j
                 prev_indices = np.arange(j)
                 t_k = pts_times[prev_indices]
                 dt = t_j - t_k
                 
-                # Ràng buộc thời gian: dt >= min_gap_sec
-                valid_mask = (dt >= min_gap_sec) & (dp[i-1, :j] > -1e8)
+                # Ràng buộc thời gian tăng dần nghiêm ngặt (dt > 0)
+                valid_mask = (dt > 0) & (dp[i-1, :j] > -1e8)
                 if not np.any(valid_mask):
-                    # Nếu quá sát, cho phép dt >= 0
-                    valid_mask = (dt >= 0) & (dp[i-1, :j] > -1e8)
-                    if not np.any(valid_mask):
-                        continue
+                    continue
 
                 valid_k = prev_indices[valid_mask]
                 valid_scores = dp[i-1, valid_k]
                 
-                # Penalty nếu khoảng cách quá xa (> max_gap_sec)
+                # Phạt nhẹ nếu khoảng cách giữa 2 sự kiện vượt quá max_gap_sec
                 excess_dt = np.maximum(0.0, dt[valid_mask] - max_gap_sec)
-                penalties = 0.005 * excess_dt
+                penalties = 0.001 * excess_dt
                 
                 total_candidates = valid_scores - penalties
-                best_idx = np.argmax(total_candidates)
-                best_k = valid_k[best_idx]
+                best_idx = int(np.argmax(total_candidates))
+                best_k = int(valid_k[best_idx])
                 
-                dp[i, j] = sim_matrix[i, j] + total_candidates[best_idx]
+                dp[i, j] = S_norm[i, j] + total_candidates[best_idx]
                 parent[i, j] = best_k
 
-        # Truy vết (Backtracking) từ j tốt nhất ở Event N-1
-        best_end_j = np.argmax(dp[N-1, :])
+        # Backtracking
+        best_end_j = int(np.argmax(dp[N-1, :]))
         if dp[N-1, best_end_j] <= -1e8:
-            # Fallback nếu không có đường đi hợp lệ: chọn argmax từng event thỏa mãn tăng dần
-            chosen_j = []
-            curr_k = 0
-            for i in range(N):
-                rem_cands = np.arange(curr_k, M)
-                if len(rem_cands) > 0:
-                    pick = rem_cands[np.argmax(sim_matrix[i, rem_cands])]
-                    chosen_j.append(pick)
-                    curr_k = min(pick + 1, M - 1)
-                else:
-                    chosen_j.append(M - 1)
-            return chosen_j
+            return [int(np.argmax(S_norm[i])) for i in range(N)]
 
         chosen_j = [0] * N
         curr = best_end_j
@@ -125,77 +157,133 @@ class TRAKEAlignmentAgent:
 
         return chosen_j
 
-    def align_events(self, raw_query: str, events: list[str], top_videos: int = 5) -> list[dict]:
+    def align_events(
+        self,
+        raw_query: str,
+        events: list[str],
+        top_k: int = 100,
+        use_multi_query: bool = True,
+        use_event_coverage: bool = True,
+        use_row_norm_dp: bool = True
+    ) -> list[dict]:
         """
-        Tìm kiếm và căn chỉnh chuỗi sự kiện trong video mục tiêu qua Monotonic DP.
-        Returns: list các candidate predictions có chuỗi mốc thời gian tăng dần.
+        Tìm kiếm và căn chỉnh chuỗi sự kiện bằng Multi-Query Retrieval & Calibrated Event Coverage.
         """
         if not events:
             return []
 
         n_events = len(events)
-        # 1. Mã hóa từng sự kiện con bằng UnifiedTextEncoder (SigLIP 2 1152d)
-        event_vecs = [self.text_encoder.encode_text(ev) for ev in events]
-
-        # 2. Tìm kiếm ứng viên cho từng sự kiện qua FAISS
-        video_event_hits = defaultdict(lambda: defaultdict(list))
         
-        for e_idx, vec in enumerate(event_vecs):
-            scores, indices = self.faiss_index.search(vec, 300)
-            for rank, (sc, idx) in enumerate(zip(scores[0], indices[0]), 1):
-                row = self.df_frames.iloc[idx]
-                v_id = row["video_id"]
-                f_idx = int(row["frame_idx"])
-                video_event_hits[v_id][e_idx].append({"frame_idx": f_idx, "score": float(sc), "rank": rank})
+        # 1. Mã hóa sự kiện & Global Query
+        event_vecs = np.array([self.text_encoder.encode_text(ev)[0] for ev in events], dtype=np.float32)
+        q_global = self.text_encoder.encode_text(raw_query)[0].astype(np.float32)
 
-        # 3. Chấm điểm Video: Video nào có nhiều sự kiện con xuất hiện nhất với điểm cao nhất
-        video_scores = []
-        for v_id, e_dict in video_event_hits.items():
-            coverage = len(e_dict)  # Số sự kiện xuất hiện
-            avg_score = np.mean([max([c["score"] for c in cands]) for cands in e_dict.values()])
-            # Boost mạnh video có coverage cao
-            combined_v_score = (coverage / n_events) * 2.0 + avg_score
-            video_scores.append((v_id, combined_v_score, coverage))
+        # 2. Stage-1 Candidate Retrieval (Multi-Query vs Single-Query)
+        if use_multi_query:
+            all_queries = np.vstack([event_vecs, q_global.reshape(1, -1)])
+            scores, indices = self.faiss_index.search(all_queries, 100)
+            candidate_videos = set()
+            for row_indices in indices:
+                for idx in row_indices:
+                    v_id = self.df_frames.iloc[idx]["video_id"]
+                    if v_id in self.video_frames:
+                        candidate_videos.add(v_id)
+        else:
+            scores, indices = self.faiss_index.search(q_global.reshape(1, -1), 300)
+            candidate_videos = set()
+            for idx in indices[0]:
+                v_id = self.df_frames.iloc[idx]["video_id"]
+                if v_id in self.video_frames:
+                    candidate_videos.add(v_id)
 
-        video_scores.sort(key=lambda x: x[1], reverse=True)
-        top_v_list = [v[0] for v in video_scores[:top_videos]]
+        if self.siglip_features is None or not candidate_videos:
+            return []
 
-        # 4. Trích xuất chuỗi frame tăng dần qua Monotonic Dynamic Programming
-        final_predictions = []
-        for v_id in top_v_list:
-            if v_id not in self.video_frames:
-                continue
-
+        # 3. Stage-2: Temporal NMS Peak & Event Coverage Reranking
+        candidate_data = []
+        for v_id in candidate_videos:
             v_info = self.video_frames[v_id]
-            f_indices = v_info["frame_indices"]
+            row_indices = v_info["row_indices"]
             pts_times = v_info["pts_times"]
-            M = len(f_indices)
-
-            # Xây dựng ma trận tương đồng sắc nét (N, M)
-            sim_matrix = np.zeros((n_events, M), dtype=np.float32)
-            e_dict = video_event_hits[v_id]
-
-            # Điền điểm từ FAISS hits
-            for e_idx in range(n_events):
-                cands = e_dict.get(e_idx, [])
-                frame_to_sc = {c["frame_idx"]: c["score"] for c in cands}
-                for j, f_id in enumerate(f_indices):
-                    if f_id in frame_to_sc:
-                        sim_matrix[e_idx, j] = frame_to_sc[f_id]
-                    else:
-                        sim_matrix[e_idx, j] = 0.05  # Base background similarity
-
-            # Giải bài toán Monotonic Sequence DP
-            chosen_kf_indices = self._solve_monotonic_dp(sim_matrix, pts_times, min_gap_sec=0.5)
-            chosen_frames = [int(f_indices[j]) for j in chosen_kf_indices]
-
-            final_predictions.append({
+            v_feats = np.asarray(self.siglip_features[row_indices], dtype=np.float32)
+            
+            # Ma trận tương đồng (N_events, M_keyframes)
+            sim_matrix = np.dot(event_vecs, v_feats.T)
+            
+            # Tính Top-3 temporal NMS peak cho mỗi event
+            event_peaks = []
+            for j in range(n_events):
+                peaks_j = self._extract_temporal_nms_peaks(sim_matrix[j], pts_times, k=3, nms_radius_sec=2.0)
+                event_peaks.append(np.mean(peaks_j))
+            
+            event_peaks = np.array(event_peaks, dtype=np.float32)
+            
+            # Điểm toàn cục
+            sim_global = np.dot(v_feats, q_global)
+            s_global_top = float(np.mean(np.sort(sim_global)[-3:]))
+            
+            candidate_data.append({
                 "video_id": v_id,
-                "event_frames": chosen_frames,
-                "score": float(video_scores[0][1]) if v_id == video_scores[0][0] else 0.5
+                "event_peaks": event_peaks,
+                "s_global": s_global_top,
+                "sim_matrix": sim_matrix,
+                "pts_times": pts_times,
+                "frame_indices": v_info["frame_indices"]
             })
 
-        return final_predictions
+        if use_event_coverage and candidate_data:
+            # Chuẩn hóa Event-wise Calibration giữa các candidate videos
+            all_peaks = np.array([cd["event_peaks"] for cd in candidate_data])  # (K_cands, N_events)
+            min_p = np.min(all_peaks, axis=0, keepdims=True)
+            max_p = np.max(all_peaks, axis=0, keepdims=True)
+            denom = np.where(max_p - min_p > 1e-6, max_p - min_p, 1.0)
+            norm_peaks = (all_peaks - min_p) / denom
+
+            # Tính Video Score tổng hợp
+            for idx, cd in enumerate(candidate_data):
+                p_norm = norm_peaks[idx]
+                mean_q = float(np.mean(p_norm))
+                soft_min_q = float(-0.2 * np.log(np.sum(np.exp(-5.0 * p_norm)) + 1e-6))
+                s_g = cd["s_global"]
+                cd["v_score"] = 0.40 * mean_q + 0.30 * soft_min_q + 0.30 * s_g
+        else:
+            for cd in candidate_data:
+                cd["v_score"] = cd["s_global"]
+
+        # Sắp xếp và chọn Top 50 videos tốt nhất đưa vào DP
+        candidate_data.sort(key=lambda x: x["v_score"], reverse=True)
+        top_50_cands = candidate_data[:50]
+
+        # 4. Stage-3: Row-Normalized Monotonic DP Alignment
+        final_predictions = []
+        for v_idx, cd in enumerate(top_50_cands):
+            v_id = cd["video_id"]
+            sim_matrix = cd["sim_matrix"]
+            pts_times = cd["pts_times"]
+            f_indices = cd["frame_indices"]
+            
+            chosen_kf_indices = self._solve_monotonic_dp(sim_matrix, pts_times)
+            chosen_frames = [int(f_indices[j]) for j in chosen_kf_indices]
+            
+            # Điểm tương đồng thực tế của chuỗi được chọn
+            raw_dp_scores = [sim_matrix[i, chosen_kf_indices[i]] for i in range(n_events)]
+            dp_score = float(np.mean(raw_dp_scores))
+            
+            # Kết hợp điểm Rerank và điểm DP
+            v_rank_score = (1.0 / (v_idx + 1)) * 3.0 + dp_score + cd["v_score"]
+            
+            final_predictions.append({
+                "video_id": v_id,
+                "frame_idx": chosen_frames[0] if chosen_frames else 0,
+                "event_frames": chosen_frames,
+                "score": v_rank_score
+            })
+
+        final_predictions.sort(key=lambda x: x["score"], reverse=True)
+        for r, p in enumerate(final_predictions, 1):
+            p["rank"] = r
+
+        return final_predictions[:top_k]
 
 if __name__ == "__main__":
     agent = TRAKEAlignmentAgent("siglip2")
@@ -206,7 +294,7 @@ if __name__ == "__main__":
         "Adds diced carrots into the pan",
         "Pours boiled pasta into the pan"
     ]
-    res = agent.align_events("Nấu mì Ý", events_sample, top_videos=3)
-    print("🏆 Kết quả Monotonic Dynamic Programming:")
+    res = agent.align_events("Nấu mì Ý", events_sample, top_k=5)
+    print("🏆 Kết quả Monotonic Dynamic Programming Vectorized:")
     for r in res:
-        print(f"Video: {r['video_id']} | Frames: {r['event_frames']}")
+        print(f"Rank #{r['rank']} | Video: {r['video_id']} | Score: {r['score']:.4f} | Event Frames: {r['event_frames']}")

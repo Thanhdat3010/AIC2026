@@ -108,33 +108,35 @@ You are an expert Multimodal Video Retrieval AI System for AI Challenge 2026.
 Analyze this Vietnamese query:
 "{raw_query}"
 
-Rules for Modality Gating:
-1. has_ocr_signal: set to TRUE ONLY if the query mentions specific signs, banners, titles, text in quotes, license plates, written words, numbers. If purely visual, set to FALSE.
-2. has_asr_signal: set to TRUE ONLY if the query mentions spoken speech, dialogue quotes, interview answers, announcements. If purely visual, set to FALSE.
-3. is_qa: set to TRUE if the query is a Question asking for specific entity/action (starts with Khi nào, Ai, Cái gì, Ở đâu, Như thế nào, Bao nhiêu, etc.).
+Rules for Semantic Generalization & Modality Gating:
+1. has_ocr_signal: set to TRUE ONLY if the query explicitly mentions reading written text, signs, banners, titles, text in quotes, awards, numbers, license plates. If the query is purely about visual actions/people/objects, set to FALSE.
+   - If has_ocr_signal is true: provide `ocr_keywords` containing the normalized Vietnamese text entity AND likely OCR variants.
+2. has_asr_signal: set to TRUE ONLY if the query explicitly asks about spoken dialogue, interview speech, voice announcements.
+   - If has_asr_signal is true: provide `asr_keywords` containing normalized spoken phrases.
+3. is_qa: set to TRUE if the query is a Question asking for specific entity/action/color/count/time/name.
 4. is_trake: set to TRUE if the query describes a chronological sequence of multiple distinct consecutive actions (First... then... then...).
-5. If is_trake is true: break down the chronological actions into granular atomic sub-steps in `trake_events` (in English). For example, "lần lượt thêm đậu Hà Lan rồi cà rốt thái hạt lựu" MUST be split into TWO distinct events: "chef adding green peas into the pan" and "chef adding diced carrots into the pan". Do not merge multiple actions into one.
+5. If is_trake is true: break down the chronological actions into granular atomic sub-steps in `trake_events` (in concise natural English).
+
+CRITICAL RULE FOR VISUAL PROMPTS:
+- Do NOT include prefixes like "Sentence 1:", "Scene 1:", or "-". Just output the raw text.
+- visual_prompts[0] MUST BE a "Comprehensive Visual Prompt": A highly detailed and rich English description of the scene. Include the main subjects, actions, specific colors, clothing, background props, and spatial context (e.g. "on the left", "in the background"). Contrastive models like SigLIP thrive on long, dense captions. Do NOT use conversational fillers like "The image shows...".
+- visual_prompts[1] MUST BE "Action Focus": A short description isolating only the dynamic actions occurring.
+- visual_prompts[2] MUST BE "Entity Focus": A short list of the key objects/people present.
 
 Respond with ONLY a JSON object with this EXACT structure:
 {{
   "visual_prompts": [
-    "Sentence 1: Comprehensive natural English scene description (Dominant Prompt)",
-    "Sentence 2: English caption strictly focusing on Subjects and their Action dynamics",
-    "Sentence 3: English caption strictly focusing on Salient Objects, Colors, and Background Props"
+    "Comprehensive detailed English description of the entire scene including colors and spatial relations",
+    "Short English description of actions",
+    "Short English list of key entities"
   ],
   "has_ocr_signal": true or false,
-  "ocr_keywords": ["Specific keywords only if has_ocr_signal is true, else empty list"],
+  "ocr_keywords": ["normalized entity keywords"],
   "has_asr_signal": true or false,
-  "asr_keywords": ["Specific spoken phrases only if has_asr_signal is true, else empty list"],
+  "asr_keywords": ["spoken dialogue phrases"],
   "is_qa": true or false,
   "is_trake": true or false,
-  "trake_events": ["Atomic Event 1 in English", "Atomic Event 2 in English", "Atomic Event 3 in English..."],
-  "weights": {{
-    "visual": 1.0,
-    "ocr": 0.0,
-    "asr": 0.0
-  }},
-  "temporal_hint": "early / middle / late / any"
+  "trake_events": ["Short English event 1", "Short English event 2"]
 }}
 """
         res_str = self._call_gemini(prompt)
@@ -148,6 +150,8 @@ Respond with ONLY a JSON object with this EXACT structure:
                     cleaned = cleaned[:-3]
                 parsed = json.loads(cleaned.strip())
 
+                if "weights" not in parsed:
+                    parsed["weights"] = {"visual": 1.0, "ocr": 0.0, "asr": 0.0}
                 # Áp dụng Adaptive Modality Gating an toàn tuyệt đối
                 if not parsed.get("has_ocr_signal", False):
                     parsed["ocr_keywords"] = []

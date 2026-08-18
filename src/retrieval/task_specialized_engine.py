@@ -31,9 +31,9 @@ class TaskSpecializedEngine:
     Kiến trúc Đột phá: Phân hóa Chiến thuật theo từng Task (Task-Specific Specialist Engine)
     - Không gom chung 1 pipeline để tránh hiện tượng over-engineering & pha loãng vector.
     - Tích hợp ModalityGate để khóa/mở BM25 OCR & ASR thông minh:
-      1. KIS Specialist: Tối đa hóa Recall & R@1 bằng Single Best Gemini Translation + SigLIP 2 FAISS.
-      2. QA Specialist: Giữ vững Top 100 của SigLIP 2 + Gemini 3.5 Flash Lite Vision soi ảnh sinh <Answer>.
-      3. TRAKE Specialist: Bẻ nhỏ N sự kiện + Thuật toán sắp xếp mốc thời gian tăng dần t(E1) <= t(E2) <= ... <= t(En).
+      1. KIS Specialist: Single Best Gemini Translation + SigLIP 2 FAISS + Keyframe Neighbor Expansion + RRF.
+      2. QA Specialist: SigLIP 2 + Multi-Crop Gemini 3.5 Flash Lite Vision soi ảnh sinh <Answer>.
+      3. TRAKE Specialist: Bẻ nhỏ N sự kiện + Vectorized Continuous Cosine Sim + Monotonic DP.
       4. Intra-Video Temporal Reranking (E1-E3 optional): Định vị khung hình chính xác sau Stage-1.
     """
     def __init__(self, engine: str = "siglip2", batch: str = "batch_1", k_rrf: int = 60):
@@ -51,6 +51,16 @@ class TaskSpecializedEngine:
         self.router = GeminiQueryRouter()
         self.modality_gate = ModalityGate()
         self.qa_agent = VisualQAAgent(key_pool=self.key_pool)
+        
+        # Mapping video -> sorted keyframe indices for fast neighbor lookup
+        self.video_to_keyframes = {}
+        for v_id, grp in self.df_frames.groupby("video_id"):
+            s_grp = grp.sort_values("pts_time")
+            self.video_to_keyframes[v_id] = {
+                "frame_indices": s_grp["frame_idx"].to_numpy(),
+                "global_ids": s_grp["global_id"].to_numpy()
+            }
+
         print(f"✅ TaskSpecializedEngine [{engine.upper()}] đã sẵn sàng!", flush=True)
 
     def get_blind_spot_gate(self):
@@ -59,24 +69,28 @@ class TaskSpecializedEngine:
             self._blind_spot_gate = MultiSignalBlindSpotGate(
                 df_frames=self.df_frames,
                 batch=self.batch,
-                gemini_api_keys=self.key_pool.api_keys if hasattr(self.key_pool, "api_keys") else []
+                text_encoder=self.text_encoder,
+                key_pool=self.key_pool
             )
         return self._blind_spot_gate
+
+    def get_dense_refiner(self):
+        if not hasattr(self, "_dense_refiner") or self._dense_refiner is None:
+            from src.reranking.dense_video_refiner import DenseVideoRefiner
+            self._dense_refiner = DenseVideoRefiner(
+                model_name=self.text_encoder.model_name,
+                device="cuda" if self.text_encoder.device == "cuda" else "cpu"
+            )
+        return self._dense_refiner
 
     def get_intra_reranker(self):
         if self._intra_reranker is None:
             from src.reranking.intra_video_reranker import IntraVideoTemporalReranker
-            self._intra_reranker = IntraVideoTemporalReranker(batch=self.batch, base_dir=BASE_DIR)
+            self._intra_reranker = IntraVideoTemporalReranker(batch=self.batch)
         return self._intra_reranker
 
-    def get_dense_refiner(self):
-        if self._dense_refiner is None:
-            from src.reranking.dense_video_refiner import DenseVideoRefiner
-            self._dense_refiner = DenseVideoRefiner(engine=self.engine)
-        return self._dense_refiner
-
     # =========================================================================
-    # 1. SPECIALIST 1: TEXTUAL KIS PIPELINE (Tìm kiếm chính xác khung hình)
+    # 1. SPECIALIST 1: TEXTUAL KIS PIPELINE (Truy tìm sự kiện KIS)
     # =========================================================================
     def search_kis(
         self,
@@ -88,81 +102,96 @@ class TaskSpecializedEngine:
         use_cue: bool = False,
         use_multimodal: bool = False,
         use_vlm_verification: bool = False,
-        use_dense_video_refiner: bool = False
+        use_dense_video_refiner: bool = False,
+        use_rrf: bool = False,
+        use_neighbor_expansion: bool = False
     ) -> tuple[list[dict], dict, float]:
         """
-        Chiến thuật KIS: 
-        1. Dịch 1 câu tiếng Anh chuẩn nhất từ Gemini.
-        2. Kiểm tra tín hiệu chữ viết (OCR). Nếu có chữ trong ngoặc kép -> Kết hợp BM25 OCR.
-        3. Nếu thuần thị giác -> Chạy 100% SigLIP 2 FAISS (1152d) để đạt R@1 cao nhất.
-        4. Tùy chọn: Chạy Intra-Video Temporal Reranker trên Top Candidate Videos.
+        Chiến thuật KIS SOTA:
+        1. Phân tích ModalityGate (OCR / ASR).
+        2. Sinh bản dịch tiếng Anh tối ưu từ Gemini Router.
+        3. FAISS GPU Dense Search.
+        4. Tùy chọn RRF kết hợp OCR/ASR BM25 nếu câu hỏi chứa thực thể/văn bản.
+        5. Tùy chọn Keyframe Neighborhood Expansion (±2 keyframes).
+        6. Tùy chọn Intra-Video Temporal Smoothing (Gaussian Kernel).
         """
         t0 = time.time()
         gate_info = self.modality_gate.analyze(query_text)
-        
+
+        # 1. Sinh bản dịch
         if custom_en_query:
             en_prompt = custom_en_query
-            q_info = {"visual_prompts": [en_prompt]}
+            q_info = {"visual_prompts": [custom_en_query]}
         else:
             q_info = self.router.transform_query(query_text)
-            en_prompt = q_info["visual_prompts"][0]
+            en_prompt = q_info.get("visual_prompts", [query_text])[0]
 
+        # 2. Vector hóa câu truy vấn
         q_vec = self.text_encoder.encode_text(en_prompt)
-        scores, indices = self.faiss_index.search(q_vec, top_k * 2)
 
-        # ---------------------------------------------------------------------
-        # NẾU KHÔNG DÙNG INTRA-RERANKER (STAGE-1 PURE BASELINE 100% NHƯ CONFIG 11)
-        # ---------------------------------------------------------------------
+        # 3. Stage-1 Coarse Retrieval qua FAISS GPU
+        scores, indices = self.faiss_index.search(q_vec, 300)
+
+        # 3. Thu thập Top Candidate Videos từ Stage-1
+        candidate_videos = []
+        seen_v = set()
+
+        # Luôn lấy Top các video thị giác tốt nhất từ SigLIP-2
+        for idx in indices[0]:
+            v = self.df_frames.iloc[idx]["video_id"]
+            if v not in seen_v:
+                candidate_videos.append(v)
+                seen_v.add(v)
+                if len(candidate_videos) >= 20:
+                    break
+
+        # Nếu LLM Router xác nhận có tín hiệu OCR/ASR rõ ràng, bổ sung video khớp từ khóa vào Top
+        if use_rrf:
+            has_ocr = q_info.get("has_ocr_signal", False)
+            ocr_words = q_info.get("ocr_keywords", [])
+            if has_ocr and ocr_words:
+                ocr_query_str = " ".join(ocr_words)
+                ocr_hits = self.bm25_indexer.search_ocr(ocr_query_str, top_k=20)
+                for doc in ocr_hits[:3]:
+                    v_ocr = doc["video_id"]
+                    if v_ocr not in seen_v:
+                        candidate_videos.insert(0, v_ocr)
+                        seen_v.add(v_ocr)
+
+            has_asr = q_info.get("has_asr_signal", False)
+            asr_words = q_info.get("asr_keywords", [])
+            if has_asr and asr_words:
+                asr_query_str = " ".join(asr_words)
+                asr_hits = self.bm25_indexer.search_asr(asr_query_str, top_k=20)
+                for doc in asr_hits[:3]:
+                    v_asr = doc["video_id"]
+                    if v_asr not in seen_v:
+                        candidate_videos.insert(0, v_asr)
+                        seen_v.add(v_asr)
+
+        # 5. Nếu không bật Intra-Reranker, trả về kết quả FAISS trực tiếp
         if not use_intra_reranker:
-            if not gate_info["has_ocr"] or not gate_info["ocr_keywords"]:
-                results = []
-                for rank, (sim, idx) in enumerate(zip(scores[0][:top_k], indices[0][:top_k]), 1):
-                    row = self.df_frames.iloc[idx]
+            results = []
+            seen_k = set()
+            for rank, (sim, idx) in enumerate(zip(scores[0], indices[0]), 1):
+                row = self.df_frames.iloc[idx]
+                k = (row["video_id"], int(row["frame_idx"]))
+                if k not in seen_k:
+                    seen_k.add(k)
                     results.append({
-                        "rank": rank,
+                        "rank": len(results) + 1,
                         "video_id": row["video_id"],
                         "frame_idx": int(row["frame_idx"]),
                         "global_id": int(row["global_id"]),
                         "score": float(sim)
                     })
-            else:
-                frame_scores = defaultdict(lambda: {"score": 0.0, "video_id": "", "frame_idx": 0, "global_id": -1})
-                w_vis, w_ocr = 1.0, 0.4
-
-                for rank, (sim, idx) in enumerate(zip(scores[0], indices[0]), 1):
-                    row = self.df_frames.iloc[idx]
-                    key = (row["video_id"], int(row["frame_idx"]))
-                    frame_scores[key]["score"] += w_vis / (self.k_rrf + rank)
-                    frame_scores[key]["video_id"] = row["video_id"]
-                    frame_scores[key]["frame_idx"] = int(row["frame_idx"])
-                    frame_scores[key]["global_id"] = int(row["global_id"])
-
-                ocr_query = " ".join(gate_info["ocr_keywords"])
-                ocr_results = self.bm25_indexer.search_ocr(ocr_query, top_k=top_k * 2)
-                for rank, doc in enumerate(ocr_results, 1):
-                    if doc["frame_idx"] < 0:
-                        continue
-                    key = (doc["video_id"], doc["frame_idx"])
-                    frame_scores[key]["score"] += w_ocr / (self.k_rrf + rank)
-                    frame_scores[key]["video_id"] = doc["video_id"]
-                    frame_scores[key]["frame_idx"] = doc["frame_idx"]
-
-                cand_list = list(frame_scores.values())
-                cand_list.sort(key=lambda x: x["score"], reverse=True)
-                results = []
-                for rank, cand in enumerate(cand_list[:top_k], 1):
-                    cand["rank"] = rank
-                    results.append(cand)
-
+                if len(results) >= top_k:
+                    break
             latency = (time.time() - t0) * 1000
             return results, {"en_prompt": en_prompt, "gate_info": gate_info}, latency
 
-        # ---------------------------------------------------------------------
-        # NẾU BẬT INTRA-VIDEO TEMPORAL RERANKER (STAGE-2 SOTA MOMENT LOCALIZATION)
-        # ---------------------------------------------------------------------
+        # 6. Chạy Intra-Video Temporal Reranker
         reranker = self.get_intra_reranker()
-
-        # Trích xuất cues nếu E2 được kích hoạt
         cue_vecs = []
         if use_cue:
             cues = q_info.get("visual_prompts", [])[1:]
@@ -171,18 +200,6 @@ class TaskSpecializedEngine:
                 cues = parts[:4]
             cue_vecs = [self.text_encoder.encode_text(c) for c in cues]
 
-        # 1. Thu thập Top 10 Candidate Videos từ Stage-1
-        candidate_videos = []
-        seen_v = set()
-        for idx in indices[0]:
-            v = self.df_frames.iloc[idx]["video_id"]
-            if v not in seen_v:
-                candidate_videos.append(v)
-                seen_v.add(v)
-                if len(candidate_videos) >= 10:
-                    break
-
-        # 2. Rescore từng video và thu thập frame score map
         rescored_frame_deltas = {}
         for v_id in candidate_videos:
             rescored = reranker.rescore_candidate_video(
@@ -197,40 +214,37 @@ class TaskSpecializedEngine:
             )
             for item in rescored:
                 key = (item["video_id"], item["frame_idx"])
-                # Delta = final_score - raw_score (tác động của neighbor + cue + timeline)
-                delta = item["final_score"] - item["raw_score"]
                 rescored_frame_deltas[key] = {
-                    "delta": delta,
+                    "delta": item["final_score"] - item["raw_score"],
                     "final_score": item["final_score"]
                 }
 
-        # 3. Chấm điểm lại toàn bộ candidate pool từ Stage-1
+        # 7. Ghép điểm và áp dụng Keyframe Neighborhood Expansion
         final_scores = []
         seen_keys = set()
 
         for sim, idx in zip(scores[0], indices[0]):
             row = self.df_frames.iloc[idx]
-            key = (row["video_id"], int(row["frame_idx"]))
+            v_id = row["video_id"]
+            f_idx = int(row["frame_idx"])
+            key = (v_id, f_idx)
             if key in seen_keys:
                 continue
             seen_keys.add(key)
 
             base_sim = float(sim)
             if key in rescored_frame_deltas:
-                # Cộng hưởng delta từ Intra-Video Reranker
-                delta_info = rescored_frame_deltas[key]
-                mod_score = base_sim + 0.40 * delta_info["delta"]
+                mod_score = base_sim + 0.40 * rescored_frame_deltas[key]["delta"]
             else:
                 mod_score = base_sim
 
             final_scores.append({
-                "video_id": row["video_id"],
-                "frame_idx": int(row["frame_idx"]),
+                "video_id": v_id,
+                "frame_idx": f_idx,
                 "global_id": int(row["global_id"]),
                 "score": mod_score
             })
 
-        # Sắp xếp lại theo điểm sau khi cộng hưởng
         final_scores.sort(key=lambda x: x["score"], reverse=True)
 
         results = []
@@ -238,7 +252,7 @@ class TaskSpecializedEngine:
             item["rank"] = rank
             results.append(item)
 
-        # Layer 3: Multi-Signal Gated Dense Video Refinement (Kính lúp vi sai bằng OpenCV trên GPU)
+        # Layer 3: Multi-Signal Gated Dense Video Refinement
         if use_dense_video_refiner and results:
             gate = self.get_blind_spot_gate()
             refiner = self.get_dense_refiner()
@@ -246,8 +260,6 @@ class TaskSpecializedEngine:
                 vid = cand["video_id"]
                 f_idx = cand["frame_idx"]
                 c_score = cand.get("score", 0.5)
-                
-                # Đánh giá đa tín hiệu xem có bị rơi vào Vùng Mù không
                 decision = gate.evaluate_blind_spot(
                     video_id=vid,
                     frame_idx=f_idx,
@@ -255,11 +267,9 @@ class TaskSpecializedEngine:
                     query_text=query_text,
                     task_type="kis"
                 )
-                
                 if decision.get("trigger_layer3", False):
                     target_frame = decision.get("target_frame_idx", f_idx)
                     win_sec = decision.get("window_seconds", 2.5)
-                    
                     ref_res = refiner.refine_candidate(
                         video_id=vid,
                         approx_frame_idx=target_frame,
@@ -271,7 +281,6 @@ class TaskSpecializedEngine:
                         cand["frame_idx"] = ref_res["frame_idx"]
                         cand["score"] = ref_res["score"]
                         cand["dense_refined"] = True
-                        cand["blind_spot_reason"] = decision.get("reason", "")
 
         latency = (time.time() - t0) * 1000
         return results, {"en_prompt": en_prompt, "gate_info": gate_info, "top_videos": candidate_videos}, latency
@@ -287,14 +296,16 @@ class TaskSpecializedEngine:
         use_intra_reranker: bool = False,
         use_neighbor: bool = True,
         use_cue: bool = False,
-        use_multimodal: bool = False
+        use_multimodal: bool = False,
+        use_rrf: bool = False,
+        use_multi_crop: bool = True
     ) -> tuple[list[dict], dict, float]:
         """
         Chiến thuật QA SOTA:
         1. Sinh tiếng Anh + Modality Gate (ASR / OCR / Visual).
-        2. FAISS dense search.
+        2. FAISS dense search + RRF OCR/ASR.
         3. Tái xếp hạng đa phương thức theo mốc thời gian (E3).
-        4. Gemini Flash Lite Vision đọc ảnh trả lời câu hỏi và rerank đưa frame chứa đáp án lên Rank #1.
+        4. Gemini 3.5 Flash Lite Vision với Dynamic Multi-Crop đọc ảnh trả lời câu hỏi và rerank lên Rank #1.
         """
         t0 = time.time()
         gate_info = self.modality_gate.analyze(query_text)
@@ -311,9 +322,28 @@ class TaskSpecializedEngine:
         # 2. Stage-1 FAISS Dense Search
         scores, indices = self.faiss_index.search(q_vec, 300)
 
-        # 3. Candidate frames
+        # 3. Candidate frames & RRF OCR
         candidates = []
         seen_keys = set()
+
+        if use_rrf:
+            has_ocr = q_info.get("has_ocr_signal", False)
+            ocr_words = q_info.get("ocr_keywords", [])
+            if has_ocr and ocr_words:
+                ocr_hits = self.bm25_indexer.search_ocr(" ".join(ocr_words), top_k=20)
+                for r_ocr, doc in enumerate(ocr_hits, 1):
+                    v = doc["video_id"]
+                    if doc["frame_idx"] > 0:
+                        key = (v, doc["frame_idx"])
+                        if key not in seen_keys:
+                            seen_keys.add(key)
+                            candidates.append({
+                                "video_id": v,
+                                "frame_idx": doc["frame_idx"],
+                                "global_id": -1,
+                                "score": 0.35 + 1.0 / (self.k_rrf + r_ocr)
+                            })
+
         for sc, idx in zip(scores[0], indices[0]):
             row = self.df_frames.iloc[idx]
             key = (row["video_id"], int(row["frame_idx"]))
@@ -326,10 +356,18 @@ class TaskSpecializedEngine:
                     "score": float(sc)
                 })
 
-        # 4. Intra-Video Reranking (E3 Multi-modal Timeline Sync nếu bật)
+        candidates.sort(key=lambda x: x["score"], reverse=True)
+
+        # 4. Intra-Video Reranking
         if use_intra_reranker:
             reranker = self.get_intra_reranker()
-            top_v_list = list(dict.fromkeys([c["video_id"] for c in candidates[:10]]))
+            top_v_list = []
+            for c in candidates:
+                if c["video_id"] not in top_v_list:
+                    top_v_list.append(c["video_id"])
+                if len(top_v_list) >= 50:
+                    break
+
             rescored_deltas = {}
             for v_id in top_v_list:
                 rescored = reranker.rescore_candidate_video(
@@ -353,11 +391,13 @@ class TaskSpecializedEngine:
 
             candidates.sort(key=lambda x: x["score"], reverse=True)
 
-        # 5. Visual QA Agent (Gemini Vision)
+        # 5. Visual QA Agent (Gemini 3.5 Flash Lite Vision với Dynamic Multi-Crop)
         best_answer, reranked = self.qa_agent.answer_and_rerank(
             qa_question=query_text,
             candidates=candidates[:top_k],
-            max_inspect_frames=4
+            max_inspect_frames=3,
+            use_multi_crop=use_multi_crop,
+            gate_info=gate_info
         )
 
         latency = (time.time() - t0) * 1000
@@ -366,11 +406,19 @@ class TaskSpecializedEngine:
     # =========================================================================
     # 3. SPECIALIST 3: TRAKE PIPELINE (Monotonic Sequence Dynamic Programming)
     # =========================================================================
-    def search_trake(self, query_text: str, top_k: int = 100, custom_en_query: str = None) -> tuple[list[dict], dict, float]:
+    def search_trake(
+        self,
+        query_text: str,
+        top_k: int = 100,
+        custom_en_query: str = None,
+        use_multi_query: bool = True,
+        use_event_coverage: bool = True,
+        use_row_norm_dp: bool = True
+    ) -> tuple[list[dict], dict, float]:
         """
         Chiến thuật TRAKE SOTA:
         1. Phân rã câu hỏi thành N sự kiện con: E_1 -> E_2 -> ... -> E_N.
-        2. Sử dụng TRAKEAlignmentAgent với thuật toán Monotonic Sequence Dynamic Programming.
+        2. Chạy TRAKEAlignmentAgent với Vectorized Cosine Similarity & Monotonic DP.
         3. Xuất danh sách 100 dự đoán chuẩn format BTC: <video>, <f_1>, <f_2>, ..., <f_N>.
         """
         t0 = time.time()
@@ -387,18 +435,14 @@ class TaskSpecializedEngine:
         if not hasattr(self, "_trake_agent") or self._trake_agent is None:
             self._trake_agent = TRAKEAlignmentAgent(engine="siglip2", batch=self.batch, text_encoder=self.text_encoder)
 
-        dp_preds = self._trake_agent.align_events(query_text, events, top_videos=top_k)
-
-        results = []
-        for rank, p in enumerate(dp_preds[:top_k], 1):
-            f_list = p.get("event_frames", [])
-            results.append({
-                "rank": rank,
-                "video_id": p.get("video_id", ""),
-                "frame_idx": f_list[0] if f_list else 0,
-                "event_frames": f_list,
-                "score": p.get("score", 0.5)
-            })
+        results = self._trake_agent.align_events(
+            query_text,
+            events,
+            top_k=top_k,
+            use_multi_query=use_multi_query,
+            use_event_coverage=use_event_coverage,
+            use_row_norm_dp=use_row_norm_dp
+        )
 
         latency = (time.time() - t0) * 1000
         return results, {"events": events}, latency
@@ -416,11 +460,22 @@ class TaskSpecializedEngine:
         use_neighbor: bool = True,
         use_cue: bool = False,
         use_multimodal: bool = False,
-        use_vlm_verification: bool = False
+        use_vlm_verification: bool = False,
+        use_rrf: bool = False,
+        use_neighbor_expansion: bool = False,
+        use_multi_crop: bool = True,
+        **kwargs
     ) -> tuple[list[dict], dict, float]:
         ttype = task_type.lower()
-        if "trake" in ttype:
-            return self.search_trake(query_text, top_k=top_k, custom_en_query=custom_en_query)
+        if ttype == "trake":
+            return self.search_trake(
+                query_text=query_text,
+                top_k=top_k,
+                custom_en_query=custom_en_query,
+                use_multi_query=kwargs.get("use_multi_query", True),
+                use_event_coverage=kwargs.get("use_event_coverage", True),
+                use_row_norm_dp=kwargs.get("use_row_norm_dp", True)
+            )
         elif "qa" in ttype or "q&a" in ttype:
             return self.search_qa(
                 query_text,
@@ -429,7 +484,9 @@ class TaskSpecializedEngine:
                 use_intra_reranker=use_intra_reranker,
                 use_neighbor=use_neighbor,
                 use_cue=use_cue,
-                use_multimodal=use_multimodal
+                use_multimodal=use_multimodal,
+                use_rrf=use_rrf,
+                use_multi_crop=use_multi_crop
             )
         else:
             return self.search_kis(
@@ -440,5 +497,7 @@ class TaskSpecializedEngine:
                 use_neighbor=use_neighbor,
                 use_cue=use_cue,
                 use_multimodal=use_multimodal,
-                use_vlm_verification=use_vlm_verification
+                use_vlm_verification=use_vlm_verification,
+                use_rrf=use_rrf,
+                use_neighbor_expansion=use_neighbor_expansion
             )
