@@ -3,7 +3,7 @@ from pathlib import Path
 import sys
 
 # Add project root to sys.path
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.append(str(PROJECT_ROOT))
 
 from src.preprocessing.preprocess_videos import process_videos

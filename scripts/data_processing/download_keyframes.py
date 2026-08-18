@@ -90,7 +90,7 @@ def download_file(url: str, dest_path: Path, max_retries: int = 5):
                 return False
 
 def main():
-    base_dir = Path(__file__).resolve().parent.parent
+    base_dir = Path(__file__).resolve().parent.parent.parent
     urls_file = base_dir / "config" / "drive_keyframes_urls.txt"
     dest_dir = base_dir / "raw" / "batch_1" / "Keyframes"
     dest_dir.mkdir(parents=True, exist_ok=True)

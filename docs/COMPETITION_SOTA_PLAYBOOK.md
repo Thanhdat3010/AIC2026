@@ -57,7 +57,7 @@ conda activate AIC2026
 
 ```powershell
 # Chạy trực tiếp trên thư mục câu hỏi của BTC
-python scripts/run_submission.py --input query/batch_1/query-p1-groupA --top_k 100
+python scripts/submission/run_submission.py --input query/batch_1/query-p1-groupA --top_k 100
 ```
 
 > **Hệ thống sẽ tự động:**
@@ -68,7 +68,7 @@ python scripts/run_submission.py --input query/batch_1/query-p1-groupA --top_k 1
 
 Hoặc nếu đề thi cung cấp dưới dạng file `.json`:
 ```powershell
-python scripts/run_submission.py --input data/benchmark/ground_truth.json --top_k 100
+python scripts/submission/run_submission.py --input data/benchmark/ground_truth.json --top_k 100
 ```
 
 ---
@@ -78,7 +78,7 @@ python scripts/run_submission.py --input data/benchmark/ground_truth.json --top_
 Trước khi nộp bài lên hệ thống BTC, luôn chạy script kiểm tra:
 
 ```powershell
-python scripts/validate_submission.py --zip outputs/submission.zip
+python scripts/submission/validate_submission.py --zip outputs/submission.zip
 ```
 
 Script sẽ tự động kiểm tra:
@@ -95,13 +95,13 @@ Script sẽ tự động kiểm tra:
 
 ```powershell
 # Chạy cấu hình SOTA tổng hợp (Config 14)
-python scripts/evaluate_ablation.py --config 14
+python scripts/evaluation/evaluate_ablation.py --config 14
 
 # Chạy cấu hình KIS chuyên sâu (Config 12)
-python scripts/evaluate_ablation.py --config 12
+python scripts/evaluation/evaluate_ablation.py --config 12
 
 # So sánh toàn bộ các cấu hình
-python scripts/evaluate_ablation.py --all_configs
+python scripts/evaluation/evaluate_ablation.py --all_configs
 ```
 
 ---

@@ -19,7 +19,7 @@ tmux new -s siglip
 ### 🔹 Bước 2: Kích hoạt Conda và Chạy Trích Xuất (Lệnh 1 dòng)
 ```bash
 conda activate AIC2026
-python scripts/extract_visual_features.py --urls_file config/drive_keyframes_urls.txt --model_name google/siglip-so400m-patch14-384 --output_path data/batch_1/processed/siglip_features.npy --batch_size 128 --device cuda
+python scripts/data_processing/extract_visual_features.py --urls_file config/drive_keyframes_urls.txt --model_name google/siglip-so400m-patch14-384 --output_path data/batch_1/processed/siglip_features.npy --batch_size 128 --device cuda
 ```
 
 ### 🔹 Bước 3: Thoát ra ngoài an toàn (để script tự chạy ngầm)
@@ -37,13 +37,13 @@ tmux attach -t siglip
 ### 🔹 Nếu bị cúp điện / gián đoạn mạng (Tự động Resume chạy tiếp):
 ```bash
 tmux attach -t siglip || tmux new -s siglip
-python scripts/extract_visual_features.py --urls_file config/drive_keyframes_urls.txt --model_name google/siglip-so400m-patch14-384 --output_path data/batch_1/processed/siglip_features.npy --batch_size 128 --device cuda
+python scripts/data_processing/extract_visual_features.py --urls_file config/drive_keyframes_urls.txt --model_name google/siglip-so400m-patch14-384 --output_path data/batch_1/processed/siglip_features.npy --batch_size 128 --device cuda
 ```
 
 ---
 
 ## 📦 4. ĐÓNG GÓI FAISS INDEX (KHI CHẠY XONG FILE .NPY)
 ```bash
-python scripts/build_index.py --features data/batch_1/processed/siglip_features.npy --out indexes/batch_1/siglip-so400m.faiss
+python scripts/data_processing/build_index.py --features data/batch_1/processed/siglip_features.npy --out indexes/batch_1/siglip-so400m.faiss
 ```
 *(Quá trình đóng gói FAISS chỉ mất khoảng 3 đến 5 giây).*

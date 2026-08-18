@@ -8,7 +8,7 @@ from tqdm import tqdm
 import sys
 
 # Setup paths relative to the project root
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 RAW_DIR = PROJECT_ROOT / "raw"
 
 # Archive filenames

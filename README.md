@@ -100,11 +100,10 @@ d:\HCMUS\AIC2026\
 ├── raw/
 │   └── batch_1/                  # Video Zips, Keyframe Zips, Audio, OCR gốc
 ├── scripts/
-│   ├── evaluate_ablation.py      # Chạy kiểm chuẩn toàn diện mô hình AI
-│   ├── generate_official_batch1.py # Chạy tự động toàn bộ 24 câu đề thi BTC
-│   ├── validate_submission.py    # Kiểm tra tính hợp lệ file nộp bài chuẩn BTC
-│   ├── extract_visual_features.py# Trích xuất vector SigLIP-2
-│   └── build_index.py            # Xây dựng chỉ mục tìm kiếm
+│   ├── data_processing/          # Xử lý dữ liệu (extract_features, build_index, v.v.)
+│   ├── evaluation/               # Đánh giá và kiểm chuẩn AI (evaluate_ablation, audit_gt)
+│   ├── submission/               # Tạo và kiểm tra file nộp bài chuẩn BTC
+│   └── verification/             # Kiểm tra tính toàn vẹn dữ liệu và môi trường
 ├── src/
 │   ├── evaluation/btc_metric.py  # Công thức tính điểm BTC chính thống
 │   ├── query/
@@ -155,7 +154,7 @@ GEMINI_API_KEYS="AIzaSy...,AIzaSy...,AIzaSy..."
 ### 🧪 A. Chạy Thử Nghiệm & Đo Điểm Chuẩn (Ablation Benchmark):
 Để đánh giá độ chính xác trên 11 test cases chuẩn BTC:
 ```bash
-python scripts/evaluate_ablation.py --config 16
+python scripts/evaluation/evaluate_ablation.py --config 16
 ```
 > Kết quả đo lường và ma trận điểm số sẽ tự động lưu vào `data/benchmark/latest_ablation_results.json` và `docs/ABLATION_STUDY_RESULTS.md`.
 
@@ -164,7 +163,7 @@ python scripts/evaluate_ablation.py --config 16
 ### 🚀 B. Chạy Toàn Bộ 24 Câu Đề Thi BTC (Batch Run):
 Để chạy mô hình AI tự động trên toàn bộ 24 câu hỏi của đợt thi:
 ```bash
-python scripts/generate_official_batch1.py
+python scripts/submission/generate_official_batch1.py
 ```
 > Toàn bộ 24 file kết quả CSV sẽ được lưu tự động tại `output/batch_1/*.csv`.
 
@@ -172,7 +171,7 @@ python scripts/generate_official_batch1.py
 
 ### 🔍 C. Kiểm Chuẩn Định Dạng File Nộp Bài BTC:
 ```bash
-python scripts/validate_submission.py
+python scripts/submission/validate_submission.py
 ```
 
 ---

@@ -104,7 +104,7 @@ $$Final\ Score = \frac{1}{5} \sum_{k \in \{1, 5, 20, 50, 100\}} R@k$$
 *Trong đó $R@k = \max_{1 \le i \le k} \{ R\text{-}Score(r_i) \}$.*
 
 ### 2. Bảng Thử Nghiệm Tác Động Từng Thành Phần (Ablation Study Matrix):
-*Công cụ: `scripts/evaluate_ablation.py` đối chiếu tự động với `data/benchmark/ground_truth.json`.*
+*Công cụ: `scripts/evaluation/evaluate_ablation.py` đối chiếu tự động với `data/benchmark/ground_truth.json`.*
 *Quản lý 2 file FAISS độc lập: `indexes/batch_1/clip_btc.faiss` (512d) & `indexes/batch_1/siglip2.faiss` (1152d).*
 
 | # | Cấu hình Thử nghiệm (Ablation Setup) | KIS | QA | TRAKE | 🏆 BTC Final Score | Độ trễ (ms) | Đánh giá & Tác động |

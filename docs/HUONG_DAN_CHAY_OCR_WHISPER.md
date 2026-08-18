@@ -30,7 +30,7 @@ pip install easyocr vietocr faster-whisper requests gdown "numpy<2.0.0" "setupto
 ```bash
 tmux new -s ocr
 conda activate AIC2026
-python scripts/extract_ocr_from_drive.py --urls_file config/drive_keyframes_urls.txt --output_path data/batch_1/processed/ocr_results.parquet --use_vietocr --use_gpu
+python scripts/data_processing/extract_ocr_from_drive.py --urls_file config/drive_keyframes_urls.txt --output_path data/batch_1/processed/ocr_results.parquet --use_vietocr --use_gpu
 ```
 *(Thoát ra ngoài: Nhấn `Ctrl + B` rồi bấm `D`)*.
 
@@ -40,7 +40,7 @@ python scripts/extract_ocr_from_drive.py --urls_file config/drive_keyframes_urls
 ```bash
 tmux new -s asr
 conda activate AIC2026
-python scripts/extract_asr_from_drive.py --urls_file config/drive_videos_urls.txt --output_path data/batch_1/processed/transcripts.parquet --model_size vinai/PhoWhisper-large --batch_size 16 --beam_size 5 --device cuda
+python scripts/data_processing/extract_asr_from_drive.py --urls_file config/drive_videos_urls.txt --output_path data/batch_1/processed/transcripts.parquet --model_size vinai/PhoWhisper-large --batch_size 16 --beam_size 5 --device cuda
 ```
 *(Thoát ra ngoài: Nhấn `Ctrl + B` rồi bấm `D`)*.
 
@@ -58,10 +58,10 @@ Chỉ cần chạy lại y nguyên câu lệnh cũ:
 ### 🌟 Cách 2: Chọn chạy từ một gói cụ thể bằng `--start_from`
 ```bash
 # OCR chạy tiếp từ Keyframes_L25.zip:
-python scripts/extract_ocr_from_drive.py --start_from Keyframes_L25.zip --use_vietocr --use_gpu
+python scripts/data_processing/extract_ocr_from_drive.py --start_from Keyframes_L25.zip --use_vietocr --use_gpu
 
 # PhoWhisper chạy tiếp từ Videos_L25_a.zip:
-python scripts/extract_asr_from_drive.py --start_from Videos_L25_a.zip --model_size vinai/PhoWhisper-large --device cuda
+python scripts/data_processing/extract_asr_from_drive.py --start_from Videos_L25_a.zip --model_size vinai/PhoWhisper-large --device cuda
 ```
 
 ---
@@ -69,8 +69,8 @@ python scripts/extract_asr_from_drive.py --start_from Videos_L25_a.zip --model_s
 ### 🌟 Cách 3: Chọn chạy từ số thứ tự gói bằng `--start_index`
 ```bash
 # OCR chạy từ gói 5:
-python scripts/extract_ocr_from_drive.py --start_index 5 --use_vietocr --use_gpu
+python scripts/data_processing/extract_ocr_from_drive.py --start_index 5 --use_vietocr --use_gpu
 
 # PhoWhisper chạy từ gói 5:
-python scripts/extract_asr_from_drive.py --start_index 5 --model_size vinai/PhoWhisper-large --device cuda
+python scripts/data_processing/extract_asr_from_drive.py --start_index 5 --model_size vinai/PhoWhisper-large --device cuda
 ```

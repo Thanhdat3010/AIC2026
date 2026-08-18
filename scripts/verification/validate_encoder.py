@@ -4,7 +4,7 @@ import sys
 import numpy as np
 
 # Add project root to sys.path
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.append(str(PROJECT_ROOT))
 
 from src.query.text_encoder import CLIPTextEncoder, MultiLingualQueryEncoder

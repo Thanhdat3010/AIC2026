@@ -9,7 +9,7 @@ if hasattr(sys.stdout, 'reconfigure'):
 if hasattr(sys.stderr, 'reconfigure'):
     sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 FRAMES_PATH = BASE_DIR / "data" / "batch_1" / "processed" / "frames.parquet"
 GT_PATH = BASE_DIR / "data" / "benchmark" / "ground_truth.json"
 
