@@ -14,9 +14,8 @@ from src.submission.validator import SubmissionValidator
 def test_config_paths_exist():
     assert settings.directories.raw.exists()
     assert settings.directories.processed.exists()
-    assert settings.directories.indexes.exists()
     assert (settings.directories.processed / "frames.parquet").exists()
-    assert (settings.directories.indexes / "clip.faiss").exists()
+    assert (settings.directories.processed / "siglip_features.npy").exists()
 
 def test_query_decomposer():
     decomposer = QueryDecomposer()

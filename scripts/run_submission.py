@@ -144,14 +144,26 @@ def generate_submission(input_path: Path, output_root: Path = None, top_k: int =
         lines = []
 
         if ttype == "kis":
-            preds, info, lat = engine.search_kis(query_text=qtext, top_k=top_k)
+            preds, info, lat = engine.search_kis(
+                query_text=qtext,
+                top_k=top_k,
+                use_intra_reranker=True,
+                use_neighbor=True
+            )
             for p in preds[:100]:
                 v_clean = clean_video_name(p["video_id"])
                 f_idx = int(p["frame_idx"])
                 lines.append(f"{v_clean},{f_idx}")
 
         elif ttype == "qa":
-            preds, info, lat = engine.search_qa(query_text=qtext, top_k=top_k)
+            preds, info, lat = engine.search_qa(
+                query_text=qtext,
+                top_k=top_k,
+                use_intra_reranker=True,
+                use_neighbor=True,
+                use_cue=True,
+                use_multimodal=True
+            )
             default_ans = info.get("generated_qa_answer", "Không xác định")
             for p in preds[:100]:
                 v_clean = clean_video_name(p["video_id"])

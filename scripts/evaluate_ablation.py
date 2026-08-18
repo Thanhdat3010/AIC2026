@@ -21,7 +21,6 @@ sys.path.insert(0, str(BASE_DIR))
 
 from src.indexing.faiss_indexer import load_faiss_index
 from src.query.text_encoder import UnifiedTextEncoder
-from src.retrieval.hybrid_engine import HybridRetrievalEngine
 from src.retrieval.task_specialized_engine import TaskSpecializedEngine
 
 # Zero-shot simple English translation dictionary for baseline tests
@@ -39,96 +38,10 @@ BENCHMARK_TRANSLATIONS = {
     "test-kis-11": "Aerial flycam view looking straight down at 4 cyclists riding in a line along an asphalt road passing by a blooming purple bougainvillea tree on the right roadside."
 }
 
+from src.evaluation.btc_metric import evaluate_query_predictions
+
 def evaluate_retrieval_ranking(predictions: list[dict], ground_truth: dict, task_type: str) -> dict:
-    """
-    Tính toán cả 2 nhóm chỉ số:
-    1. BTC Official Metric: Frame-level R@1, R@5, R@20, R@50, R@100 & Final Score.
-    2. Diagnostic Metrics: Stage-1 Video-level Recall @ 1, 5, 10, 20, 50, 100.
-    """
-    K_VALUES = [1, 5, 20, 50, 100]
-    V_K_VALUES = [1, 5, 10, 20, 50, 100]
-    
-    target_video = ground_truth.get("video_id", "")
-    
-    # 1. Đo lường Video-Level Recall (Xác định Stage-1 Retriever đã tìm thấy đúng Video chưa)
-    unique_videos = []
-    seen_v = set()
-    for p in predictions:
-        v = p.get("video_id", "")
-        if v and v not in seen_v:
-            unique_videos.append(v)
-            seen_v.add(v)
-
-    video_hit_rank = -1
-    for idx, v in enumerate(unique_videos, 1):
-        if v == target_video:
-            video_hit_rank = idx
-            break
-
-    video_recall_at_k = {}
-    for k in V_K_VALUES:
-        video_recall_at_k[f"V-R@{k}"] = 1.0 if (video_hit_rank != -1 and video_hit_rank <= k) else 0.0
-
-    # 2. Đo lường Frame-Level Recall (Chuẩn 100% BTC)
-    r_scores = []
-    if task_type in ["kis", "qa"]:
-        s_frame = ground_truth.get("start_frame", 0)
-        e_frame = ground_truth.get("end_frame", 0)
-
-        for p in predictions:
-            v_pred = p.get("video_id", "")
-            f_pred = p.get("frame_idx", 0)
-            if v_pred == target_video and s_frame <= f_pred <= e_frame:
-                r_scores.append(1.0)
-            else:
-                r_scores.append(0.0)
-
-    elif task_type == "trake":
-        events = ground_truth.get("events", [])
-        n_events = len(events)
-        for p in predictions:
-            v_pred = p.get("video_id", "")
-            if v_pred == target_video:
-                hit_count = 0
-                event_frames = p.get("event_frames", [])
-                if event_frames:
-                    for j, ev in enumerate(events):
-                        if j < len(event_frames) and ev["start_frame"] <= event_frames[j] <= ev["end_frame"]:
-                            hit_count += 1
-                else:
-                    f_pred = p.get("frame_idx", 0)
-                    for ev in events:
-                        if ev["start_frame"] <= f_pred <= ev["end_frame"]:
-                            hit_count += 1
-                r_scores.append(hit_count / max(1, n_events))
-            else:
-                r_scores.append(0.0)
-    else:
-        r_scores = [0.0] * len(predictions)
-
-    if len(r_scores) < 100:
-        r_scores.extend([0.0] * (100 - len(r_scores)))
-
-    r_at_k = {}
-    for k in K_VALUES:
-        r_at_k[f"R@{k}"] = max(r_scores[:k]) if k <= len(r_scores) else 0.0
-
-    final_score = sum(r_at_k.values()) / len(K_VALUES)
-    
-    first_hit_rank = -1
-    for idx, sc in enumerate(r_scores):
-        if sc > 0.0:
-            first_hit_rank = idx + 1
-            break
-
-    return {
-        "r_at_k": r_at_k,
-        "final_score": final_score,
-        "first_hit_rank": first_hit_rank,
-        "first_hit_score": r_scores[first_hit_rank - 1] if first_hit_rank != -1 else 0.0,
-        "video_hit_rank": video_hit_rank,
-        "video_recall_at_k": video_recall_at_k
-    }
+    return evaluate_query_predictions(predictions, ground_truth, task_type, check_qa_answer=True)
 
 class DenseBaselinePipeline:
     def __init__(self, engine: str = "siglip2", batch: str = "batch_1"):
@@ -173,6 +86,10 @@ def run_ablation_experiment(config_code: str, pipeline_cache: dict = None) -> di
     use_temporal = False
     use_soft = False
     use_qa = False
+    use_intra_reranker = False
+    use_neighbor = True
+    use_cue = False
+    use_multimodal = False
 
     if config_code == "0":
         config_name = "Baseline 0: BTC CLIP (512d) + Dịch từ điển thô"
@@ -223,8 +140,84 @@ def run_ablation_experiment(config_code: str, pipeline_cache: dict = None) -> di
                 pipeline_cache["hybrid_siglip"] = pipeline
 
     elif config_code == "11":
-        config_name = "Cấu hình 11: 🚀 TASK-SPECIALIZED SOTA ARCHITECTURE (Chuyên biệt hóa KIS, QA, TRAKE + Gating thông minh)"
+        config_name = "Cấu hình 11: 🚀 TASK-SPECIALIZED SOTA ARCHITECTURE (Stage-1 Baseline: ModalityGate + Specialized Routing)"
         mode = "specialized"
+        use_intra_reranker = False
+        if pipeline_cache and "task_specialized" in pipeline_cache:
+            pipeline = pipeline_cache["task_specialized"]
+        else:
+            pipeline = TaskSpecializedEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["task_specialized"] = pipeline
+
+    elif config_code == "12":
+        config_name = "Cấu hình 12 (E1): Config 11 + Gaussian Neighbor Temporal Support (N_i)"
+        mode = "specialized"
+        use_intra_reranker = True
+        use_neighbor = True
+        use_cue = False
+        use_multimodal = False
+        if pipeline_cache and "task_specialized" in pipeline_cache:
+            pipeline = pipeline_cache["task_specialized"]
+        else:
+            pipeline = TaskSpecializedEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["task_specialized"] = pipeline
+
+    elif config_code == "13":
+        config_name = "Cấu hình 13 (E1+E2): + Query Cue Decomposition & Sliding Window Coverage"
+        mode = "specialized"
+        use_intra_reranker = True
+        use_neighbor = True
+        use_cue = True
+        use_multimodal = False
+        if pipeline_cache and "task_specialized" in pipeline_cache:
+            pipeline = pipeline_cache["task_specialized"]
+        else:
+            pipeline = TaskSpecializedEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["task_specialized"] = pipeline
+
+    elif config_code == "14":
+        config_name = "Cấu hình 14 (E1+E2+E3): + Time-Aligned Multi-Modal Timeline Fusion (ASR/OCR/Objects)"
+        mode = "specialized"
+        use_intra_reranker = True
+        use_neighbor = True
+        use_cue = True
+        use_multimodal = True
+        use_vlm_verification = False
+        if pipeline_cache and "task_specialized" in pipeline_cache:
+            pipeline = pipeline_cache["task_specialized"]
+        else:
+            pipeline = TaskSpecializedEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["task_specialized"] = pipeline
+
+    elif config_code == "15":
+        config_name = "Cấu hình 15 (SOTA Master): Task-Specialized + E1 Neighbor + E3 ASR + VLM Verification + Monotonic DP"
+        mode = "specialized"
+        use_intra_reranker = True
+        use_neighbor = True
+        use_cue = True
+        use_multimodal = True
+        use_vlm_verification = True
+        use_dense_video_refiner = False
+        if pipeline_cache and "task_specialized" in pipeline_cache:
+            pipeline = pipeline_cache["task_specialized"]
+        else:
+            pipeline = TaskSpecializedEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["task_specialized"] = pipeline
+
+    elif config_code == "16":
+        config_name = "Cấu hình 16 (Full 3-Layer Master): Config 15 + Layer 3 Gated Dense Video Refinement (OpenCV Vi Sai)"
+        mode = "specialized"
+        use_intra_reranker = True
+        use_neighbor = True
+        use_cue = True
+        use_multimodal = True
+        use_vlm_verification = True
+        use_dense_video_refiner = True
         if pipeline_cache and "task_specialized" in pipeline_cache:
             pipeline = pipeline_cache["task_specialized"]
         else:
@@ -266,11 +259,34 @@ def run_ablation_experiment(config_code: str, pipeline_cache: dict = None) -> di
                 use_qa_agent=use_qa
             )
         elif mode == "specialized":
-            preds, qinfo, latency = pipeline.search(
-                query_text=qtext,
-                task_type=ttype,
-                top_k=100
-            )
+            if ttype == "kis":
+                # KIS SOTA: E1 Neighbor Smoothing + VLM Verification + Layer 3 Dense Video Refiner
+                preds, qinfo, latency = pipeline.search_kis(
+                    query_text=qtext,
+                    top_k=100,
+                    use_intra_reranker=use_intra_reranker,
+                    use_neighbor=True,
+                    use_cue=False,
+                    use_multimodal=False,
+                    use_vlm_verification=use_vlm_verification,
+                    use_dense_video_refiner=use_dense_video_refiner
+                )
+            elif ttype == "qa":
+                # QA SOTA: E1 + E2 Cue + E3 Time-Aligned ASR Fusion + Gemini Vision Answering
+                preds, qinfo, latency = pipeline.search_qa(
+                    query_text=qtext,
+                    top_k=100,
+                    use_intra_reranker=use_intra_reranker,
+                    use_neighbor=True,
+                    use_cue=True,
+                    use_multimodal=True
+                )
+            else:
+                # TRAKE SOTA: Global Monotonic Sequence Dynamic Programming
+                preds, qinfo, latency = pipeline.search_trake(
+                    query_text=qtext,
+                    top_k=100
+                )
 
         latencies.append(latency)
         eval_res = evaluate_retrieval_ranking(preds, gt, ttype)
@@ -301,10 +317,21 @@ def run_ablation_experiment(config_code: str, pipeline_cache: dict = None) -> di
             "R@20": f"{eval_res['r_at_k']['R@20']:.2f}",
             "R@50": f"{eval_res['r_at_k']['R@50']:.2f}",
             "Final Score": f"{fs:.4f}",
-            "Latency": f"{latency:.0f}ms"
+            "Latency": f"{latency:.0f}ms",
+            "top_candidates": [
+                {
+                    "rank": r,
+                    "video_id": p.get("video_id", ""),
+                    "frame_idx": int(p.get("frame_idx", 0)),
+                    "score": float(p.get("score", 0.0)),
+                    "answer": p.get("answer", "")
+                } for r, p in enumerate(preds[:20], 1)
+            ]
         })
+        print(f"   ▶ [{len(records):02d}/{len(test_cases):02d}] {qid:13s} ({ttype.upper():5s}) -> Video: {video_hit:4s} | Frame: {frame_hit:5s} | BTC Score: {fs:.4f} ({latency:.0f}ms)", flush=True)
 
-    df_res = pd.DataFrame(records)
+    print("\n" + "=" * 100)
+    df_res = pd.DataFrame([{k: v for k, v in r.items() if k != "top_candidates"} for r in records])
     print(df_res.to_string(index=False))
     print("\n" + "-" * 100)
 
@@ -314,7 +341,6 @@ def run_ablation_experiment(config_code: str, pipeline_cache: dict = None) -> di
     overall_final = np.mean([r for scores in task_scores.values() for r in scores])
     avg_latency = np.mean(latencies)
 
-    # Tính toán trung bình Video Recall các cấp độ
     vr_1 = np.mean(video_recalls[1]) * 100
     vr_5 = np.mean(video_recalls[5]) * 100
     vr_10 = np.mean(video_recalls[10]) * 100
@@ -337,26 +363,36 @@ def run_ablation_experiment(config_code: str, pipeline_cache: dict = None) -> di
     print(f"      ▶ Video Recall@100: {vr_100:.1f}%")
     print(f"   • ⚡ Average Query Latency    : {avg_latency:.2f} ms")
     print("=" * 100 + "\n")
-    return {
+
+    res_dict = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "config_code": config_code,
         "config_name": config_name,
-        "kis_score": kis_avg,
-        "qa_score": qa_avg,
-        "trake_score": trake_avg,
-        "final_score": overall_final,
-        "video_recall_1": vr_1,
-        "video_recall_5": vr_5,
-        "video_recall_10": vr_10,
-        "video_recall_20": vr_20,
-        "video_recall_50": vr_50,
-        "video_recall_100": vr_100,
-        "latency_ms": avg_latency,
+        "kis_score": float(kis_avg),
+        "qa_score": float(qa_avg),
+        "trake_score": float(trake_avg),
+        "final_score": float(overall_final),
+        "video_recall_1": float(vr_1),
+        "video_recall_5": float(vr_5),
+        "video_recall_10": float(vr_10),
+        "video_recall_20": float(vr_20),
+        "video_recall_50": float(vr_50),
+        "video_recall_100": float(vr_100),
+        "latency_ms": float(avg_latency),
         "records": records
     }
 
+    # Lưu kết quả Benchmark động cho Streamlit
+    latest_json_path = BASE_DIR / "data" / "benchmark" / "latest_ablation_results.json"
+    latest_json_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(latest_json_path, "w", encoding="utf-8") as f:
+        json.dump(res_dict, f, ensure_ascii=False, indent=2)
+    print(f"💾 [ĐÃ LƯU KẾT QUẢ BENCHMARK ĐỘNG] -> {latest_json_path}", flush=True)
+
+    return res_dict
+
 def save_ablation_markdown_report(results: list[dict], output_path: Path):
     timestamp_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    base_score = results[0]["final_score"] if results else 0.0
 
     lines = []
     lines.append(f"# 📊 BÁO CÁO ĐO LƯỜNG & CHẨN ĐOÁN BOTTLENECK ABLATION STUDY (AIC 2026)")
@@ -366,11 +402,11 @@ def save_ablation_markdown_report(results: list[dict], output_path: Path):
     lines.append("---\n")
 
     lines.append("## 🏆 1. MA TRẬN CHẨN ĐOÁN HIỆU SUẤT VÀ NÚT THẮT (BOTTLENECK DIAGNOSIS MATRIX)\n")
-    lines.append("| # | Cấu hình Thử nghiệm | 🏆 BTC Final Score | V-R@1 | V-R@5 | V-R@10 | V-R@20 | V-R@50 | Latency | Đánh giá Nút thắt |")
-    lines.append("| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |")
+    lines.append("| # | Cấu hình Thử nghiệm | 🏆 BTC Final Score | V-R@1 | V-R@5 | V-R@10 | V-R@20 | Latency | Đánh giá Nút thắt |")
+    lines.append("| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |")
 
     for r in results:
-        lines.append(f"| **{r['config_code']}** | {r['config_name']} | **{r['final_score']:.4f}** | {r['video_recall_1']:.1f}% | {r['video_recall_5']:.1f}% | {r['video_recall_10']:.1f}% | {r['video_recall_20']:.1f}% | {r['video_recall_50']:.1f}% | {r['latency_ms']:.0f}ms | {'Cần Reranker đưa từ Top 5 lên #1' if r['video_recall_5'] > r['video_recall_1'] else 'Retriever tốt'} |")
+        lines.append(f"| **{r['config_code']}** | {r['config_name']} | **{r['final_score']:.4f}** | {r['video_recall_1']:.1f}% | {r['video_recall_5']:.1f}% | {r['video_recall_10']:.1f}% | {r['video_recall_20']:.1f}% | {r['latency_ms']:.0f}ms | {'🔥 Cần Reranker kéo V-R@5 lên #1' if r['video_recall_5'] > r['video_recall_1'] else 'Đã tối ưu'} |")
 
     lines.append("\n---\n")
     lines.append("## 🔍 2. CHI TIẾT TỪNG QUERY: SO SÁNH VIDEO RANK VS FRAME RANK\n")
@@ -380,7 +416,7 @@ def save_ablation_markdown_report(results: list[dict], output_path: Path):
         lines.append(f"- **BTC Final Score:** `{r['final_score']:.4f}` | **Video Recall@5:** `{r['video_recall_5']:.1f}%` | **Video Recall@20:** `{r['video_recall_20']:.1f}%`\n")
 
         lines.append("| Query ID | Task | Target Video | Video Rank | Frame Rank | R@1 | R@5 | R@20 | R@50 | Final Score | Latency |")
-        lines.append("| :--- | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |")
+        lines.append("| :--- | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: | :---: |")
         for rec in r["records"]:
             lines.append(f"| {rec['Query ID']} | {rec['Task']} | {rec['Target Video']} | **{rec['Video Rank']}** | **{rec['Frame Rank']}** | {rec['R@1']} | {rec['R@5']} | {rec['R@20']} | {rec['R@50']} | {rec['Final Score']} | {rec['Latency']} |")
         lines.append("\n")
@@ -404,7 +440,7 @@ def update_leaderboard(current_results: list[dict], lb_path: Path, run_id: str):
 
     for rank, r in enumerate(sorted_results, 1):
         crown = "🥇" if rank == 1 else ("🥈" if rank == 2 else ("🥉" if rank == 3 else f"#{rank}"))
-        lines.append(f"| {crown} | **{r['config_name']}** | **{r['final_score']:.4f}** | {r['video_recall_1']:.1f}% | {r['video_recall_5']:.1f}% | {r['video_recall_20']:.1f}% | {r['latency_ms']:.0f}ms | {'🔥 Cần Reranker kéo V-R@5 lên #1' if rank == 1 else 'Thử nghiệm'} |")
+        lines.append(f"| {crown} | **{r['config_name']}** | **{r['final_score']:.4f}** | {r['video_recall_1']:.1f}% | {r['video_recall_5']:.1f}% | {r['video_recall_20']:.1f}% | {r['latency_ms']:.0f}ms | {'🔥 KHUYÊN DÙNG THI ĐẤU' if rank == 1 else 'Thử nghiệm'} |")
 
     with open(lb_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
@@ -412,18 +448,18 @@ def update_leaderboard(current_results: list[dict], lb_path: Path, run_id: str):
 
 def main():
     parser = argparse.ArgumentParser(description="Chạy Ablation Benchmark kèm chẩn đoán Stage-1 Video Recall")
-    parser.add_argument("--config", type=str, default=None, help="Mã cấu hình ('0', '1', '1b', '10', '11')")
+    parser.add_argument("--config", type=str, default=None, help="Mã cấu hình ('11', '12', '13', '14')")
     parser.add_argument("--all_configs", action="store_true", help="Chạy toàn bộ các cấu hình để so sánh ma trận")
     args = parser.parse_args()
 
     pipeline_cache = {}
     md_output_path = BASE_DIR / "docs" / "ABLATION_STUDY_RESULTS.md"
 
-    configs_to_test = ["0", "1", "1b", "10", "11"]
+    configs_to_test = ["11", "12", "14", "15"]
     if args.config is not None:
         configs_to_test = [args.config]
 
-    print("\n🚀 BẮT ĐẦU CHẠY ĐO LƯỜNG CHẨN ĐOÁN BOTTLENECK (STAGE-1 VIDEO RECALL VS FRAME RECALL)...")
+    print("\n🚀 BẮT ĐẦU CHẠY THỬ NGHIỆM ABLATION STUDY: INTRA-VIDEO TEMPORAL RERANKER (E1 -> E3)...")
     results = []
     for cid in configs_to_test:
         res = run_ablation_experiment(cid, pipeline_cache=pipeline_cache)

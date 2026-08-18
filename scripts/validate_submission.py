@@ -1,38 +1,40 @@
 import sys
 from pathlib import Path
 
+# Fix Windows console UTF-8 output encoding
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8")
+
 # Add project root to sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(PROJECT_ROOT))
 
-from src.submission.writer import SubmissionWriter
-from src.submission.validator import SubmissionValidator
-from src.config import settings
+from src.submission.submission_validator import SubmissionValidator
 
 def main():
-    print("=== Submission Validation ===")
+    print("=" * 80)
+    print("[*] KIEM TRA DINH DANG TEP NOP BAI CHUAN BTC (AIC 2026 VALIDATION)")
+    print("=" * 80)
     
-    # 1. Generate a dummy submission
-    writer = SubmissionWriter(settings.directories.outputs)
-    
-    dummy_results = [
-        {"video_id": "L21_V001", "frame_idx": 123},
-        {"video_id": "L21_V001", "frame_idx": 456},
-        {"video_id": "L22_V015", "frame_idx": 789},
-        {"video_id": "L30_V112", "frame_idx": 1024},
-    ]
-    
-    out_path = writer.write("dummy01", dummy_results, top_k=100)
-    
-    # 2. Validate it
     validator = SubmissionValidator()
-    is_valid, message = validator.validate(out_path)
+    output_dir = PROJECT_ROOT / "output" / "batch_1"
     
-    if is_valid:
-        print(f"\n[SUCCESS] {message}")
-    else:
-        print(f"\n[ERROR] {message}")
+    if not output_dir.exists():
+        print(f"[!] Khong tim thay thu muc: {output_dir}")
         sys.exit(1)
+        
+    summary = validator.validate_directory(output_dir)
+    print(f"[*] Thu muc kiem tra: {output_dir}")
+    print(f"[*] Tong so file CSV: {summary['total_files']}")
+    print(f"[*] Ket qua kiem chuan: {'[SUCCESS] 100% HOP LE QUY CHE BTC' if summary['all_valid'] else '[FAILED] PHAT HIEN LOI DINH DANG'}")
+    
+    if not summary["all_valid"]:
+        for f, err in summary.get("details", {}).items():
+            if not err["valid"]:
+                print(f"   - {f}: {err['reason']}")
+        sys.exit(1)
+    else:
+        print("\n[SUCCESS] Toan bo cac file CSV da san sang de dong goi submission.zip!")
 
 if __name__ == "__main__":
     main()

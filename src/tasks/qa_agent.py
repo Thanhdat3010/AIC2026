@@ -97,6 +97,7 @@ Trả về định dạng JSON thuần túy:
                 conf = float(res_json.get("confidence", 0.0))
 
                 cand["qa_answer"] = ans
+                cand["answer"] = ans
                 cand["qa_confidence"] = conf
 
                 if has_ans and conf > best_confidence and ans.lower() not in ["không xác định", "không có", "unknown", "n/a"]:
@@ -117,6 +118,8 @@ Trả về định dạng JSON thuần túy:
 
         for r, c in enumerate(reranked, 1):
             c["rank"] = r
+            if "answer" not in c or not c["answer"]:
+                c["answer"] = best_answer if best_answer not in ["Không xác định", "Lỗi API"] else ""
 
         return best_answer, reranked
 

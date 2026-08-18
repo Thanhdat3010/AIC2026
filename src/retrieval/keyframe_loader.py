@@ -89,6 +89,66 @@ class KeyframeZipLoader:
 
         return None
 
+    def load_frame(self, video_id: str, frame_idx: int) -> Image.Image:
+        """Alias cho get_image."""
+        return self.get_image(video_id, frame_idx)
+
+    def get_keyframe_image(self, video_id: str, frame_idx: int) -> Image.Image:
+        """Alias cho get_image."""
+        return self.get_image(video_id, frame_idx)
+
+    def get_surrounding_keyframes(self, video_id: str, frame_idx: int, count: int = 5) -> list:
+        """
+        Lấy danh sách các keyframes lân cận (trước và sau) để soi dải phim ngữ cảnh.
+        """
+        df_v = self.df_frames[self.df_frames["video_id"] == video_id].sort_values("frame_idx")
+        if df_v.empty:
+            return []
+
+        frame_list = df_v["frame_idx"].tolist()
+        import bisect
+        pos = bisect.bisect_left(frame_list, int(frame_idx))
+        pos = min(pos, len(frame_list) - 1)
+
+        half = count // 2
+        start_idx = max(0, pos - half)
+        end_idx = min(len(frame_list), start_idx + count)
+        if end_idx - start_idx < count:
+            start_idx = max(0, end_idx - count)
+
+        sub_frames = frame_list[start_idx:end_idx]
+        results = []
+        for f in sub_frames:
+            img = self.get_image(video_id, f)
+            results.append({
+                "frame_idx": f,
+                "is_current": (f == frame_list[pos]),
+                "image": img
+            })
+        return results
+
+    def get_dense_video_frame(self, video_id: str, frame_idx: int) -> Image.Image:
+        """
+        Trích xuất frame video chính xác từng frame từ file MP4 gốc qua OpenCV.
+        """
+        try:
+            import cv2
+            from src.reranking.dense_video_refiner import VideoZipManager
+            zm = VideoZipManager()
+            v_path = zm.get_video_path(video_id)
+            if not v_path or not v_path.exists():
+                return None
+            cap = cv2.VideoCapture(str(v_path))
+            cap.set(cv2.CAP_PROP_POS_FRAMES, int(frame_idx))
+            ret, frame = cap.read()
+            cap.release()
+            if ret:
+                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                return Image.fromarray(frame_rgb)
+        except Exception:
+            pass
+        return None
+
 if __name__ == "__main__":
     loader = KeyframeZipLoader()
     print("Testing loader on L27_V002 frame 920...")

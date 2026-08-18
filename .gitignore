@@ -52,6 +52,9 @@ env/
 .venv
 AIC2026/
 
+# Temporary Scratch / Video cache
+scratch/
+
 # Pytest & IDEs
 .pytest_cache/
 .coverage

@@ -113,6 +113,7 @@ Rules for Modality Gating:
 2. has_asr_signal: set to TRUE ONLY if the query mentions spoken speech, dialogue quotes, interview answers, announcements. If purely visual, set to FALSE.
 3. is_qa: set to TRUE if the query is a Question asking for specific entity/action (starts with Khi nào, Ai, Cái gì, Ở đâu, Như thế nào, Bao nhiêu, etc.).
 4. is_trake: set to TRUE if the query describes a chronological sequence of multiple distinct consecutive actions (First... then... then...).
+5. If is_trake is true: break down the chronological actions into granular atomic sub-steps in `trake_events` (in English). For example, "lần lượt thêm đậu Hà Lan rồi cà rốt thái hạt lựu" MUST be split into TWO distinct events: "chef adding green peas into the pan" and "chef adding diced carrots into the pan". Do not merge multiple actions into one.
 
 Respond with ONLY a JSON object with this EXACT structure:
 {{
@@ -127,7 +128,7 @@ Respond with ONLY a JSON object with this EXACT structure:
   "asr_keywords": ["Specific spoken phrases only if has_asr_signal is true, else empty list"],
   "is_qa": true or false,
   "is_trake": true or false,
-  "trake_events": ["Event 1 English", "Event 2 English", "Event 3 English (if is_trake is true)"],
+  "trake_events": ["Atomic Event 1 in English", "Atomic Event 2 in English", "Atomic Event 3 in English..."],
   "weights": {{
     "visual": 1.0,
     "ocr": 0.0,
