@@ -70,6 +70,15 @@ engine = get_engine()
 keyframe_loader = get_keyframe_loader()
 validator = get_validator()
 
+def sync_submission_zip(csv_dir: Path, zip_dest: Path):
+    """Tự động đóng gói và đồng bộ file submission.zip chuẩn 100% BTC."""
+    if not csv_dir.exists():
+        return
+    zip_dest.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(zip_dest, "w", zipfile.ZIP_DEFLATED) as z:
+        for csv_f in sorted(list(csv_dir.glob("*.csv"))):
+            z.write(csv_f, arcname=f"submission/{csv_f.name}")
+
 # Sidebar
 with st.sidebar:
     st.image("https://img.shields.io/badge/AIC_2026-CHAMPIONSHIP_CONSOLE-gold?style=for-the-badge&logo=google", use_container_width=True)
@@ -388,25 +397,39 @@ if active_tab == "📊 Benchmark & Ground Truth (11 Câu Đã Eval)":
 # TAB 2: KIỂM DUYỆT TOÀN BỘ ĐỀ THI BTC (24 CÂU BATCH 1)
 # =============================================================================
 elif active_tab == "📂 Đề Thi Chính Thức BTC (24 Câu Batch 1)":
-    st.title("📂 Đề Thi Chính Thức BTC (24 Câu Batch 1)")
-    st.caption("Kiểm duyệt toàn bộ 24 câu hỏi của đợt thi Batch 1, chạy tự động và xuất gói nộp bài ZIP chuẩn BTC.")
+    st.title("📂 Đề Thi Chính Thức & Thử Nghiệm BTC")
+    st.caption("Kiểm duyệt toàn bộ các câu hỏi, chạy tự động, chỉnh sửa tay trực quan và tự động đồng bộ file submission.zip chuẩn 100% BTC.")
 
-    query_dir = PROJECT_ROOT / "query" / "batch_1" / "query-p1-groupA"
-    output_dir = PROJECT_ROOT / "output" / "batch_1"
+    pkg_choice = st.selectbox(
+        "📦 Chọn Gói Đề Thi / Thư Mục Nộp Bài:",
+        [
+            "🧪 Gói Thử Nghiệm: query/THUNGHIEM-bo-de-thi → thunghiem/submission",
+            "📂 Gói Batch 1 Group A: query/batch_1/query-p1-groupA → output/batch_1"
+        ]
+    )
+
+    if "THUNGHIEM" in pkg_choice:
+        query_dir = PROJECT_ROOT / "query" / "THUNGHIEM-bo-de-thi"
+        output_dir = PROJECT_ROOT / "thunghiem" / "submission"
+        zip_output_path = PROJECT_ROOT / "thunghiem" / "submission.zip"
+    else:
+        query_dir = PROJECT_ROOT / "query" / "batch_1" / "query-p1-groupA"
+        output_dir = PROJECT_ROOT / "output" / "batch_1"
+        zip_output_path = PROJECT_ROOT / "output" / "submission.zip"
+
     output_dir.mkdir(parents=True, exist_ok=True)
-
     query_files = sorted(list(query_dir.glob("*.txt"))) if query_dir.exists() else []
 
     if not query_files:
         st.error(f"Không tìm thấy query trong {query_dir}!")
     else:
-        # Batch Runner: Chạy toàn bộ 24 câu tự động
+        # Batch Runner: Chạy toàn bộ câu tự động
         st.markdown("### ⚡ Chạy Tự Động Toàn Bộ Batch (Batch Auto-Run)")
         batch_col1, batch_col2 = st.columns([3, 1])
         with batch_col1:
-            st.caption("Chạy toàn bộ 24 câu hỏi qua mô hình SOTA (Full 3-Layer + VLM + DP) và tự động ghi đè file CSV.")
+            st.caption(f"Chạy toàn bộ {len(query_files)} câu hỏi qua mô hình SOTA (Full 3-Layer + VLM + DP) và tự động ghi đè file CSV & ZIP.")
         with batch_col2:
-            run_all_btn = st.button("🔥 Chạy Full 24 Câu Tự Động", type="primary", use_container_width=True)
+            run_all_btn = st.button(f"🔥 Chạy Full {len(query_files)} Câu Tự Động", type="primary", use_container_width=True)
 
         if run_all_btn:
             progress_bar = st.progress(0)
@@ -437,7 +460,8 @@ elif active_tab == "📂 Đề Thi Chính Thức BTC (24 Câu Batch 1)":
                         else:
                             f.write(f"{p['video_id']},{p['frame_idx']}\n")
                 progress_bar.progress((idx + 1) / len(query_files))
-            status_text.success("🎉 Đã hoàn tất chạy toàn bộ 24 câu hỏi!")
+            sync_submission_zip(output_dir, zip_output_path)
+            status_text.success(f"🎉 Đã hoàn tất chạy toàn bộ {len(query_files)} câu và tự động cập nhật submission.zip!")
             st.rerun()
 
         st.divider()
@@ -506,7 +530,8 @@ elif active_tab == "📂 Đề Thi Chính Thức BTC (24 Câu Batch 1)":
                         else:
                             f.write(f"{p['video_id']},{p['frame_idx']}\n")
 
-                st.success(f"✅ Đã tạo và lưu kết quả vào `{target_csv_path.name}` ({len(preds)} dòng)!")
+                sync_submission_zip(output_dir, zip_output_path)
+                st.success(f"✅ Đã tạo và lưu kết quả vào `{target_csv_path.name}` ({len(preds)} dòng) & tự động cập nhật `{zip_output_path.name}`!")
 
         # Đọc dữ liệu CSV hiện tại để hiển thị và chỉnh sửa
         if target_csv_path.exists():
@@ -548,10 +573,11 @@ elif active_tab == "📂 Đề Thi Chính Thức BTC (24 Câu Batch 1)":
                         if st.button(f"⭐ Đặt làm Rank #1", key=f"promote_{idx}", use_container_width=True):
                             promoted = rows.pop(idx)
                             rows.insert(0, promoted)
-                            # Ghi lại file CSV ngay lập tức
+                            # Ghi lại file CSV ngay lập tức & đồng bộ ZIP
                             with open(target_csv_path, "w", encoding="utf-8") as f:
                                 for item in rows:
                                     f.write(",".join(item) + "\n")
+                            sync_submission_zip(output_dir, zip_output_path)
                             st.rerun()
 
                     # Expander soi dải phim ngữ cảnh
@@ -590,7 +616,8 @@ elif active_tab == "📂 Đề Thi Chính Thức BTC (24 Câu Batch 1)":
                         with open(target_csv_path, "w", encoding="utf-8") as f:
                             for item in rows:
                                 f.write(",".join(item) + "\n")
-                        st.success(f"✅ Đã cập nhật Rank 1 thành Frame {curr_adj_frame} và lưu vào file CSV!")
+                        sync_submission_zip(output_dir, zip_output_path)
+                        st.success(f"✅ Đã cập nhật Rank 1 thành Frame {curr_adj_frame} và tự động cập nhật submission.zip!")
                         st.rerun()
 
                 with col_insp2:
@@ -636,14 +663,15 @@ elif active_tab == "📂 Đề Thi Chính Thức BTC (24 Câu Batch 1)":
                     # Cập nhật dòng 0
                     if len(rows[0]) >= 2:
                         rows[0] = [rows[0][0], rows[0][1], f'"{clean_ans_to_save}"']
-                    # Ghi đè vào file CSV
+                    # Ghi đè vào file CSV & đồng bộ ZIP
                     with open(target_csv_path, "w", encoding="utf-8") as f:
                         for item in rows:
                             if len(item) > 2:
                                 f.write(f'{item[0]},{item[1]},{item[2]}\n')
                             else:
                                 f.write(f'{item[0]},{item[1]},"{clean_ans_to_save}"\n')
-                    st.success(f'🎉 Đã lưu câu trả lời QA: `"{clean_ans_to_save}"` vào `{target_csv_path.name}` thành công!')
+                    sync_submission_zip(output_dir, zip_output_path)
+                    st.success(f'🎉 Đã lưu câu trả lời QA: `"{clean_ans_to_save}"` & tự động cập nhật submission.zip!')
                     st.rerun()
 
             # =====================================================================
@@ -711,7 +739,8 @@ elif active_tab == "📂 Đề Thi Chính Thức BTC (24 Câu Batch 1)":
                                 with open(target_csv_path, "w", encoding="utf-8") as f:
                                     for item in rows:
                                         f.write(",".join(item) + "\n")
-                                st.success(f"🎉 Đã lưu chuỗi {len(updated_events)} sự kiện TRAKE của `{r1_vid}` vào file CSV thành công!")
+                                sync_submission_zip(output_dir, zip_output_path)
+                                st.success(f"🎉 Đã lưu chuỗi {len(updated_events)} sự kiện TRAKE của `{r1_vid}` & tự động cập nhật submission.zip!")
                                 st.rerun()
 
         # =====================================================================
@@ -720,27 +749,29 @@ elif active_tab == "📂 Đề Thi Chính Thức BTC (24 Câu Batch 1)":
         st.divider()
         st.subheader("📦 Kiểm tra Toàn Diện & Xuất Gói Nộp Bài (.ZIP)")
 
+        # Đảm bảo file ZIP trên đĩa luôn đồng bộ mới nhất
+        sync_submission_zip(output_dir, zip_output_path)
+
         val_summary = validator.validate_directory(output_dir)
         if val_summary.get("all_valid", False):
-            st.success(f"🎉 Toàn bộ {val_summary['total_files']} file CSV trong thư mục output đều HỢP LỆ 100% chuẩn quy chế BTC!")
+            st.success(f"🎉 Toàn bộ {val_summary['total_files']} file CSV trong thư mục `{output_dir.name}` đều HỢP LỆ 100% chuẩn quy chế BTC!")
+            if zip_output_path.exists():
+                st.info(f"💾 **File ZIP trên đĩa đã tự động cập nhật:** `{zip_output_path}` ({zip_output_path.stat().st_size / 1024:.1f} KB)")
         else:
             st.warning(f"⚠️ Phát hiện vấn đề: {val_summary.get('error', 'Một số file chưa đạt chuẩn')}")
 
-        # Nút đóng gói tải về
-        zip_buffer = io.BytesIO()
-        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as z:
-            for csv_file in sorted(list(output_dir.glob("*.csv"))):
-                z.write(csv_file, arcname=csv_file.name)
-        zip_buffer.seek(0)
+        if zip_output_path.exists():
+            with open(zip_output_path, "rb") as fz:
+                zip_bytes = fz.read()
 
-        st.download_button(
-            label="📦 Tải Gói Nộp Bài Đầy Đủ (submission.zip)",
-            data=zip_buffer,
-            file_name="AIC2026_submission.zip",
-            mime="application/zip",
-            type="primary",
-            use_container_width=True
-        )
+            st.download_button(
+                label="📦 Tải Gói Nộp Bài Đầy Đủ (submission.zip)",
+                data=zip_bytes,
+                file_name="submission.zip",
+                mime="application/zip",
+                type="primary",
+                use_container_width=True
+            )
 
 # =============================================================================
 # TAB 3: TÌM KIẾM TRỰC TIẾP (LIVE SEARCH)

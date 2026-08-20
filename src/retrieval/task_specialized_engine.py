@@ -391,13 +391,15 @@ class TaskSpecializedEngine:
 
             candidates.sort(key=lambda x: x["score"], reverse=True)
 
+        qa_modality = self.router.get_qa_modality(query_text)
         # 5. Visual QA Agent (Gemini 3.5 Flash Lite Vision với Dynamic Multi-Crop)
         best_answer, reranked = self.qa_agent.answer_and_rerank(
             qa_question=query_text,
             candidates=candidates[:top_k],
-            max_inspect_frames=3,
+            max_inspect_frames=15, # Top-15 video limit
             use_multi_crop=use_multi_crop,
-            gate_info=gate_info
+            gate_info=gate_info,
+            qa_modality=qa_modality
         )
 
         latency = (time.time() - t0) * 1000
@@ -413,12 +415,13 @@ class TaskSpecializedEngine:
         custom_en_query: str = None,
         use_multi_query: bool = True,
         use_event_coverage: bool = True,
-        use_row_norm_dp: bool = True
+        use_row_norm_dp: bool = True,
+        use_segmental_dp: bool = True
     ) -> tuple[list[dict], dict, float]:
         """
         Chiến thuật TRAKE SOTA:
         1. Phân rã câu hỏi thành N sự kiện con: E_1 -> E_2 -> ... -> E_N.
-        2. Chạy TRAKEAlignmentAgent với Vectorized Cosine Similarity & Monotonic DP.
+        2. Chạy TRAKEAlignmentAgent với Vectorized Cosine Similarity & Monotonic/Segmental DP.
         3. Xuất danh sách 100 dự đoán chuẩn format BTC: <video>, <f_1>, <f_2>, ..., <f_N>.
         """
         t0 = time.time()
@@ -430,7 +433,7 @@ class TaskSpecializedEngine:
             parts = [p.strip() for p in re.split(r"[,;]|\bvà\b|\btiếp tục\b|\bcuối cùng\b", query_text) if p.strip()]
             events = parts if len(parts) >= 2 else [query_text, query_text]
 
-        # 2. Chạy Monotonic DP Alignment Agent
+        # 2. Chạy Monotonic/Segmental DP Alignment Agent
         from src.tasks.trake_agent import TRAKEAlignmentAgent
         if not hasattr(self, "_trake_agent") or self._trake_agent is None:
             self._trake_agent = TRAKEAlignmentAgent(engine="siglip2", batch=self.batch, text_encoder=self.text_encoder)
@@ -441,7 +444,8 @@ class TaskSpecializedEngine:
             top_k=top_k,
             use_multi_query=use_multi_query,
             use_event_coverage=use_event_coverage,
-            use_row_norm_dp=use_row_norm_dp
+            use_row_norm_dp=use_row_norm_dp,
+            use_segmental_dp=use_segmental_dp
         )
 
         latency = (time.time() - t0) * 1000

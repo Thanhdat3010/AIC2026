@@ -1,0 +1,3847 @@
+{
+  "system_name": "Qwen3VL_Phase3_Proxy",
+  "predictions": {
+    "test-kis-01": [
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15930
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15866
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 16027
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 16065
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15712
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15525
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 16486
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15468
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 16609
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15305
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 16165
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15660
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 16335
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 16200
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15569
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 16228
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 16358
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15747
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15978
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 16662
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 4725
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 16740
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 16470
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 11205
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15119
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15074
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15255
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15794
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 409
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 411
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 409
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 5727
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 11745
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 4860
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 409
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 17753
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14580
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 17824
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 4738
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 17820
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14040
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 960
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 27295
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 11047
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14334
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10345
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 5136
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 5485
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14444
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 13402
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14575
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 5400
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 4903
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 5397
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 5585
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 22545
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 411
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 13597
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 5535
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 7756
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 5323
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8813
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 4185
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 16575
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 411
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8906
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 13983
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10443
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 23760
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 4348
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24588
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8910
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 10361
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10395
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 25718
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 9349
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 9585
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 13635
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 12830
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 13786
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9048
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 10054
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 611
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 7989
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 12825
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15005
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 1215
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14850
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10125
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 11733
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 7659
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 11070
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 8775
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 10395
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 9225
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14847
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 16635
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10174
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 25257
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24088
+      }
+    ],
+    "test-qa-02": [
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 910,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 6075,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 5948,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 6139,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 5979,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 6210,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 944,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 5940,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 9875,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 3240,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 21210,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 6345,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 4320,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 603,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 604,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 4242,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 25152,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 2963,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 5239,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 405,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 21150,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 2970,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 2691,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 833,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 20217,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 5265,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 1346,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 25191,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 20192,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 21567,
+        "answer": ""
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 2248,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 25500,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 24930,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 9965,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 959,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7584,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 13574,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 32571,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 27635,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 24272,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 2755,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 25308,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 26550,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 10779,
+        "answer": ""
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 2812,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 27908,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7173,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 2160,
+        "answer": ""
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 27539,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7425,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 1334,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 21018,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7412,
+        "answer": ""
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 2073,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 4995,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 100,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 5675,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 6831,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 3240,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 100,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 2700,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 6234,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 634,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 5565,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 8957,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 1345,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 100,
+        "answer": ""
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 8640,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 6480,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 23293,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 3307,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 27812,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 7659,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 26794,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 1282,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 6409,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 29058,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 25739,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 6462,
+        "answer": ""
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 858,
+        "answer": ""
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 2547,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 661,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 27723,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 2136,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 4726,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 21080,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 25590,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 936,
+        "answer": ""
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 1065,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 2295,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 6311,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 6884,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 32541,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 6389,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 7425,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 663,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 3019,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 1350,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 3218,
+        "answer": ""
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 2646,
+        "answer": ""
+      }
+    ],
+    "test-trake-03": [
+      {
+        "video_id": "L26_V008",
+        "event_frames": [
+          4024,
+          4455,
+          4697,
+          4725,
+          4841
+        ]
+      }
+    ],
+    "test-kis-04": [
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10283
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10169
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 315
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7584
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 315
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 315
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 6556
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 3964
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7559
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10014
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10443
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8910
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9048
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 4519
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 9990
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 1036
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 374
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 27350
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 374
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8813
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 11178
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 982
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 374
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7695
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10852
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8906
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 961
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2025
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9515
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9720
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10351
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9180
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 3315
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2512
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9585
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8693
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 27295
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 240
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 240
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2565
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 240
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 960
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 5138
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7902
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10125
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10935
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 1080
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10260
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 299
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 1069
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 1953
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2970
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 299
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8992
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 5940
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 12424
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 299
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 11220
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7617
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 3907
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7556
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2700
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 12234
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10395
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 3105
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2799
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 3375
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10630
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9045
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 5265
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8100
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2364
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10665
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2105
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10011
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2079
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 12015
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2835
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 3701
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 1797
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9855
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 12285
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 4841
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 12420
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2013
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 3915
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 10815
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 4995
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2145
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 4320
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 1007
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 405
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8857
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 405
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 11578
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 4860
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 13135
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 4124
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2295
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 11266
+      }
+    ],
+    "test-kis-05": [
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 23805
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 25650
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 28288
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 11686
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7902
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 27988
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 27405
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 28144
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 28080
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 27350
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 9990
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24277
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 23895
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7290
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 4519
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 27295
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 11771
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 6897
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 240
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 19435
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 240
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 25515
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 6947
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 240
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 15005
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 22422
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24300
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 17010
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 12015
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 22545
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 8876
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 16875
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 11816
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24982
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 8910
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 25398
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 11205
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 1016
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 17007
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 17976
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 11939
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 22307
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 1889
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 14460
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 25399
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10935
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10892
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 26206
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 13769
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 14175
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 10625
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24777
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 9990
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 25452
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 12825
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 23760
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 11114
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 16740
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 12290
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 25823
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7559
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 17662
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 744
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7695
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 3915
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 6556
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 6948
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 12340
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 4995
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 26325
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 4903
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 3779
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7155
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10630
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7556
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10581
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 22743
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14762
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 9939
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10665
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 6039
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 12631
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 171
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7617
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2105
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 3767
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9753
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 26460
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 135
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 11648
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2295
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24570
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7215
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 11778
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 4264
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24444
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 12150
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7493
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 6850
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 5238
+      }
+    ],
+    "test-kis-06": [
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10112
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10174
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10125
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10173
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8992
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 299
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 299
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 299
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9045
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10014
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10141
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 982
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10498
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9048
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9180
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9207
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8910
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10283
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8906
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10530
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10048
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10169
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 3907
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8857
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9855
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10800
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10721
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8693
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9515
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10665
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8640
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9720
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8100
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9585
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8813
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8623
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 961
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10443
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 11178
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8235
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10630
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2512
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8581
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 27350
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 9980
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2364
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 9940
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 3645
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2565
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 13094
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 3315
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8304
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 27295
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 5940
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 1080
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 12424
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 5894
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10125
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 9990
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10260
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10011
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 11771
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 3590
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10345
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 9366
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10852
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 10935
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8505
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 7902
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 315
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 4050
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 4860
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 960
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 315
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2700
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 315
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 9898
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10298
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 3375
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 3964
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 9948
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 4024
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10395
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 11422
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2970
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8738
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 13135
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 3701
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 11205
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 11205
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 4841
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 14850
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 11880
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 8411
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 11220
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 4185
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 11578
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 2799
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 3105
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 374
+      }
+    ],
+    "test-qa-07": [
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 13905,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 5136,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 5003,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 11610,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 4860,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 20445,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 14175,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 4185,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 21195,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 6480,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 9127,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 4941,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 5174,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 22251,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 4995,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 10530,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 6456,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 16953,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 4811,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 6664,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 5535,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 3645,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 20520,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 22436,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 10491,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 9180,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 18729,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 22140,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 22969,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 25672,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 2295,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 22275,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 11205,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 4180,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 12938,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 16763,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 23220,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 22125,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 25912,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 12960,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 25515,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 7967,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 22005,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 20243,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 25451,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 17010,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 15501,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 13635,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 23201,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 25920,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 5485,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 18765,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 21880,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 20250,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 18913,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 21602,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 810,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 13600,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 11024,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 2700,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 15684,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 16621,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 20906,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 13422,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 5130,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 13759,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 25752,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 21060,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 15930,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 17685,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 4455,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 11745,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 12486,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 15525,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 5585,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 13769,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 5050,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 14757,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 20925,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 17636,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 25989,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 4045,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 13241,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 7015,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 13500,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 3704,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 25785,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 6152,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 16419,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 5819,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 10665,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 21519,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 8775,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 3779,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 26055,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 26247,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 11070,
+        "answer": ""
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 26189,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 4995,
+        "answer": ""
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 2680,
+        "answer": ""
+      }
+    ],
+    "test-kis-08": [
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 17249
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 17670
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 411
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 411
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 411
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 17725
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 16932
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 409
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 409
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 409
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 7145
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 9855
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 4101
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 1045
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 12365
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 1080
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 9761
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 18467
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 344
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 2783
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 344
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 412
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 412
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 344
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 12420
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 32349
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 412
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 32102
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 17818
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 240
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 4707
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 8537
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 5721
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 240
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 1941
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 4572
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 18126
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 404
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 3703
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 240
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 19260
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 1738
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 5535
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 17882
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 17019
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 224
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 3993
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 19694
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 4266
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 31712
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 14669
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 405
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 17148
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 2005
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 21653
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 1589
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 20816
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 1860
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 9846
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 2700
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 2142
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 8574
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 19167
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 27908
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 25583
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 10815
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 4199
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 14310
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 23949
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 4314
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 405
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 25257
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 11459
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 11114
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 5477
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 7277
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 634
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 15794
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 1282
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 7421
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 14910
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 421
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 422
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 11745
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 12165
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 1281
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 422
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 1279
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 23037
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 26036
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 9715
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 14252
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 7559
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 17571
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 3672
+      },
+      {
+        "video_id": "L27_V012",
+        "frame_idx": 422
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10581
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 31767
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 22675
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 10935
+      }
+    ],
+    "test-trake-09": [
+      {
+        "video_id": "L22_V006",
+        "event_frames": [
+          32918,
+          33063,
+          33345,
+          34215,
+          34398
+        ]
+      }
+    ],
+    "test-kis-10": [
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 14157
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 14595
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 14343
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 9807
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 14739
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 14943
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 15020
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 15171
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 14655
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 9908
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 15374
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 15525
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 9983
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 28144
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 25823
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 15711
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 28080
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 28288
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24435
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 15632
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 26739
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 25515
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24720
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24982
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 13769
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24277
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 22422
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 14847
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 15111
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 26337
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 22545
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24975
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24777
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 25964
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24300
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24371
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 28350
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 25650
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 22628
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 26206
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 31767
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 14460
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 11610
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 25399
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 6556
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 25398
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 12933
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 26189
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 12654
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 26325
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 12650
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 23211
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14669
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14762
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 23895
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 26130
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 22886
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 26055
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 16875
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14175
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24705
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 853
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14985
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 12433
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 24588
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 19435
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 12980
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 22743
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 25452
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 23760
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 857
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 11746
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 13691
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14580
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 23355
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14575
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 23220
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 1349
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14444
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 13635
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14334
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 13094
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14715
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 13402
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 17662
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14040
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14915
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 26460
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 26595
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 17685
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 13500
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 25920
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 12015
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 810
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 12555
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 14113
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 1345
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 13786
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 13365
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 13056
+      }
+    ],
+    "test-kis-11": [
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 407
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 1108
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 231
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 1439
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 1283
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 1629
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 1574
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 3863
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 4175
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 5205
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 1065
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 2722
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 3075
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 3911
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 5186
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 2579
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 2987
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 5358
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 533
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 933
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 3170
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 655
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 2073
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 0
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 519
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 2547
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 4250
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 1678
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 1853
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 6769
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 125
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 2248
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 4821
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 2812
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 4996
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 3579
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 4004
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 5075
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 6944
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 6600
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 6425
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 780
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 2402
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 1961
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 959
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 6250
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 4425
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 7034
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 7775
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 7350
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 6157
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 7475
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 7208
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 5650
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 7650
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 783
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 5825
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 4539
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 19821
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 782
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 26370
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 5550
+      },
+      {
+        "video_id": "L28_V009",
+        "frame_idx": 1923
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 3327
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 5982
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 4714
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 902
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 781
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 634
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 780
+      },
+      {
+        "video_id": "L27_V013",
+        "frame_idx": 11375
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 9000
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 21653
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 5375
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 903
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 603
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 784
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 662
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 905
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 30648
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 664
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 785
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 20007
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 663
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 26460
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 26550
+      },
+      {
+        "video_id": "L23_V017",
+        "frame_idx": 3404
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 902
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 911
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 20783
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 786
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 788
+      },
+      {
+        "video_id": "L27_V002",
+        "frame_idx": 600
+      },
+      {
+        "video_id": "L26_V008",
+        "frame_idx": 224
+      },
+      {
+        "video_id": "L29_V013",
+        "frame_idx": 779
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 23293
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 7659
+      },
+      {
+        "video_id": "L22_V003",
+        "frame_idx": 25590
+      },
+      {
+        "video_id": "L22_V001",
+        "frame_idx": 29567
+      },
+      {
+        "video_id": "L22_V006",
+        "frame_idx": 27152
+      }
+    ]
+  }
+}

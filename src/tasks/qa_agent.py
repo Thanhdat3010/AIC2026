@@ -85,8 +85,9 @@ class VisualQAAgent:
         qa_question: str,
         candidates: list[dict],
         max_inspect_frames: int = 5,
-        use_multi_crop: bool = True,
-        gate_info: dict = None
+        use_multi_crop: bool = False,
+        gate_info: dict = None,
+        qa_modality: str = "visual"
     ) -> tuple[str, list[dict]]:
         """
         Duyệt qua các khung hình Top đầu, tìm câu trả lời và tái xếp hạng lại danh sách.
@@ -97,10 +98,8 @@ class VisualQAAgent:
 
         inspect_cands = candidates[:max_inspect_frames]
         best_answer = "Không xác định"
-        best_confidence = 0.0
-        best_cand_idx = 0
+        best_cand_idx = -1
 
-        best_cand_idx = 0
         for idx, cand in enumerate(inspect_cands):
             v_id = cand["video_id"]
             f_idx = cand["frame_idx"]
@@ -114,7 +113,13 @@ class VisualQAAgent:
 
             contents = [img_full]
             
-            if use_multi_crop:
+            # Adaptive Evidence (P3): Không dùng Multi-crop cho đếm số hoặc ASR
+            if qa_modality in ["count", "asr", "visual"]:
+                use_local_crop = False
+            else:
+                use_local_crop = use_multi_crop
+
+            if use_local_crop:
                 crops = self._generate_multi_crops(img)
                 contents.extend(crops)
                 
@@ -123,26 +128,33 @@ class VisualQAAgent:
             context_str = ""
             
             ocr_txt = self.video_frame_to_ocr.get((v_id, f_idx), "")
-            if ocr_txt:
+            if ocr_txt and qa_modality in ["ocr", "visual"]:
                 context_str += f"\n[Hệ thống OCR nhận diện được (có thể chứa nhiễu)]: {ocr_txt}"
                 
             asr_texts = []
-            for chunk in self.video_to_asr.get(v_id, []):
-                if chunk["start"] - 5.0 <= pts <= chunk["end"] + 5.0:
-                    asr_texts.append(chunk["text"])
+            if qa_modality in ["asr", "visual"]:
+                for chunk in self.video_to_asr.get(v_id, []):
+                    # Mở rộng window cho ASR
+                    if chunk["start"] - 10.0 <= pts <= chunk["end"] + 10.0:
+                        asr_texts.append(chunk["text"])
             if asr_texts:
                 context_str += f"\n[Hệ thống ASR nghe được (có thể chứa nhiễu)]: {' | '.join(asr_texts)}"
                 
-            prompt = f"""Bạn là Trợ lý AI tham gia cuộc thi AI Challenge TP.HCM.
-Nhiệm vụ: Quan sát kỹ ảnh toàn cảnh (và ảnh crop phóng to nếu có) để trả lời câu hỏi (QA) bằng TIẾNG VIỆT ĐẦY ĐỦ Ý, CHÍNH XÁC VÀ ĐÚNG TRỌNG TÂM (đáp án dưới 100 ký tự).
-(Lưu ý Agentic: Dữ liệu OCR/ASR bên dưới có thể chứa nhiễu nhận diện, bạn phải TỰ ĐỐI CHIẾU LẠI với hình ảnh thực tế, không tin tưởng mù quáng vào văn bản).
+            prompt = f"""Bạn là Giám khảo VLM (VLM Verifier) cho cuộc thi AI Challenge TP.HCM.
+Nhiệm vụ: Quan sát kỹ ảnh và các ngữ cảnh văn bản (nếu có) để trả lời câu hỏi (QA) bằng TIẾNG VIỆT ĐẦY ĐỦ Ý, CHÍNH XÁC VÀ ĐÚNG TRỌNG TÂM (đáp án dưới 100 ký tự).
+Đặc tính câu hỏi ({qa_modality}): Nếu là 'count', hãy đếm thật kỹ toàn cảnh. Nếu là 'ocr'/'asr', hãy đối chiếu văn bản cung cấp với hình ảnh.
+
 Câu hỏi: {qa_question}{context_str}
 
-Trả về định dạng JSON thuần túy:
+Trích xuất BẰNG CHỨNG (Evidence) rõ ràng từ hình ảnh để biện minh cho câu trả lời. Nếu hình ảnh không đủ thông tin để trả lời CHẮC CHẮN, hãy trả về status = "insufficient". Ngược lại, trả về status = "answer".
+
+Trả về ĐÚNG định dạng JSON thuần túy:
 {{
-  "has_answer": true/false (ảnh có chứa dữ liệu để trả lời câu hỏi không),
-  "answer": "câu trả lời chính xác",
-  "confidence": điểm tin cậy từ 0.0 đến 1.0
+  "status": "answer" | "insufficient",
+  "answer": "câu trả lời của bạn",
+  "evidence": [
+    {{ "frame_id": {f_idx}, "observation": "Mô tả bằng chứng vật lý bạn nhìn thấy trong ảnh" }}
+  ]
 }}"""
             contents.append(prompt)
 
@@ -155,30 +167,35 @@ Trả về định dạng JSON thuần túy:
                     contents=contents,
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
-                        temperature=0.1
+                        temperature=0.0 # Temperature 0.0 for deterministic verification
                     )
                 )
                 res_json = json.loads(response.text.strip())
-                has_ans = res_json.get("has_answer", False)
+                status = res_json.get("status", "insufficient")
                 ans = res_json.get("answer", "").strip()
-                conf = float(res_json.get("confidence", 0.0))
+                evidence = res_json.get("evidence", [])
 
                 cand["qa_answer"] = ans
                 cand["answer"] = ans
-                cand["qa_confidence"] = conf
+                cand["qa_status"] = status
+                cand["qa_evidence"] = evidence
+                
+                # Confidence giả lập dựa trên status
+                cand["qa_confidence"] = 1.0 if status == "answer" else 0.0
 
-                if has_ans and conf > best_confidence and ans.lower() not in ["không xác định", "không có", "unknown", "n/a"]:
-                    best_confidence = conf
+                if status == "answer" and ans.lower() not in ["không xác định", "không có", "unknown", "n/a"]:
                     best_answer = ans
                     best_cand_idx = idx
+                    break # Ngừng duyệt ngay khi có frame đủ bằng chứng (Tiết kiệm Token)
 
             except Exception as e:
                 cand["qa_answer"] = "Lỗi API"
+                cand["qa_status"] = "error"
                 cand["qa_confidence"] = 0.0
 
         # Nếu tìm thấy khung hình có câu trả lời tự tin, hoán đổi khung hình đó lên Rank #1
         reranked = candidates.copy()
-        if best_confidence > 0.4 and best_cand_idx > 0:
+        if best_cand_idx > 0:
             winner = reranked.pop(best_cand_idx)
             winner["score"] = reranked[0]["score"] + 0.1 # Đẩy điểm vượt trội
             reranked.insert(0, winner)

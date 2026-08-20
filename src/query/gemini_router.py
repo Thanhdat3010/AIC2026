@@ -116,6 +116,7 @@ Rules for Semantic Generalization & Modality Gating:
 3. is_qa: set to TRUE if the query is a Question asking for specific entity/action/color/count/time/name.
 4. is_trake: set to TRUE if the query describes a chronological sequence of multiple distinct consecutive actions (First... then... then...).
 5. If is_trake is true: break down the chronological actions into granular atomic sub-steps in `trake_events` (in concise natural English).
+   - CRITICAL: Ensure EVERY SINGLE atomic action is separated, even if they appear in the same sentence (e.g. "thêm đậu Hà Lan rồi cà rốt" MUST be split into two separate events: "add peas" and "add carrots"). Do NOT group actions!
 
 CRITICAL RULE FOR VISUAL PROMPTS:
 - Do NOT include prefixes like "Sentence 1:", "Scene 1:", or "-". Just output the raw text.
@@ -181,6 +182,26 @@ Respond with ONLY a JSON object with this EXACT structure:
             "weights": {"visual": 1.0, "ocr": 0.0, "asr": 0.0},
             "temporal_hint": "any"
         }
+
+    def get_qa_modality(self, raw_query: str) -> str:
+        """Phân loại độc lập câu hỏi QA thành 4 nhóm để phục vụ Adaptive Evidence."""
+        prompt = f"""Phân loại câu hỏi sau đây vào đúng 1 trong 4 nhóm:
+Câu hỏi: "{raw_query}"
+
+Các nhóm:
+- "count": Nếu câu hỏi yêu cầu đếm số lượng (ví dụ: có bao nhiêu...).
+- "ocr": Nếu câu hỏi yêu cầu đọc chữ, số, biển báo, tên riêng trên màn hình.
+- "asr": Nếu câu hỏi hỏi về nội dung lời nói, hội thoại.
+- "visual": Các câu hỏi thị giác thông thường (hành động, màu sắc, đồ vật).
+
+Trả về ĐÚNG 1 TỪ duy nhất: count, ocr, asr, hoặc visual."""
+        res_str = self._call_gemini(prompt)
+        if res_str:
+            res = res_str.strip().lower()
+            if "count" in res: return "count"
+            if "ocr" in res: return "ocr"
+            if "asr" in res: return "asr"
+        return "visual"
 
 if __name__ == "__main__":
     router = GeminiQueryRouter()

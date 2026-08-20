@@ -173,7 +173,14 @@ def generate_submission(input_path: Path, output_root: Path = None, top_k: int =
                 lines.append(f"{v_clean},{f_idx},{ans_formatted}")
 
         elif ttype == "trake":
-            preds, info, lat = engine.search_trake(query_text=qtext, top_k=top_k)
+            preds, info, lat = engine.search_trake(
+                query_text=qtext,
+                top_k=top_k,
+                use_multi_query=True,
+                use_event_coverage=True,
+                use_row_norm_dp=True,
+                use_segmental_dp=True
+            )
             for p in preds[:100]:
                 v_clean = clean_video_name(p["video_id"])
                 event_frames = p.get("event_frames", [p["frame_idx"]])

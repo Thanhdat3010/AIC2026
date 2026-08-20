@@ -18,10 +18,9 @@ raw/**
 !raw/**/.gitkeep
 !raw/**/AIC2026_BTC_Data_Structure.md
 
-data/**
+data/*
+!data/benchmark/
 !data/.gitkeep
-!data/**/.gitkeep
-!data/benchmark/**
 
 indexes/**
 !indexes/.gitkeep
@@ -30,6 +29,10 @@ indexes/**
 outputs/**
 !outputs/.gitkeep
 !outputs/**/.gitkeep
+
+thunghiem/**
+!thunghiem/.gitkeep
+!thunghiem/**/.gitkeep
 
 backups/**
 !backups/.gitkeep

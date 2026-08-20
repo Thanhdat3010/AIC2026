@@ -92,6 +92,10 @@ def run_ablation_experiment(config_code: str, pipeline_cache: dict = None) -> di
     use_rrf = False
     use_neighbor_expansion = False
     use_multi_crop = True
+    use_multi_query = False
+    use_event_coverage = False
+    use_row_norm_dp = False
+    use_segmental_dp = False
 
     if config_code == "0":
         config_name = "Baseline 0: BTC CLIP (512d) + Dịch từ điển thô"
@@ -296,7 +300,7 @@ def run_ablation_experiment(config_code: str, pipeline_cache: dict = None) -> di
                 pipeline_cache["task_specialized"] = pipeline
 
     elif config_code == "22":
-        config_name = "Cấu hình 22 (SOTA Master V4): Config 21 + EERCF TIB (QA Top-50 Normalized) + Diverse 3-Frame VLM"
+        config_name = "Cấu hình 22 (Ablation 4): Config 21 + Segmental Dynamic Programming (TRAKE)"
         mode = "specialized"
         use_intra_reranker = True
         use_neighbor = True
@@ -310,6 +314,7 @@ def run_ablation_experiment(config_code: str, pipeline_cache: dict = None) -> di
         use_multi_query = True
         use_event_coverage = True
         use_row_norm_dp = True
+        use_segmental_dp = True
         if pipeline_cache and "task_specialized" in pipeline_cache:
             pipeline = pipeline_cache["task_specialized"]
         else:
@@ -369,7 +374,8 @@ def run_ablation_experiment(config_code: str, pipeline_cache: dict = None) -> di
                     top_k=100,
                     use_multi_query=use_multi_query,
                     use_event_coverage=use_event_coverage,
-                    use_row_norm_dp=use_row_norm_dp
+                    use_row_norm_dp=use_row_norm_dp,
+                    use_segmental_dp=use_segmental_dp
                 )
 
         latencies.append(latency)

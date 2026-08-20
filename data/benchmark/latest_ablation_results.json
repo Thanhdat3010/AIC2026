@@ -1,0 +1,7461 @@
+{
+  "timestamp": "2026-08-19 12:40:13",
+  "config_code": "22",
+  "config_name": "Cấu hình 22 (Ablation 4): Config 21 + Segmental Dynamic Programming (TRAKE)",
+  "kis_score": 0.6785714285714287,
+  "qa_score": 0.4,
+  "trake_score": 0.51,
+  "final_score": 0.5776595744680851,
+  "video_mrr": 0.601960019737807,
+  "video_recall_1": 51.06382978723404,
+  "video_recall_5": 70.2127659574468,
+  "video_recall_10": 74.46808510638297,
+  "video_recall_20": 82.97872340425532,
+  "video_recall_50": 89.36170212765957,
+  "video_recall_100": 95.74468085106383,
+  "score_buckets": {
+    "1.0": 14,
+    "0.8": 9,
+    "0.6": 4,
+    "0.4": 8,
+    "0.2": 1,
+    "0.0": 11
+  },
+  "error_counts": {
+    "PERFECT_IN_TOP5": 8,
+    "PARTIAL_HIT": 11,
+    "PERFECT_RANK_1": 14,
+    "VIDEO_LATE (>Top20)": 6,
+    "TEMPORAL_NEAR_MISS (<=25f)": 6,
+    "VIDEO_NOT_IN_TOP100": 2
+  },
+  "latency_ms": 7345.894965719669,
+  "records": [
+    {
+      "Query ID": "test-kis-01",
+      "Task": "KIS",
+      "Target Video": "L28_V009 [15866-15977]",
+      "Video Rank": "#1",
+      "Pos Rank": "#4",
+      "Perf Rank": "#4",
+      "R@1": "0.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.8000",
+      "Latency": "5909ms",
+      "Error Type": "PERFECT_IN_TOP5",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L28_V009",
+          "frame_idx": 16228,
+          "score": 0.22583615534045554,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L28_V009",
+          "frame_idx": 15660,
+          "score": 0.22362181939940723,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L28_V009",
+          "frame_idx": 16335,
+          "score": 0.21876121853853162,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L28_V009",
+          "frame_idx": 15866,
+          "score": 0.20694611725932294,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L28_V009",
+          "frame_idx": 16662,
+          "score": 0.20630269800432688,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L28_V009",
+          "frame_idx": 15930,
+          "score": 0.20358731350836012,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L28_V009",
+          "frame_idx": 16027,
+          "score": 0.2033444676092928,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L28_V009",
+          "frame_idx": 16065,
+          "score": 0.20202097993158896,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L28_V009",
+          "frame_idx": 15569,
+          "score": 0.2004757732704257,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L28_V009",
+          "frame_idx": 15712,
+          "score": 0.19696125496982853,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L28_V009",
+          "frame_idx": 16740,
+          "score": 0.19355463127576025,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L28_V009",
+          "frame_idx": 15747,
+          "score": 0.1902346295708699,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L28_V009",
+          "frame_idx": 15978,
+          "score": 0.18838774561060476,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L28_V009",
+          "frame_idx": 15794,
+          "score": 0.17306703413515695,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L28_V009",
+          "frame_idx": 16358,
+          "score": 0.1695928269430646,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L28_V009",
+          "frame_idx": 15468,
+          "score": 0.1682455527042457,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L28_V009",
+          "frame_idx": 15525,
+          "score": 0.16458571654326815,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L28_V009",
+          "frame_idx": 16200,
+          "score": 0.1641707961852577,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L28_V009",
+          "frame_idx": 16609,
+          "score": 0.16051315915875125,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L22_V001",
+          "frame_idx": 17478,
+          "score": 0.16022914759369006,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-qa-02",
+      "Task": "QA",
+      "Target Video": "L27_V002 [910-959]",
+      "Video Rank": "#6",
+      "Pos Rank": "#15",
+      "Perf Rank": "#15",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.6000",
+      "Latency": "5990ms",
+      "Error Type": "PARTIAL_HIT",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L29_V001",
+          "frame_idx": 24000,
+          "score": 0.18571601580417968,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 2,
+          "video_id": "L29_V001",
+          "frame_idx": 23898,
+          "score": 0.17354766018622753,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 3,
+          "video_id": "L29_V001",
+          "frame_idx": 23700,
+          "score": 0.16578639315485305,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 4,
+          "video_id": "L28_V011",
+          "frame_idx": 25463,
+          "score": 0.14456479606286968,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 5,
+          "video_id": "L29_V001",
+          "frame_idx": 23850,
+          "score": 0.142156543027055,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 6,
+          "video_id": "L28_V011",
+          "frame_idx": 10830,
+          "score": 0.1375596034304035,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 7,
+          "video_id": "L28_V011",
+          "frame_idx": 7248,
+          "score": 0.13691414843321123,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 8,
+          "video_id": "L28_V012",
+          "frame_idx": 12420,
+          "score": 0.13549719378785735,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 9,
+          "video_id": "L29_V001",
+          "frame_idx": 23550,
+          "score": 0.13352635373394484,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 10,
+          "video_id": "L28_V011",
+          "frame_idx": 10800,
+          "score": 0.13260568302298706,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 11,
+          "video_id": "L28_V011",
+          "frame_idx": 10845,
+          "score": 0.1324565370211166,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 12,
+          "video_id": "L27_V004",
+          "frame_idx": 593,
+          "score": 0.13182608369968768,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 13,
+          "video_id": "L28_V004",
+          "frame_idx": 8660,
+          "score": 0.12948759252793374,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 14,
+          "video_id": "L29_V001",
+          "frame_idx": 24150,
+          "score": 0.12940960651987266,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 15,
+          "video_id": "L27_V002",
+          "frame_idx": 910,
+          "score": 0.1290736310944735,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 16,
+          "video_id": "L27_V002",
+          "frame_idx": 5948,
+          "score": 0.1283864715494804,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 17,
+          "video_id": "L28_V001",
+          "frame_idx": 11515,
+          "score": 0.12820085831497494,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 18,
+          "video_id": "L29_V001",
+          "frame_idx": 23443,
+          "score": 0.1264538620093546,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 19,
+          "video_id": "L28_V011",
+          "frame_idx": 25515,
+          "score": 0.12623157547406447,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        },
+        {
+          "rank": 20,
+          "video_id": "L27_V002",
+          "frame_idx": 6139,
+          "score": 0.12581352061660653,
+          "answer": "Người lái xe máy đội một chiếc mũ bảo hiểm màu xanh dương có sọc trắng."
+        }
+      ]
+    },
+    {
+      "Query ID": "test-trake-03",
+      "Task": "TRAKE",
+      "Target Video": "L26_V008 (5 ev)",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "MISS",
+      "R@1": "0.40",
+      "R@5": "0.40",
+      "R@20": "0.40",
+      "R@50": "0.40",
+      "R@100": "0.40",
+      "Final Score": "0.4000",
+      "Latency": "5157ms",
+      "Error Type": "PARTIAL_HIT",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V008",
+          "frame_idx": 4050,
+          "score": 3.6376969546079634,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V210",
+          "frame_idx": 3786,
+          "score": 2.0603419855237006,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V276",
+          "frame_idx": 3101,
+          "score": 1.533161360025406,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V469",
+          "frame_idx": 3127,
+          "score": 1.2917287796735764,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V461",
+          "frame_idx": 4229,
+          "score": 1.1348186060786247,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V465",
+          "frame_idx": 2874,
+          "score": 1.0226172730326653,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V290",
+          "frame_idx": 2155,
+          "score": 0.9313139440757888,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V448",
+          "frame_idx": 3825,
+          "score": 0.8771377325057984,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V471",
+          "frame_idx": 5968,
+          "score": 0.8090956245859464,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V379",
+          "frame_idx": 3411,
+          "score": 0.7823968008160592,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V076",
+          "frame_idx": 3309,
+          "score": 0.7438134350559928,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V262",
+          "frame_idx": 4608,
+          "score": 0.720932187139988,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V497",
+          "frame_idx": 3968,
+          "score": 0.7043348643642207,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V151",
+          "frame_idx": 3968,
+          "score": 0.6816731252840588,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V337",
+          "frame_idx": 2304,
+          "score": 0.6667059063911438,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V377",
+          "frame_idx": 2304,
+          "score": 0.6431351020932198,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V342",
+          "frame_idx": 4082,
+          "score": 0.6348020882290952,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V375",
+          "frame_idx": 5186,
+          "score": 0.6167163679997126,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V335",
+          "frame_idx": 3945,
+          "score": 0.6023170113563538,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V372",
+          "frame_idx": 4615,
+          "score": 0.6019466313876604,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-04",
+      "Task": "KIS",
+      "Target Video": "L26_V355 [4662-4727]",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "#1",
+      "R@1": "1.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "1.0000",
+      "Latency": "1729ms",
+      "Error Type": "PERFECT_RANK_1",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V355",
+          "frame_idx": 4662,
+          "score": 0.20991445493954886,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V430",
+          "frame_idx": 3400,
+          "score": 0.17392057214702858,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V442",
+          "frame_idx": 3772,
+          "score": 0.17327398105472896,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V355",
+          "frame_idx": 5953,
+          "score": 0.16858777640096073,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V430",
+          "frame_idx": 3456,
+          "score": 0.16814826591859905,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V355",
+          "frame_idx": 6016,
+          "score": 0.16391815643652943,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V355",
+          "frame_idx": 5639,
+          "score": 0.16071049404770366,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V430",
+          "frame_idx": 3909,
+          "score": 0.16056831218465858,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V048",
+          "frame_idx": 4430,
+          "score": 0.1600101814962921,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V355",
+          "frame_idx": 4284,
+          "score": 0.15766532159178082,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V355",
+          "frame_idx": 5632,
+          "score": 0.15754259986674513,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V044",
+          "frame_idx": 3800,
+          "score": 0.1566663675237443,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V355",
+          "frame_idx": 4224,
+          "score": 0.15618878331892402,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V355",
+          "frame_idx": 5531,
+          "score": 0.15603434694262025,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V355",
+          "frame_idx": 5008,
+          "score": 0.155874326578151,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V442",
+          "frame_idx": 2688,
+          "score": 0.1552381656053923,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V220",
+          "frame_idx": 4883,
+          "score": 0.15518204618921808,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V309",
+          "frame_idx": 4300,
+          "score": 0.15517374406496165,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V048",
+          "frame_idx": 4455,
+          "score": 0.15305319966251574,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V338",
+          "frame_idx": 5919,
+          "score": 0.15258540286907213,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-05",
+      "Task": "KIS",
+      "Target Video": "L27_V012 [11686-11732]",
+      "Video Rank": "#3",
+      "Pos Rank": "#3",
+      "Perf Rank": "#3",
+      "R@1": "0.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.8000",
+      "Latency": "1789ms",
+      "Error Type": "PERFECT_IN_TOP5",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L28_V015",
+          "frame_idx": 16598,
+          "score": 0.1843427327639683,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L27_V013",
+          "frame_idx": 14175,
+          "score": 0.17122122620696684,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L27_V012",
+          "frame_idx": 11686,
+          "score": 0.17078079386928377,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L28_V015",
+          "frame_idx": 16569,
+          "score": 0.1686328288085131,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L30_V052",
+          "frame_idx": 6259,
+          "score": 0.1616587517711797,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L30_V052",
+          "frame_idx": 6212,
+          "score": 0.15908406732396763,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V205",
+          "frame_idx": 4360,
+          "score": 0.1583777460670293,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V133",
+          "frame_idx": 4864,
+          "score": 0.15565828436903564,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L29_V012",
+          "frame_idx": 18090,
+          "score": 0.15316855289038153,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L30_V052",
+          "frame_idx": 6930,
+          "score": 0.15238217290911255,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L29_V012",
+          "frame_idx": 9519,
+          "score": 0.15158931213616156,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V133",
+          "frame_idx": 4847,
+          "score": 0.1507274489949056,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L30_V052",
+          "frame_idx": 6952,
+          "score": 0.1506456819063887,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V181",
+          "frame_idx": 3711,
+          "score": 0.15010211171277504,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L29_V014",
+          "frame_idx": 9450,
+          "score": 0.14908307714780097,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L28_V016",
+          "frame_idx": 13328,
+          "score": 0.14899983818856508,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V089",
+          "frame_idx": 3711,
+          "score": 0.14879371910475778,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L28_V016",
+          "frame_idx": 13006,
+          "score": 0.14851118316859124,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L29_V014",
+          "frame_idx": 2996,
+          "score": 0.14832775543204815,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L30_V052",
+          "frame_idx": 6006,
+          "score": 0.1477313551974811,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-06",
+      "Task": "KIS",
+      "Target Video": "L27_V013 [10112-10140]",
+      "Video Rank": "#3",
+      "Pos Rank": "#10",
+      "Perf Rank": "#10",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.6000",
+      "Latency": "1901ms",
+      "Error Type": "PARTIAL_HIT",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L27_V003",
+          "frame_idx": 1602,
+          "score": 0.21715686514386376,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L27_V003",
+          "frame_idx": 1707,
+          "score": 0.21375415590314048,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L27_V003",
+          "frame_idx": 5940,
+          "score": 0.2121500261591385,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L27_V003",
+          "frame_idx": 5805,
+          "score": 0.20942525958206834,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V486",
+          "frame_idx": 7192,
+          "score": 0.2093098072624876,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L27_V013",
+          "frame_idx": 10498,
+          "score": 0.206676681874805,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V486",
+          "frame_idx": 5992,
+          "score": 0.20558322443221727,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L27_V003",
+          "frame_idx": 6114,
+          "score": 0.20519369990364686,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V486",
+          "frame_idx": 5464,
+          "score": 0.2029313338676831,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L27_V013",
+          "frame_idx": 10112,
+          "score": 0.20049872392708126,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L27_V013",
+          "frame_idx": 10173,
+          "score": 0.19967845574212228,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L27_V003",
+          "frame_idx": 1755,
+          "score": 0.19909684978330955,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V486",
+          "frame_idx": 4905,
+          "score": 0.19889601360100875,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V486",
+          "frame_idx": 5456,
+          "score": 0.19742440856678894,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V486",
+          "frame_idx": 5506,
+          "score": 0.1970370059175062,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L27_V003",
+          "frame_idx": 1620,
+          "score": 0.1947260989639527,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V486",
+          "frame_idx": 5208,
+          "score": 0.19376601863895984,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V486",
+          "frame_idx": 7120,
+          "score": 0.19360821988218968,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L27_V003",
+          "frame_idx": 7695,
+          "score": 0.19350559299471434,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L27_V003",
+          "frame_idx": 811,
+          "score": 0.1930746340310444,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-qa-07",
+      "Task": "QA",
+      "Target Video": "L29_V013 [21438-22339]",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "#1",
+      "R@1": "1.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "1.0000",
+      "Latency": "7969ms",
+      "Error Type": "PERFECT_RANK_1",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L29_V013",
+          "frame_idx": 21600,
+          "score": 0.3742804868724916,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 2,
+          "video_id": "L29_V013",
+          "frame_idx": 21060,
+          "score": 0.2742804868724916,
+          "answer": "Hình ảnh không cung cấp đủ thông tin về thời gian cụ thể chủ vườn làm việc mỗi ngày."
+        },
+        {
+          "rank": 3,
+          "video_id": "L29_V013",
+          "frame_idx": 21195,
+          "score": 0.26922431700602295,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 4,
+          "video_id": "L29_V013",
+          "frame_idx": 21519,
+          "score": 0.2666844310605728,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 5,
+          "video_id": "L29_V013",
+          "frame_idx": 21602,
+          "score": 0.2617034839581981,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 6,
+          "video_id": "L29_V013",
+          "frame_idx": 21330,
+          "score": 0.2594727099978321,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 7,
+          "video_id": "L29_V013",
+          "frame_idx": 21465,
+          "score": 0.25299128107657587,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 8,
+          "video_id": "L27_V012",
+          "frame_idx": 4185,
+          "score": 0.24344774739791689,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 9,
+          "video_id": "L27_V012",
+          "frame_idx": 4180,
+          "score": 0.23726675346596235,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 10,
+          "video_id": "L25_V017",
+          "frame_idx": 11105,
+          "score": 0.22889890830998652,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 11,
+          "video_id": "L25_V048",
+          "frame_idx": 26829,
+          "score": 0.22858091800884672,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 12,
+          "video_id": "L27_V013",
+          "frame_idx": 12960,
+          "score": 0.2237088423654356,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 13,
+          "video_id": "L27_V013",
+          "frame_idx": 13094,
+          "score": 0.22118005188623752,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 14,
+          "video_id": "L27_V013",
+          "frame_idx": 13047,
+          "score": 0.21471939778127602,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 15,
+          "video_id": "L30_V036",
+          "frame_idx": 1178,
+          "score": 0.210652031408674,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 16,
+          "video_id": "L25_V013",
+          "frame_idx": 13473,
+          "score": 0.20889940420224895,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 17,
+          "video_id": "L30_V044",
+          "frame_idx": 2896,
+          "score": 0.205625218071559,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 18,
+          "video_id": "L25_V060",
+          "frame_idx": 19803,
+          "score": 0.204662389844572,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 19,
+          "video_id": "L27_V012",
+          "frame_idx": 7809,
+          "score": 0.2037007135561575,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        },
+        {
+          "rank": 20,
+          "video_id": "L27_V012",
+          "frame_idx": 7830,
+          "score": 0.2029390818519995,
+          "answer": "Chủ vườn bắt đầu từ 4-5 giờ sáng và làm đến 9-10 giờ đêm mới kết thúc ngày làm việc."
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-08",
+      "Task": "KIS",
+      "Target Video": "L22_V003 [17762-17787]",
+      "Video Rank": "#74",
+      "Pos Rank": "MISS",
+      "Perf Rank": "MISS",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "0.00",
+      "R@100": "0.00",
+      "Final Score": "0.0000",
+      "Latency": "2463ms",
+      "Error Type": "VIDEO_LATE (>Top20)",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L25_V010",
+          "frame_idx": 2023,
+          "score": 0.1756879836320877,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L25_V053",
+          "frame_idx": 24569,
+          "score": 0.17566093802452087,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L25_V065",
+          "frame_idx": 3389,
+          "score": 0.17565864324569702,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L25_V064",
+          "frame_idx": 2119,
+          "score": 0.17490950226783752,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L25_V024",
+          "frame_idx": 35003,
+          "score": 0.17485138773918152,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L25_V001",
+          "frame_idx": 39205,
+          "score": 0.17456381022930145,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L25_V068",
+          "frame_idx": 6781,
+          "score": 0.17447492480278015,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L25_V078",
+          "frame_idx": 31238,
+          "score": 0.17378662526607513,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L25_V062",
+          "frame_idx": 7095,
+          "score": 0.17340222001075745,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L25_V055",
+          "frame_idx": 23928,
+          "score": 0.17320023477077484,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L25_V047",
+          "frame_idx": 4665,
+          "score": 0.17231139540672302,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L25_V018",
+          "frame_idx": 40700,
+          "score": 0.17207013070583344,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L25_V037",
+          "frame_idx": 19659,
+          "score": 0.17197614908218384,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L25_V045",
+          "frame_idx": 2837,
+          "score": 0.17132502794265747,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L25_V059",
+          "frame_idx": 32137,
+          "score": 0.1709570437669754,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L25_V085",
+          "frame_idx": 2682,
+          "score": 0.17075341939926147,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L25_V075",
+          "frame_idx": 42544,
+          "score": 0.17046819627285004,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L25_V036",
+          "frame_idx": 44301,
+          "score": 0.17035986483097076,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L25_V083",
+          "frame_idx": 6998,
+          "score": 0.1702125370502472,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L25_V088",
+          "frame_idx": 1841,
+          "score": 0.16920311748981476,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-trake-09",
+      "Task": "TRAKE",
+      "Target Video": "L22_V006 (5 ev)",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "MISS",
+      "R@1": "0.80",
+      "R@5": "0.80",
+      "R@20": "0.80",
+      "R@50": "0.80",
+      "R@100": "0.80",
+      "Final Score": "0.8000",
+      "Latency": "20884ms",
+      "Error Type": "PARTIAL_HIT",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L22_V006",
+          "frame_idx": 32918,
+          "score": 3.7214445054531096,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L22_V010",
+          "frame_idx": 7638,
+          "score": 2.145430827140808,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L30_V074",
+          "frame_idx": 563,
+          "score": 1.6126101359724998,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L22_V015",
+          "frame_idx": 1521,
+          "score": 1.3322995096445083,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L30_V052",
+          "frame_idx": 563,
+          "score": 1.170154829323292,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L30_V014",
+          "frame_idx": 793,
+          "score": 1.058157207071781,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L30_V027",
+          "frame_idx": 3422,
+          "score": 0.9473496647817747,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L30_V012",
+          "frame_idx": 5003,
+          "score": 0.8614100381731987,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L30_V090",
+          "frame_idx": 409,
+          "score": 0.7940887515743573,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L25_V081",
+          "frame_idx": 37350,
+          "score": 0.7635255932807923,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L22_V008",
+          "frame_idx": 1374,
+          "score": 0.70944933376529,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L22_V003",
+          "frame_idx": 1349,
+          "score": 0.6891917824745178,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L25_V046",
+          "frame_idx": 10518,
+          "score": 0.669784391270234,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L25_V064",
+          "frame_idx": 15450,
+          "score": 0.6581051030329296,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L25_V002",
+          "frame_idx": 1920,
+          "score": 0.6507063508033752,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L25_V055",
+          "frame_idx": 1237,
+          "score": 0.6378730088472366,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L25_V011",
+          "frame_idx": 19265,
+          "score": 0.6134409815949553,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L21_V024",
+          "frame_idx": 4149,
+          "score": 0.6049005875984828,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L30_V083",
+          "frame_idx": 2888,
+          "score": 0.6020956802525018,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L22_V012",
+          "frame_idx": 24375,
+          "score": 0.5861504048109055,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-10",
+      "Task": "KIS",
+      "Target Video": "L22_V001 [14158-15797]",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "#1",
+      "R@1": "1.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "1.0000",
+      "Latency": "2512ms",
+      "Error Type": "PERFECT_RANK_1",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L22_V001",
+          "frame_idx": 14595,
+          "score": 0.20443097037576535,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L22_V001",
+          "frame_idx": 14157,
+          "score": 0.20007796961052926,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L22_V001",
+          "frame_idx": 14343,
+          "score": 0.19933162634641063,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L22_V001",
+          "frame_idx": 14943,
+          "score": 0.17187875663013877,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L22_V001",
+          "frame_idx": 14655,
+          "score": 0.16641807420515808,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L22_V001",
+          "frame_idx": 14739,
+          "score": 0.165923145895739,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L22_V001",
+          "frame_idx": 15020,
+          "score": 0.1590112433442441,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L22_V001",
+          "frame_idx": 15525,
+          "score": 0.158015693313328,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L22_V001",
+          "frame_idx": 15111,
+          "score": 0.1568458143694786,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L22_V001",
+          "frame_idx": 9807,
+          "score": 0.1505374684892352,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L22_V001",
+          "frame_idx": 15171,
+          "score": 0.14981006666042765,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L22_V001",
+          "frame_idx": 14847,
+          "score": 0.14289832139081857,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L25_V057",
+          "frame_idx": 14193,
+          "score": 0.13898515984995044,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L22_V001",
+          "frame_idx": 15711,
+          "score": 0.13239469354928693,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L25_V061",
+          "frame_idx": 13316,
+          "score": 0.1312134076611931,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L22_V001",
+          "frame_idx": 14460,
+          "score": 0.1298210549600612,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L25_V061",
+          "frame_idx": 13284,
+          "score": 0.12727249365849233,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L25_V022",
+          "frame_idx": 21506,
+          "score": 0.12660276889801025,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L25_V030",
+          "frame_idx": 18154,
+          "score": 0.12620587538952166,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L25_V031",
+          "frame_idx": 13445,
+          "score": 0.12528949975967407,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-11",
+      "Task": "KIS",
+      "Target Video": "L23_V017 [347-410]",
+      "Video Rank": "#14",
+      "Pos Rank": "#45",
+      "Perf Rank": "#45",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.4000",
+      "Latency": "1523ms",
+      "Error Type": "PARTIAL_HIT",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L23_V018",
+          "frame_idx": 5475,
+          "score": 0.15933656821745634,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L29_V015",
+          "frame_idx": 2787,
+          "score": 0.14569946869686096,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L23_V021",
+          "frame_idx": 4831,
+          "score": 0.1418328072533133,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L23_V021",
+          "frame_idx": 4811,
+          "score": 0.1391281501572835,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L23_V021",
+          "frame_idx": 4841,
+          "score": 0.13880880435627727,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L23_V007",
+          "frame_idx": 3246,
+          "score": 0.13877040401145,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L23_V005",
+          "frame_idx": 2958,
+          "score": 0.1374064178900885,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L23_V021",
+          "frame_idx": 4898,
+          "score": 0.13714034640476264,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L23_V007",
+          "frame_idx": 6452,
+          "score": 0.1349800243025938,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L23_V013",
+          "frame_idx": 3132,
+          "score": 0.13394571314408374,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L23_V005",
+          "frame_idx": 3000,
+          "score": 0.13370154734209502,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L23_V003",
+          "frame_idx": 4667,
+          "score": 0.1326042496722609,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L23_V021",
+          "frame_idx": 12840,
+          "score": 0.13070358848386615,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L29_V015",
+          "frame_idx": 2788,
+          "score": 0.13054203078462392,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L23_V011",
+          "frame_idx": 8648,
+          "score": 0.12911924200631997,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L23_V013",
+          "frame_idx": 2988,
+          "score": 0.128651189576384,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L23_V007",
+          "frame_idx": 5460,
+          "score": 0.12828266806587024,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L23_V007",
+          "frame_idx": 6143,
+          "score": 0.12785154508638383,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L23_V014",
+          "frame_idx": 1375,
+          "score": 0.12721694628250832,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L29_V015",
+          "frame_idx": 2789,
+          "score": 0.1262324404430661,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-trake-12",
+      "Task": "TRAKE",
+      "Target Video": "L23_V018 (4 ev)",
+      "Video Rank": "#2",
+      "Pos Rank": "#2",
+      "Perf Rank": "MISS",
+      "R@1": "0.00",
+      "R@5": "0.50",
+      "R@20": "0.50",
+      "R@50": "0.50",
+      "R@100": "0.50",
+      "Final Score": "0.4000",
+      "Latency": "11321ms",
+      "Error Type": "PARTIAL_HIT",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L23_V025",
+          "frame_idx": 7375,
+          "score": 3.8257321760058405,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L23_V018",
+          "frame_idx": 5475,
+          "score": 2.283733893930912,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L23_V010",
+          "frame_idx": 4625,
+          "score": 1.7749980375170709,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L23_V023",
+          "frame_idx": 6698,
+          "score": 1.5220938265323638,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L23_V004",
+          "frame_idx": 4750,
+          "score": 1.364237590134144,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L23_V015",
+          "frame_idx": 1734,
+          "score": 1.2589424327015877,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L23_V013",
+          "frame_idx": 3997,
+          "score": 1.1847311364752906,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L23_V024",
+          "frame_idx": 625,
+          "score": 1.124941398203373,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L23_V022",
+          "frame_idx": 3756,
+          "score": 1.0836367910106977,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L23_V016",
+          "frame_idx": 1550,
+          "score": 1.0409190341830254,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L23_V008",
+          "frame_idx": 3750,
+          "score": 1.0107670658014036,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L23_V021",
+          "frame_idx": 900,
+          "score": 0.987628610432148,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L23_V003",
+          "frame_idx": 2198,
+          "score": 0.962282583461358,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L23_V020",
+          "frame_idx": 1426,
+          "score": 0.9362262495926449,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L23_V017",
+          "frame_idx": 1439,
+          "score": 0.9198944181203843,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L23_V019",
+          "frame_idx": 7867,
+          "score": 0.9079686999320984,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L23_V006",
+          "frame_idx": 1000,
+          "score": 0.8898048431557768,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L23_V005",
+          "frame_idx": 3000,
+          "score": 0.8769663209716478,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L23_V011",
+          "frame_idx": 625,
+          "score": 0.8674888882197833,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L23_V012",
+          "frame_idx": 6233,
+          "score": 0.861987654864788,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-13",
+      "Task": "KIS",
+      "Target Video": "L23_V023 [9707-9788]",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "#1",
+      "R@1": "1.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "1.0000",
+      "Latency": "2514ms",
+      "Error Type": "PERFECT_RANK_1",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L23_V023",
+          "frame_idx": 9750,
+          "score": 0.2552180505810504,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L23_V023",
+          "frame_idx": 9707,
+          "score": 0.2491762620047471,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L22_V025",
+          "frame_idx": 11879,
+          "score": 0.19398906014826806,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L22_V004",
+          "frame_idx": 4478,
+          "score": 0.19210769370660669,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L21_V023",
+          "frame_idx": 2037,
+          "score": 0.1913100893527206,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L29_V001",
+          "frame_idx": 10744,
+          "score": 0.18888378435125697,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L22_V025",
+          "frame_idx": 11577,
+          "score": 0.18205093609498568,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L29_V001",
+          "frame_idx": 10800,
+          "score": 0.17906720034071175,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L22_V004",
+          "frame_idx": 7250,
+          "score": 0.17710596365149012,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L22_V019",
+          "frame_idx": 21054,
+          "score": 0.17589989362207126,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L30_V075",
+          "frame_idx": 4592,
+          "score": 0.17523485260294996,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L22_V016",
+          "frame_idx": 32631,
+          "score": 0.17473185036023903,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L21_V029",
+          "frame_idx": 5294,
+          "score": 0.17468567726276313,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L22_V019",
+          "frame_idx": 20691,
+          "score": 0.1746700886889664,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L22_V031",
+          "frame_idx": 8291,
+          "score": 0.16695605957702905,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L21_V027",
+          "frame_idx": 7239,
+          "score": 0.16647844673574502,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L21_V027",
+          "frame_idx": 6171,
+          "score": 0.1664173584547081,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L30_V093",
+          "frame_idx": 803,
+          "score": 0.16601358119847948,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L22_V003",
+          "frame_idx": 10302,
+          "score": 0.16585763956392835,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L21_V006",
+          "frame_idx": 11058,
+          "score": 0.16497810184955597,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-qa-14",
+      "Task": "QA",
+      "Target Video": "L24_V020 [2684-3164]",
+      "Video Rank": "#3",
+      "Pos Rank": "#7",
+      "Perf Rank": "#7",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.6000",
+      "Latency": "5825ms",
+      "Error Type": "PARTIAL_HIT",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L24_V032",
+          "frame_idx": 15004,
+          "score": 0.2218137941171777,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 2,
+          "video_id": "L24_V013",
+          "frame_idx": 2514,
+          "score": 0.21972431211892612,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 3,
+          "video_id": "L24_V032",
+          "frame_idx": 14977,
+          "score": 0.21635634186857872,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 4,
+          "video_id": "L24_V020",
+          "frame_idx": 11024,
+          "score": 0.21392455103859936,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 5,
+          "video_id": "L24_V032",
+          "frame_idx": 15128,
+          "score": 0.2139089708040546,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 6,
+          "video_id": "L24_V011",
+          "frame_idx": 4964,
+          "score": 0.21352863857237053,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 7,
+          "video_id": "L24_V020",
+          "frame_idx": 2888,
+          "score": 0.21319651950113325,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 8,
+          "video_id": "L24_V032",
+          "frame_idx": 15252,
+          "score": 0.21291082859464291,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 9,
+          "video_id": "L24_V011",
+          "frame_idx": 799,
+          "score": 0.2124182133041065,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 10,
+          "video_id": "L24_V020",
+          "frame_idx": 11096,
+          "score": 0.21226299738805904,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 11,
+          "video_id": "L24_V020",
+          "frame_idx": 8289,
+          "score": 0.21193189853280842,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 12,
+          "video_id": "L24_V032",
+          "frame_idx": 9672,
+          "score": 0.21064715712356144,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 13,
+          "video_id": "L24_V010",
+          "frame_idx": 9391,
+          "score": 0.2089499354440137,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 14,
+          "video_id": "L24_V013",
+          "frame_idx": 2604,
+          "score": 0.20881833490547333,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 15,
+          "video_id": "L24_V011",
+          "frame_idx": 248,
+          "score": 0.20821855069154166,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 16,
+          "video_id": "L24_V011",
+          "frame_idx": 3829,
+          "score": 0.20818242998708575,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 17,
+          "video_id": "L24_V020",
+          "frame_idx": 2736,
+          "score": 0.2079034536209869,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 18,
+          "video_id": "L24_V028",
+          "frame_idx": 8816,
+          "score": 0.207673349246156,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 19,
+          "video_id": "L24_V011",
+          "frame_idx": 8654,
+          "score": 0.20754974517969538,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        },
+        {
+          "rank": 20,
+          "video_id": "L24_V011",
+          "frame_idx": 3968,
+          "score": 0.2072878697486824,
+          "answer": "Người đứng gần ống kính nhất bên trái đang chơi trống."
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-15",
+      "Task": "KIS",
+      "Target Video": "L24_V041 [745-769]",
+      "Video Rank": "#14",
+      "Pos Rank": "#38",
+      "Perf Rank": "#38",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.4000",
+      "Latency": "1687ms",
+      "Error Type": "PARTIAL_HIT",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L24_V025",
+          "frame_idx": 4104,
+          "score": 0.19353193905730523,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L24_V025",
+          "frame_idx": 1562,
+          "score": 0.19294356316006264,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L24_V025",
+          "frame_idx": 1671,
+          "score": 0.19286253549236537,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L24_V025",
+          "frame_idx": 4256,
+          "score": 0.18861783807413499,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L24_V025",
+          "frame_idx": 3917,
+          "score": 0.18481005708847903,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L24_V025",
+          "frame_idx": 7904,
+          "score": 0.18074291882222232,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L24_V027",
+          "frame_idx": 13832,
+          "score": 0.18052839640895774,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L24_V025",
+          "frame_idx": 3951,
+          "score": 0.1802816625675642,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L24_V027",
+          "frame_idx": 13667,
+          "score": 0.17948764352931762,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L24_V025",
+          "frame_idx": 11997,
+          "score": 0.1780780039880407,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L24_V027",
+          "frame_idx": 13680,
+          "score": 0.17740965887391208,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L24_V030",
+          "frame_idx": 16416,
+          "score": 0.1742880692494311,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L24_V027",
+          "frame_idx": 494,
+          "score": 0.17381171947606616,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L24_V016",
+          "frame_idx": 12152,
+          "score": 0.17323278178649232,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L24_V007",
+          "frame_idx": 528,
+          "score": 0.1711072267451448,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L24_V016",
+          "frame_idx": 11904,
+          "score": 0.16884753860081103,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L24_V035",
+          "frame_idx": 3192,
+          "score": 0.1687535382706469,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L24_V036",
+          "frame_idx": 7599,
+          "score": 0.16802312369999192,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L24_V014",
+          "frame_idx": 7440,
+          "score": 0.16769289301261459,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L24_V014",
+          "frame_idx": 530,
+          "score": 0.16755797745883755,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-qa-16",
+      "Task": "QA",
+      "Target Video": "L24_V026 [13072-13181]",
+      "Video Rank": "#4",
+      "Pos Rank": "MISS",
+      "Perf Rank": "MISS",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "0.00",
+      "R@100": "0.00",
+      "Final Score": "0.0000",
+      "Latency": "4782ms",
+      "Error Type": "TEMPORAL_NEAR_MISS (<=25f)",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L24_V018",
+          "frame_idx": 13731,
+          "score": 0.1908536317350864,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 2,
+          "video_id": "L24_V018",
+          "frame_idx": 13763,
+          "score": 0.1905641386578983,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 3,
+          "video_id": "L24_V035",
+          "frame_idx": 17784,
+          "score": 0.18850219105211558,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 4,
+          "video_id": "L24_V021",
+          "frame_idx": 14288,
+          "score": 0.1880894984700078,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 5,
+          "video_id": "L24_V026",
+          "frame_idx": 13072,
+          "score": 0.1867150873655733,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 6,
+          "video_id": "L24_V025",
+          "frame_idx": 15345,
+          "score": 0.1862673303754826,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 7,
+          "video_id": "L24_V021",
+          "frame_idx": 14238,
+          "score": 0.1856208621771488,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 8,
+          "video_id": "L24_V025",
+          "frame_idx": 15351,
+          "score": 0.18543104478529865,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 9,
+          "video_id": "L24_V035",
+          "frame_idx": 17729,
+          "score": 0.17993681852411228,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 10,
+          "video_id": "L24_V026",
+          "frame_idx": 13144,
+          "score": 0.1755353497301007,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 11,
+          "video_id": "L24_V031",
+          "frame_idx": 15503,
+          "score": 0.17327400199967596,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 12,
+          "video_id": "L24_V032",
+          "frame_idx": 14384,
+          "score": 0.16989303824347343,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 13,
+          "video_id": "L24_V008",
+          "frame_idx": 11408,
+          "score": 0.16853303773227488,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 14,
+          "video_id": "L24_V031",
+          "frame_idx": 15467,
+          "score": 0.16458036155879932,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 15,
+          "video_id": "L24_V020",
+          "frame_idx": 12225,
+          "score": 0.16413205231219052,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 16,
+          "video_id": "L24_V008",
+          "frame_idx": 11656,
+          "score": 0.16395571445162016,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 17,
+          "video_id": "L24_V008",
+          "frame_idx": 11284,
+          "score": 0.1620835337466367,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 18,
+          "video_id": "L24_V008",
+          "frame_idx": 11532,
+          "score": 0.16045649550150431,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 19,
+          "video_id": "L24_V039",
+          "frame_idx": 13820,
+          "score": 0.1600741841326011,
+          "answer": "Hoa mai vàng giả."
+        },
+        {
+          "rank": 20,
+          "video_id": "L24_V008",
+          "frame_idx": 5392,
+          "score": 0.15959568867546803,
+          "answer": "Hoa mai vàng giả."
+        }
+      ]
+    },
+    {
+      "Query ID": "test-qa-17",
+      "Task": "QA",
+      "Target Video": "L25_V067 [2019-2039]",
+      "Video Rank": "MISS",
+      "Pos Rank": "MISS",
+      "Perf Rank": "MISS",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "0.00",
+      "R@100": "0.00",
+      "Final Score": "0.0000",
+      "Latency": "9072ms",
+      "Error Type": "VIDEO_NOT_IN_TOP100",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L25_V039",
+          "frame_idx": 36540,
+          "score": 0.4953346280936334,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 2,
+          "video_id": "L25_V022",
+          "frame_idx": 40675,
+          "score": 0.47929354890841036,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 3,
+          "video_id": "L25_V011",
+          "frame_idx": 793,
+          "score": 0.4774378242113571,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 4,
+          "video_id": "L25_V031",
+          "frame_idx": 653,
+          "score": 0.47273221201956417,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 5,
+          "video_id": "L25_V001",
+          "frame_idx": 38575,
+          "score": 0.46534115801256576,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 6,
+          "video_id": "L25_V049",
+          "frame_idx": 40042,
+          "score": 0.2671593452951906,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 7,
+          "video_id": "L25_V003",
+          "frame_idx": 27670,
+          "score": 0.2658223548859662,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 8,
+          "video_id": "L25_V029",
+          "frame_idx": 5243,
+          "score": 0.2651944677221729,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 9,
+          "video_id": "L30_V026",
+          "frame_idx": 3531,
+          "score": 0.2646486079995445,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 10,
+          "video_id": "L25_V024",
+          "frame_idx": 34478,
+          "score": 0.2645508717842975,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 11,
+          "video_id": "L25_V005",
+          "frame_idx": 1512,
+          "score": 0.2619767384366651,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 12,
+          "video_id": "L25_V027",
+          "frame_idx": 2130,
+          "score": 0.26052181353068693,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 13,
+          "video_id": "L25_V007",
+          "frame_idx": 66983,
+          "score": 0.2601931554374364,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 14,
+          "video_id": "L25_V046",
+          "frame_idx": 2700,
+          "score": 0.26007666768129956,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 15,
+          "video_id": "L25_V041",
+          "frame_idx": 7526,
+          "score": 0.25965032527273335,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 16,
+          "video_id": "L25_V046",
+          "frame_idx": 1982,
+          "score": 0.25850004221590434,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 17,
+          "video_id": "L25_V050",
+          "frame_idx": 5192,
+          "score": 0.2582557170289615,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 18,
+          "video_id": "L25_V016",
+          "frame_idx": 794,
+          "score": 0.2579177047012089,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 19,
+          "video_id": "L25_V012",
+          "frame_idx": 5128,
+          "score": 0.2578889120332567,
+          "answer": "EHUD BARAK"
+        },
+        {
+          "rank": 20,
+          "video_id": "L25_V055",
+          "frame_idx": 23403,
+          "score": 0.256892140184225,
+          "answer": "EHUD BARAK"
+        }
+      ]
+    },
+    {
+      "Query ID": "test-trake-18",
+      "Task": "TRAKE",
+      "Target Video": "L25_V041 (4 ev)",
+      "Video Rank": "#15",
+      "Pos Rank": "#15",
+      "Perf Rank": "MISS",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.75",
+      "R@50": "0.75",
+      "R@100": "0.75",
+      "Final Score": "0.4500",
+      "Latency": "19760ms",
+      "Error Type": "PARTIAL_HIT",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L25_V037",
+          "frame_idx": 2047,
+          "score": 3.624371473491192,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L25_V038",
+          "frame_idx": 5951,
+          "score": 2.122288690507412,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L25_V035",
+          "frame_idx": 4975,
+          "score": 1.5740991234779358,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L25_V086",
+          "frame_idx": 53400,
+          "score": 1.345185397565365,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L25_V069",
+          "frame_idx": 47735,
+          "score": 1.1676049143075944,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L25_V065",
+          "frame_idx": 27900,
+          "score": 1.047572596371174,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L25_V015",
+          "frame_idx": 32489,
+          "score": 1.0047891723258155,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L25_V046",
+          "frame_idx": 21390,
+          "score": 0.9463091656565666,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L25_V007",
+          "frame_idx": 1483,
+          "score": 0.8770516877373059,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L25_V050",
+          "frame_idx": 40139,
+          "score": 0.8308961033821106,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L25_V020",
+          "frame_idx": 6377,
+          "score": 0.8286483012817123,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L25_V045",
+          "frame_idx": 33804,
+          "score": 0.7862710401415824,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L25_V023",
+          "frame_idx": 5409,
+          "score": 0.7479380625944871,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L25_V016",
+          "frame_idx": 39082,
+          "score": 0.736283539235592,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L25_V041",
+          "frame_idx": 7965,
+          "score": 0.7323391162923405,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L25_V026",
+          "frame_idx": 40527,
+          "score": 0.7273177593946457,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L25_V056",
+          "frame_idx": 5100,
+          "score": 0.6831133873147123,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L25_V068",
+          "frame_idx": 43156,
+          "score": 0.68046100469012,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L25_V079",
+          "frame_idx": 25301,
+          "score": 0.6801837876439095,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L25_V012",
+          "frame_idx": 30325,
+          "score": 0.6785740743080775,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-19",
+      "Task": "KIS",
+      "Target Video": "L25_V063 [2316-2342]",
+      "Video Rank": "MISS",
+      "Pos Rank": "MISS",
+      "Perf Rank": "MISS",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "0.00",
+      "R@100": "0.00",
+      "Final Score": "0.0000",
+      "Latency": "3642ms",
+      "Error Type": "VIDEO_NOT_IN_TOP100",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L25_V084",
+          "frame_idx": 2243,
+          "score": 0.20747891068458557,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L25_V079",
+          "frame_idx": 6073,
+          "score": 0.20739677548408508,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L25_V068",
+          "frame_idx": 7239,
+          "score": 0.20721866190433502,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L25_V015",
+          "frame_idx": 3211,
+          "score": 0.20692269504070282,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L25_V027",
+          "frame_idx": 3112,
+          "score": 0.20678433775901794,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L25_V006",
+          "frame_idx": 27661,
+          "score": 0.206646129488945,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L25_V072",
+          "frame_idx": 21892,
+          "score": 0.20662051439285278,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L25_V067",
+          "frame_idx": 3321,
+          "score": 0.20659665763378143,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L25_V065",
+          "frame_idx": 3846,
+          "score": 0.206560879945755,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L25_V073",
+          "frame_idx": 32996,
+          "score": 0.20653611421585083,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L25_V033",
+          "frame_idx": 47828,
+          "score": 0.20646974444389343,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L25_V042",
+          "frame_idx": 47828,
+          "score": 0.20610211789608002,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L25_V011",
+          "frame_idx": 1880,
+          "score": 0.20605430006980896,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L25_V042",
+          "frame_idx": 47850,
+          "score": 0.20602230727672577,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L25_V060",
+          "frame_idx": 39167,
+          "score": 0.2059401273727417,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L25_V050",
+          "frame_idx": 6174,
+          "score": 0.20592911541461945,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L25_V044",
+          "frame_idx": 3758,
+          "score": 0.20587864518165588,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L25_V026",
+          "frame_idx": 8450,
+          "score": 0.20585858821868896,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L25_V083",
+          "frame_idx": 7456,
+          "score": 0.20551110804080963,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L25_V036",
+          "frame_idx": 44758,
+          "score": 0.2054653763771057,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-qa-20",
+      "Task": "QA",
+      "Target Video": "L25_V044 [2730-2748]",
+      "Video Rank": "#73",
+      "Pos Rank": "#85",
+      "Perf Rank": "#85",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "0.00",
+      "R@100": "1.00",
+      "Final Score": "0.2000",
+      "Latency": "14368ms",
+      "Error Type": "VIDEO_LATE (>Top20)",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L25_V085",
+          "frame_idx": 1999,
+          "score": 0.274937133558899,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        },
+        {
+          "rank": 2,
+          "video_id": "L25_V020",
+          "frame_idx": 28464,
+          "score": 0.17493713355889898,
+          "answer": "Hình ảnh hoàn toàn là màu đen, không thể quan sát được robot hình người."
+        },
+        {
+          "rank": 3,
+          "video_id": "L25_V002",
+          "frame_idx": 26095,
+          "score": 0.17483917805559115,
+          "answer": "Hình ảnh tối đen không hiển thị thông tin để xác định màu sắc của robot."
+        },
+        {
+          "rank": 4,
+          "video_id": "L25_V038",
+          "frame_idx": 32733,
+          "score": 0.17467903705819204,
+          "answer": "Hình ảnh hoàn toàn tối đen (màu đen), không thể quan sát được robot hay bất kỳ chi tiết nào."
+        },
+        {
+          "rank": 5,
+          "video_id": "L25_V086",
+          "frame_idx": 13838,
+          "score": 0.1740980773272242,
+          "answer": "Hình ảnh hiển thị màu đen, không thể quan sát được robot hình người."
+        },
+        {
+          "rank": 6,
+          "video_id": "L25_V042",
+          "frame_idx": 46800,
+          "score": 0.16343608498573303,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        },
+        {
+          "rank": 7,
+          "video_id": "L25_V082",
+          "frame_idx": 3121,
+          "score": 0.1633884459733963,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        },
+        {
+          "rank": 8,
+          "video_id": "L25_V010",
+          "frame_idx": 1471,
+          "score": 0.1633884459733963,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        },
+        {
+          "rank": 9,
+          "video_id": "L25_V081",
+          "frame_idx": 4564,
+          "score": 0.1630779653787613,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        },
+        {
+          "rank": 10,
+          "video_id": "L25_V077",
+          "frame_idx": 41405,
+          "score": 0.16226910054683685,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        },
+        {
+          "rank": 11,
+          "video_id": "L25_V082",
+          "frame_idx": 3103,
+          "score": 0.1622578650712967,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        },
+        {
+          "rank": 12,
+          "video_id": "L25_V063",
+          "frame_idx": 1543,
+          "score": 0.1622578650712967,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        },
+        {
+          "rank": 13,
+          "video_id": "L25_V010",
+          "frame_idx": 1453,
+          "score": 0.1622578650712967,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        },
+        {
+          "rank": 14,
+          "video_id": "L25_V001",
+          "frame_idx": 38634,
+          "score": 0.16205599904060364,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        },
+        {
+          "rank": 15,
+          "video_id": "L25_V074",
+          "frame_idx": 52524,
+          "score": 0.16201338171958923,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        },
+        {
+          "rank": 16,
+          "video_id": "L25_V042",
+          "frame_idx": 46818,
+          "score": 0.16197893023490906,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        },
+        {
+          "rank": 17,
+          "video_id": "L25_V001",
+          "frame_idx": 38652,
+          "score": 0.16189727187156677,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        },
+        {
+          "rank": 18,
+          "video_id": "L25_V063",
+          "frame_idx": 1561,
+          "score": 0.1615065038204193,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        },
+        {
+          "rank": 19,
+          "video_id": "L25_V046",
+          "frame_idx": 1950,
+          "score": 0.1609582006931305,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        },
+        {
+          "rank": 20,
+          "video_id": "L25_V034",
+          "frame_idx": 1032,
+          "score": 0.15985152125358582,
+          "answer": "Con robot có hai tông màu chính là trắng và cam."
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-21",
+      "Task": "KIS",
+      "Target Video": "L26_V073 [5722-5908]",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "#1",
+      "R@1": "1.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "1.0000",
+      "Latency": "1775ms",
+      "Error Type": "PERFECT_RANK_1",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V073",
+          "frame_idx": 5828,
+          "score": 0.1739029462598754,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V073",
+          "frame_idx": 5520,
+          "score": 0.15469762925111005,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V073",
+          "frame_idx": 5722,
+          "score": 0.1484402671260883,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V073",
+          "frame_idx": 6216,
+          "score": 0.13464500114508093,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V073",
+          "frame_idx": 6338,
+          "score": 0.1286687209435968,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V459",
+          "frame_idx": 5972,
+          "score": 0.12772565105181294,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V459",
+          "frame_idx": 6016,
+          "score": 0.12345336517379044,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V487",
+          "frame_idx": 6324,
+          "score": 0.12005704483214066,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V459",
+          "frame_idx": 5620,
+          "score": 0.11297752491264149,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V128",
+          "frame_idx": 5298,
+          "score": 0.11144688788900768,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V128",
+          "frame_idx": 5888,
+          "score": 0.10786724504382575,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V128",
+          "frame_idx": 5691,
+          "score": 0.10551945956465848,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V128",
+          "frame_idx": 6182,
+          "score": 0.10543353827514095,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V225",
+          "frame_idx": 6107,
+          "score": 0.10465926691015558,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V459",
+          "frame_idx": 5632,
+          "score": 0.10346024335153273,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V073",
+          "frame_idx": 4105,
+          "score": 0.09993822313560069,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V073",
+          "frame_idx": 5580,
+          "score": 0.09970398039006519,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V128",
+          "frame_idx": 5678,
+          "score": 0.09747329203715972,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V225",
+          "frame_idx": 6144,
+          "score": 0.0969960435948093,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V187",
+          "frame_idx": 5878,
+          "score": 0.09623009192252005,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-22",
+      "Task": "KIS",
+      "Target Video": "L26_V076 [5981-6047]",
+      "Video Rank": "#2",
+      "Pos Rank": "#2",
+      "Perf Rank": "#2",
+      "R@1": "0.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.8000",
+      "Latency": "1416ms",
+      "Error Type": "PERFECT_IN_TOP5",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V388",
+          "frame_idx": 4743,
+          "score": 0.18015230887143666,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V076",
+          "frame_idx": 5981,
+          "score": 0.1684365079556665,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V052",
+          "frame_idx": 3689,
+          "score": 0.16038480743870126,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V390",
+          "frame_idx": 3822,
+          "score": 0.15252920985221863,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V191",
+          "frame_idx": 2092,
+          "score": 0.15247270464897156,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V394",
+          "frame_idx": 2221,
+          "score": 0.1522991955280304,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V037",
+          "frame_idx": 4770,
+          "score": 0.15179529786109924,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V017",
+          "frame_idx": 4132,
+          "score": 0.15161002560312611,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V406",
+          "frame_idx": 5248,
+          "score": 0.1513805786622232,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V448",
+          "frame_idx": 4866,
+          "score": 0.15131308138370514,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V132",
+          "frame_idx": 3593,
+          "score": 0.15130987763404846,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V435",
+          "frame_idx": 3425,
+          "score": 0.15120774507522583,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V474",
+          "frame_idx": 4040,
+          "score": 0.15105871856212616,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V191",
+          "frame_idx": 2176,
+          "score": 0.151022806763649,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V074",
+          "frame_idx": 3336,
+          "score": 0.150708869099617,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V204",
+          "frame_idx": 3868,
+          "score": 0.15066843067655933,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V428",
+          "frame_idx": 3740,
+          "score": 0.15053372917972013,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V492",
+          "frame_idx": 2487,
+          "score": 0.15027502179145813,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V167",
+          "frame_idx": 4864,
+          "score": 0.15011935615699498,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V406",
+          "frame_idx": 5302,
+          "score": 0.149826485529527,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-23",
+      "Task": "KIS",
+      "Target Video": "L26_V080 [4128-4220]",
+      "Video Rank": "#26",
+      "Pos Rank": "#41",
+      "Perf Rank": "#41",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.4000",
+      "Latency": "2057ms",
+      "Error Type": "VIDEO_LATE (>Top20)",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V268",
+          "frame_idx": 2300,
+          "score": 0.16078004595115739,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V223",
+          "frame_idx": 5632,
+          "score": 0.16008274917370857,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V142",
+          "frame_idx": 4093,
+          "score": 0.1599626118196768,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V223",
+          "frame_idx": 5626,
+          "score": 0.15951491048280325,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V456",
+          "frame_idx": 2455,
+          "score": 0.15916805570530346,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V268",
+          "frame_idx": 2329,
+          "score": 0.15899323703379303,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V268",
+          "frame_idx": 2048,
+          "score": 0.15761858029864145,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V341",
+          "frame_idx": 3584,
+          "score": 0.15736816975376577,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V268",
+          "frame_idx": 2304,
+          "score": 0.15635214023841926,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V456",
+          "frame_idx": 2944,
+          "score": 0.1545010159283648,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V437",
+          "frame_idx": 3140,
+          "score": 0.15350255692837564,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V341",
+          "frame_idx": 3328,
+          "score": 0.15310595097855834,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V456",
+          "frame_idx": 2568,
+          "score": 0.15263837615109568,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V060",
+          "frame_idx": 4836,
+          "score": 0.15118528994465913,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V142",
+          "frame_idx": 4096,
+          "score": 0.15015401987630095,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V356",
+          "frame_idx": 2323,
+          "score": 0.14982564786392905,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V427",
+          "frame_idx": 5003,
+          "score": 0.14872215056660465,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V185",
+          "frame_idx": 4115,
+          "score": 0.14864292740821838,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V085",
+          "frame_idx": 4090,
+          "score": 0.14863227307796478,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V456",
+          "frame_idx": 2890,
+          "score": 0.14824134460741453,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-24",
+      "Task": "KIS",
+      "Target Video": "L26_V177 [2213-2292]",
+      "Video Rank": "#3",
+      "Pos Rank": "#5",
+      "Perf Rank": "#5",
+      "R@1": "0.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.8000",
+      "Latency": "1960ms",
+      "Error Type": "PERFECT_IN_TOP5",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V232",
+          "frame_idx": 1800,
+          "score": 0.1685165874713013,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V136",
+          "frame_idx": 1664,
+          "score": 0.1677657890698545,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V136",
+          "frame_idx": 1627,
+          "score": 0.16609943222706017,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V232",
+          "frame_idx": 1838,
+          "score": 0.15878119379934288,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V177",
+          "frame_idx": 2251,
+          "score": 0.15387242895995518,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V476",
+          "frame_idx": 2356,
+          "score": 0.1509296714085398,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V036",
+          "frame_idx": 1639,
+          "score": 0.1496753709623117,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V177",
+          "frame_idx": 2213,
+          "score": 0.14832502751561547,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V039",
+          "frame_idx": 3585,
+          "score": 0.14528571893311065,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V435",
+          "frame_idx": 3137,
+          "score": 0.14483379996477017,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V161",
+          "frame_idx": 1920,
+          "score": 0.14409442727985414,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V190",
+          "frame_idx": 4262,
+          "score": 0.14352504221944493,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V476",
+          "frame_idx": 2360,
+          "score": 0.1433547890488542,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V036",
+          "frame_idx": 1560,
+          "score": 0.14310417143077053,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V435",
+          "frame_idx": 3193,
+          "score": 0.1410341413547449,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V476",
+          "frame_idx": 2310,
+          "score": 0.14052794199211,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V039",
+          "frame_idx": 3645,
+          "score": 0.13922606853582276,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V420",
+          "frame_idx": 3854,
+          "score": 0.13800467969995298,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V435",
+          "frame_idx": 3200,
+          "score": 0.13699421718792926,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V358",
+          "frame_idx": 5006,
+          "score": 0.13498856676744672,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-25",
+      "Task": "KIS",
+      "Target Video": "L26_V163 [4496-4557]",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "#1",
+      "R@1": "1.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "1.0000",
+      "Latency": "1752ms",
+      "Error Type": "PERFECT_RANK_1",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V163",
+          "frame_idx": 4496,
+          "score": 0.22521732448010826,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V172",
+          "frame_idx": 4096,
+          "score": 0.21555025102736147,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V470",
+          "frame_idx": 4719,
+          "score": 0.19364723503409942,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V172",
+          "frame_idx": 4046,
+          "score": 0.19182435384719088,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V055",
+          "frame_idx": 4120,
+          "score": 0.19144494672134862,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V163",
+          "frame_idx": 4608,
+          "score": 0.18870985653314906,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V441",
+          "frame_idx": 3584,
+          "score": 0.18793856519385319,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V480",
+          "frame_idx": 5393,
+          "score": 0.18580633632557222,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V449",
+          "frame_idx": 5172,
+          "score": 0.1847023810210817,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V437",
+          "frame_idx": 3328,
+          "score": 0.18416019890907576,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V034",
+          "frame_idx": 4590,
+          "score": 0.18228211346723364,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V163",
+          "frame_idx": 4558,
+          "score": 0.18037501700920483,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V232",
+          "frame_idx": 4371,
+          "score": 0.1790971887752198,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V034",
+          "frame_idx": 4691,
+          "score": 0.17836266576378515,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V104",
+          "frame_idx": 5376,
+          "score": 0.17810382838684996,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V449",
+          "frame_idx": 5101,
+          "score": 0.17748165176795605,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V480",
+          "frame_idx": 4836,
+          "score": 0.17632621757436906,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V441",
+          "frame_idx": 5193,
+          "score": 0.17618548941061504,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V456",
+          "frame_idx": 2688,
+          "score": 0.17564606388802712,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V470",
+          "frame_idx": 4216,
+          "score": 0.1749378647943617,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-qa-26",
+      "Task": "QA",
+      "Target Video": "L26_V173 [1565-1595]",
+      "Video Rank": "#1",
+      "Pos Rank": "#3",
+      "Perf Rank": "#3",
+      "R@1": "0.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.8000",
+      "Latency": "5003ms",
+      "Error Type": "PERFECT_IN_TOP5",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V173",
+          "frame_idx": 1121,
+          "score": 0.15298424421489448,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V173",
+          "frame_idx": 1152,
+          "score": 0.15081097103152555,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V173",
+          "frame_idx": 1565,
+          "score": 0.14814965108295827,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V280",
+          "frame_idx": 1792,
+          "score": 0.1220740542376129,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V280",
+          "frame_idx": 1748,
+          "score": 0.12050134146352104,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V173",
+          "frame_idx": 416,
+          "score": 0.11722439495542852,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V193",
+          "frame_idx": 5738,
+          "score": 0.11076549802680401,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V123",
+          "frame_idx": 6831,
+          "score": 0.09835573261284306,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V237",
+          "frame_idx": 1280,
+          "score": 0.09503148782556112,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V067",
+          "frame_idx": 640,
+          "score": 0.09420745665032179,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V222",
+          "frame_idx": 512,
+          "score": 0.09347539484407744,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V220",
+          "frame_idx": 394,
+          "score": 0.09295223959167578,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V104",
+          "frame_idx": 2688,
+          "score": 0.09291304947815766,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V173",
+          "frame_idx": 1689,
+          "score": 0.09153154751615031,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V319",
+          "frame_idx": 4682,
+          "score": 0.0883477331519842,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V237",
+          "frame_idx": 1242,
+          "score": 0.08763325655230404,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V280",
+          "frame_idx": 1157,
+          "score": 0.08733083754699479,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V025",
+          "frame_idx": 701,
+          "score": 0.0870518981683252,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V178",
+          "frame_idx": 4471,
+          "score": 0.08656447315869359,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V237",
+          "frame_idx": 1034,
+          "score": 0.08653988367973695,
+          "answer": "Trên chiếc đĩa có tất cả 4 quả trứng vịt."
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-27",
+      "Task": "KIS",
+      "Target Video": "L26_V271 [6676-6727]",
+      "Video Rank": "#1",
+      "Pos Rank": "MISS",
+      "Perf Rank": "MISS",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "0.00",
+      "R@100": "0.00",
+      "Final Score": "0.0000",
+      "Latency": "2143ms",
+      "Error Type": "TEMPORAL_NEAR_MISS (<=25f)",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V271",
+          "frame_idx": 6656,
+          "score": 0.21215280947338178,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L29_V020",
+          "frame_idx": 25016,
+          "score": 0.20194862370065098,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V355",
+          "frame_idx": 5494,
+          "score": 0.1992259499813002,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V041",
+          "frame_idx": 3261,
+          "score": 0.1964690919066696,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V355",
+          "frame_idx": 5504,
+          "score": 0.19545422905182797,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L30_V023",
+          "frame_idx": 601,
+          "score": 0.19526816807030206,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V292",
+          "frame_idx": 4553,
+          "score": 0.1932296107517644,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L30_V023",
+          "frame_idx": 762,
+          "score": 0.19297918126241917,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V269",
+          "frame_idx": 2367,
+          "score": 0.1927076066357434,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V157",
+          "frame_idx": 4864,
+          "score": 0.18919868788885874,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V044",
+          "frame_idx": 5248,
+          "score": 0.1884835660457611,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L29_V012",
+          "frame_idx": 11685,
+          "score": 0.18824775516986847,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V400",
+          "frame_idx": 5248,
+          "score": 0.1880827695131302,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V303",
+          "frame_idx": 1942,
+          "score": 0.18788851380822785,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V181",
+          "frame_idx": 3840,
+          "score": 0.18777889013290405,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V235",
+          "frame_idx": 2770,
+          "score": 0.18750034477745003,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V028",
+          "frame_idx": 2234,
+          "score": 0.18692082166671753,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V041",
+          "frame_idx": 3375,
+          "score": 0.18666599990399696,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L29_V020",
+          "frame_idx": 21330,
+          "score": 0.18655730584134336,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L22_V007",
+          "frame_idx": 9659,
+          "score": 0.1864687816112182,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-28",
+      "Task": "KIS",
+      "Target Video": "L26_V245 [5211-5297]",
+      "Video Rank": "#9",
+      "Pos Rank": "#20",
+      "Perf Rank": "#20",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.6000",
+      "Latency": "1420ms",
+      "Error Type": "PARTIAL_HIT",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V416",
+          "frame_idx": 6212,
+          "score": 0.13416402436081315,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V416",
+          "frame_idx": 6144,
+          "score": 0.13205259004480607,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V075",
+          "frame_idx": 5070,
+          "score": 0.13068279672459093,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V416",
+          "frame_idx": 6093,
+          "score": 0.1298687323761309,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V158",
+          "frame_idx": 5061,
+          "score": 0.12728349408745898,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V231",
+          "frame_idx": 5632,
+          "score": 0.12479572040725795,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V158",
+          "frame_idx": 5024,
+          "score": 0.12469571650740865,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V209",
+          "frame_idx": 3672,
+          "score": 0.1240503201585674,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V158",
+          "frame_idx": 5019,
+          "score": 0.12376672754118724,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V158",
+          "frame_idx": 5020,
+          "score": 0.12278716445272243,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V075",
+          "frame_idx": 5074,
+          "score": 0.12226011991273565,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V306",
+          "frame_idx": 5120,
+          "score": 0.12041587711951342,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V075",
+          "frame_idx": 5071,
+          "score": 0.11973037669337219,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V121",
+          "frame_idx": 4585,
+          "score": 0.11883127731483742,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V174",
+          "frame_idx": 5504,
+          "score": 0.11815887029088494,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V075",
+          "frame_idx": 5034,
+          "score": 0.11809690304508494,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V209",
+          "frame_idx": 3661,
+          "score": 0.11751518454455184,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V209",
+          "frame_idx": 3635,
+          "score": 0.11740557243887322,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V075",
+          "frame_idx": 5069,
+          "score": 0.11740311326922954,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V245",
+          "frame_idx": 5248,
+          "score": 0.11677401192839908,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-qa-29",
+      "Task": "QA",
+      "Target Video": "L26_V295 [1996-2056]",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "#1",
+      "R@1": "1.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "1.0000",
+      "Latency": "4838ms",
+      "Error Type": "PERFECT_RANK_1",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V295",
+          "frame_idx": 2048,
+          "score": 0.2067609034770784,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V295",
+          "frame_idx": 1996,
+          "score": 0.19898844157352819,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V113",
+          "frame_idx": 2356,
+          "score": 0.19771260639516244,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V298",
+          "frame_idx": 3584,
+          "score": 0.1715166035828446,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V050",
+          "frame_idx": 7233,
+          "score": 0.17095033392462,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V040",
+          "frame_idx": 3140,
+          "score": 0.16883528234392792,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V239",
+          "frame_idx": 951,
+          "score": 0.16867337084884879,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V298",
+          "frame_idx": 3554,
+          "score": 0.16831666927056999,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V381",
+          "frame_idx": 3556,
+          "score": 0.16799048713429565,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V401",
+          "frame_idx": 1730,
+          "score": 0.16786125881801633,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V239",
+          "frame_idx": 1163,
+          "score": 0.1669297629753203,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V113",
+          "frame_idx": 620,
+          "score": 0.16663085366411629,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V381",
+          "frame_idx": 3584,
+          "score": 0.16661476435476807,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V302",
+          "frame_idx": 1024,
+          "score": 0.1636885580721257,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V456",
+          "frame_idx": 1837,
+          "score": 0.16162430962680074,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V113",
+          "frame_idx": 424,
+          "score": 0.16085044848266836,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V241",
+          "frame_idx": 5983,
+          "score": 0.15993741151286783,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V050",
+          "frame_idx": 6165,
+          "score": 0.15838220165668979,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V053",
+          "frame_idx": 1238,
+          "score": 0.158134281038627,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V061",
+          "frame_idx": 6554,
+          "score": 0.15787300422868614,
+          "answer": "Quả màu đỏ đặt trên đĩa là quả cà chua."
+        }
+      ]
+    },
+    {
+      "Query ID": "test-qa-30",
+      "Task": "QA",
+      "Target Video": "L26_V360 [3012-3047]",
+      "Video Rank": "#17",
+      "Pos Rank": "MISS",
+      "Perf Rank": "MISS",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "0.00",
+      "R@100": "0.00",
+      "Final Score": "0.0000",
+      "Latency": "6155ms",
+      "Error Type": "TEMPORAL_NEAR_MISS (<=25f)",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V033",
+          "frame_idx": 2123,
+          "score": 0.18151047638663445,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V033",
+          "frame_idx": 2160,
+          "score": 0.1729298616116756,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V042",
+          "frame_idx": 2160,
+          "score": 0.1647177638776663,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V062",
+          "frame_idx": 3720,
+          "score": 0.16455663246724617,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V042",
+          "frame_idx": 2129,
+          "score": 0.162976116970809,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V036",
+          "frame_idx": 3375,
+          "score": 0.16273654643294003,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V421",
+          "frame_idx": 3279,
+          "score": 0.16221353181365555,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V134",
+          "frame_idx": 1712,
+          "score": 0.1620240577093311,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V452",
+          "frame_idx": 2486,
+          "score": 0.1607210353187081,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V320",
+          "frame_idx": 3177,
+          "score": 0.1604930807623609,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V152",
+          "frame_idx": 2176,
+          "score": 0.1603570365675448,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V197",
+          "frame_idx": 2836,
+          "score": 0.16035113818891555,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V237",
+          "frame_idx": 2455,
+          "score": 0.15967429418635398,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V029",
+          "frame_idx": 3375,
+          "score": 0.1595445167782606,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V055",
+          "frame_idx": 1903,
+          "score": 0.1595242662659904,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V094",
+          "frame_idx": 2836,
+          "score": 0.1590618600919177,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V022",
+          "frame_idx": 2835,
+          "score": 0.1589845573382809,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V212",
+          "frame_idx": 2469,
+          "score": 0.15842445453884885,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V360",
+          "frame_idx": 2957,
+          "score": 0.15784786682592158,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V031",
+          "frame_idx": 4185,
+          "score": 0.1577255664736142,
+          "answer": "Người đầu bếp đang cắt hành lá."
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-31",
+      "Task": "KIS",
+      "Target Video": "L26_V384 [5606-5668]",
+      "Video Rank": "#28",
+      "Pos Rank": "MISS",
+      "Perf Rank": "MISS",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "0.00",
+      "R@100": "0.00",
+      "Final Score": "0.0000",
+      "Latency": "1923ms",
+      "Error Type": "VIDEO_LATE (>Top20)",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V126",
+          "frame_idx": 3571,
+          "score": 0.14890788150909837,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V039",
+          "frame_idx": 5761,
+          "score": 0.14706532403079983,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V175",
+          "frame_idx": 4738,
+          "score": 0.14314015148830345,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V499",
+          "frame_idx": 5845,
+          "score": 0.143066013706226,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V484",
+          "frame_idx": 3558,
+          "score": 0.1418808843917751,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V179",
+          "frame_idx": 4309,
+          "score": 0.14029518101209695,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V175",
+          "frame_idx": 3968,
+          "score": 0.14028104728071436,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V039",
+          "frame_idx": 5805,
+          "score": 0.1401362548399506,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V227",
+          "frame_idx": 4402,
+          "score": 0.1400020280487469,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V152",
+          "frame_idx": 5760,
+          "score": 0.13988789219844963,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V499",
+          "frame_idx": 4960,
+          "score": 0.13947274943815655,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V479",
+          "frame_idx": 4288,
+          "score": 0.13821491759642887,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V223",
+          "frame_idx": 5626,
+          "score": 0.13771665255189341,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V110",
+          "frame_idx": 5208,
+          "score": 0.13755675482271973,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V105",
+          "frame_idx": 4074,
+          "score": 0.13753151528416083,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V330",
+          "frame_idx": 5872,
+          "score": 0.13734957575798035,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V402",
+          "frame_idx": 4744,
+          "score": 0.13697469234466553,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V389",
+          "frame_idx": 4001,
+          "score": 0.13697031140327454,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V294",
+          "frame_idx": 3629,
+          "score": 0.13670660555362701,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V261",
+          "frame_idx": 1839,
+          "score": 0.13662777841091156,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-qa-32",
+      "Task": "QA",
+      "Target Video": "L26_V364 [3840-3985]",
+      "Video Rank": "#51",
+      "Pos Rank": "MISS",
+      "Perf Rank": "MISS",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "0.00",
+      "R@100": "0.00",
+      "Final Score": "0.0000",
+      "Latency": "5849ms",
+      "Error Type": "VIDEO_LATE (>Top20)",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V061",
+          "frame_idx": 3547,
+          "score": 0.23961158377840977,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V026",
+          "frame_idx": 2484,
+          "score": 0.13961158377840976,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V224",
+          "frame_idx": 1792,
+          "score": 0.12704144867582967,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V017",
+          "frame_idx": 2304,
+          "score": 0.12694791636082067,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V028",
+          "frame_idx": 2072,
+          "score": 0.12473062847990113,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V040",
+          "frame_idx": 2559,
+          "score": 0.12409882289850288,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V247",
+          "frame_idx": 3552,
+          "score": 0.12354853413586561,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V082",
+          "frame_idx": 1764,
+          "score": 0.12337270140182821,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V082",
+          "frame_idx": 1792,
+          "score": 0.12260207733043975,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V395",
+          "frame_idx": 2233,
+          "score": 0.12173277331052722,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V377",
+          "frame_idx": 2432,
+          "score": 0.12067079264578334,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V330",
+          "frame_idx": 3439,
+          "score": 0.11981629961740023,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V224",
+          "frame_idx": 1729,
+          "score": 0.11974849107323779,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V377",
+          "frame_idx": 2407,
+          "score": 0.11969343585419681,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V458",
+          "frame_idx": 2522,
+          "score": 0.1196307893848148,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V126",
+          "frame_idx": 1381,
+          "score": 0.11892523238231512,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V304",
+          "frame_idx": 3874,
+          "score": 0.11878034491207409,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V412",
+          "frame_idx": 2333,
+          "score": 0.11831646343608096,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V405",
+          "frame_idx": 2816,
+          "score": 0.11823691112447783,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V227",
+          "frame_idx": 3063,
+          "score": 0.11803896505432042,
+          "answer": "Người đầu bếp dùng dao cắt quả ớt sừng màu đỏ trên thớt gỗ."
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-33",
+      "Task": "KIS",
+      "Target Video": "L26_V476 [3488-3536]",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "#1",
+      "R@1": "1.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "1.0000",
+      "Latency": "2041ms",
+      "Error Type": "PERFECT_RANK_1",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V476",
+          "frame_idx": 3488,
+          "score": 0.19527923322602306,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V068",
+          "frame_idx": 4138,
+          "score": 0.17325617894322992,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V338",
+          "frame_idx": 2886,
+          "score": 0.17079377878640511,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V476",
+          "frame_idx": 3418,
+          "score": 0.1685165641795835,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V360",
+          "frame_idx": 3854,
+          "score": 0.16826086707125132,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V480",
+          "frame_idx": 4576,
+          "score": 0.16775593640360828,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V393",
+          "frame_idx": 6423,
+          "score": 0.16627788898412077,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V476",
+          "frame_idx": 3472,
+          "score": 0.16609089159032023,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V205",
+          "frame_idx": 4507,
+          "score": 0.16435719999071183,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V272",
+          "frame_idx": 6598,
+          "score": 0.16342411150407826,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V205",
+          "frame_idx": 4400,
+          "score": 0.16306191522518437,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V073",
+          "frame_idx": 4483,
+          "score": 0.16250592320543766,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V432",
+          "frame_idx": 2668,
+          "score": 0.162442274324478,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V475",
+          "frame_idx": 6358,
+          "score": 0.16181401770597736,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V084",
+          "frame_idx": 3499,
+          "score": 0.16067525018822648,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V360",
+          "frame_idx": 5837,
+          "score": 0.1606436412677268,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V404",
+          "frame_idx": 2048,
+          "score": 0.16063052415847778,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V245",
+          "frame_idx": 6616,
+          "score": 0.16033457219600677,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V089",
+          "frame_idx": 4207,
+          "score": 0.16025911168633156,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V411",
+          "frame_idx": 5187,
+          "score": 0.16017314791679382,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-34",
+      "Task": "KIS",
+      "Target Video": "L26_V478 [3352-3427]",
+      "Video Rank": "#2",
+      "Pos Rank": "#5",
+      "Perf Rank": "#5",
+      "R@1": "0.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.8000",
+      "Latency": "1705ms",
+      "Error Type": "PERFECT_IN_TOP5",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V454",
+          "frame_idx": 2560,
+          "score": 0.16240766847624233,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V454",
+          "frame_idx": 2606,
+          "score": 0.16180462303094392,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V454",
+          "frame_idx": 2534,
+          "score": 0.15684259916776594,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V454",
+          "frame_idx": 2688,
+          "score": 0.1529971283877058,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V478",
+          "frame_idx": 3352,
+          "score": 0.14103318545457594,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V484",
+          "frame_idx": 3151,
+          "score": 0.1392317876543169,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V454",
+          "frame_idx": 2432,
+          "score": 0.12903960684045918,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V387",
+          "frame_idx": 2670,
+          "score": 0.1263687615032044,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V054",
+          "frame_idx": 2295,
+          "score": 0.12631580439278284,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V149",
+          "frame_idx": 2563,
+          "score": 0.12552812538887834,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V026",
+          "frame_idx": 2484,
+          "score": 0.12272482155895831,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V464",
+          "frame_idx": 3584,
+          "score": 0.12148790305877857,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V454",
+          "frame_idx": 2445,
+          "score": 0.12082107715191995,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V370",
+          "frame_idx": 2551,
+          "score": 0.12046814635450522,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V370",
+          "frame_idx": 2560,
+          "score": 0.11863923944692482,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V464",
+          "frame_idx": 3576,
+          "score": 0.11861312502791574,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V138",
+          "frame_idx": 1792,
+          "score": 0.11843827366828918,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V201",
+          "frame_idx": 2533,
+          "score": 0.11818010128212854,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V474",
+          "frame_idx": 3728,
+          "score": 0.11773943901062012,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V138",
+          "frame_idx": 1785,
+          "score": 0.11750316619873047,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-qa-35",
+      "Task": "QA",
+      "Target Video": "L26_V473 [3317-3384]",
+      "Video Rank": "#24",
+      "Pos Rank": "#40",
+      "Perf Rank": "#40",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.4000",
+      "Latency": "5089ms",
+      "Error Type": "VIDEO_LATE (>Top20)",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L26_V244",
+          "frame_idx": 3840,
+          "score": 0.14189352079654613,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 2,
+          "video_id": "L26_V060",
+          "frame_idx": 3347,
+          "score": 0.1366244622672771,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 3,
+          "video_id": "L26_V041",
+          "frame_idx": 2792,
+          "score": 0.1351003005110782,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 4,
+          "video_id": "L26_V390",
+          "frame_idx": 3012,
+          "score": 0.1349914429413735,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 5,
+          "video_id": "L26_V258",
+          "frame_idx": 4451,
+          "score": 0.13316042005587267,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 6,
+          "video_id": "L26_V342",
+          "frame_idx": 3125,
+          "score": 0.13246604117055583,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V171",
+          "frame_idx": 2060,
+          "score": 0.13088020781801318,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V375",
+          "frame_idx": 3234,
+          "score": 0.130756339058075,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V017",
+          "frame_idx": 2304,
+          "score": 0.13072838608630344,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 10,
+          "video_id": "L26_V111",
+          "frame_idx": 2121,
+          "score": 0.12987999641653716,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 11,
+          "video_id": "L26_V171",
+          "frame_idx": 2138,
+          "score": 0.1297851875784305,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V117",
+          "frame_idx": 2688,
+          "score": 0.12933211655521842,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 13,
+          "video_id": "L26_V445",
+          "frame_idx": 2974,
+          "score": 0.12929346087145177,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 14,
+          "video_id": "L26_V342",
+          "frame_idx": 3124,
+          "score": 0.12774551115017388,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 15,
+          "video_id": "L26_V126",
+          "frame_idx": 1381,
+          "score": 0.12684964123214817,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V156",
+          "frame_idx": 3090,
+          "score": 0.1260136756444388,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 17,
+          "video_id": "L26_V229",
+          "frame_idx": 1943,
+          "score": 0.12574971244985952,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 18,
+          "video_id": "L26_V171",
+          "frame_idx": 2176,
+          "score": 0.12558504945311086,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V390",
+          "frame_idx": 3072,
+          "score": 0.12536279453316745,
+          "answer": "củ cà rốt"
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V126",
+          "frame_idx": 1382,
+          "score": 0.1248367599817684,
+          "answer": "củ cà rốt"
+        }
+      ]
+    },
+    {
+      "Query ID": "test-qa-36",
+      "Task": "QA",
+      "Target Video": "L27_V008 [4412-4756]",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "#1",
+      "R@1": "1.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "1.0000",
+      "Latency": "45135ms",
+      "Error Type": "PERFECT_RANK_1",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L27_V008",
+          "frame_idx": 4455,
+          "score": 0.5264376310095098,
+          "answer": "Thích Minh Tuệ"
+        },
+        {
+          "rank": 2,
+          "video_id": "L25_V021",
+          "frame_idx": 3899,
+          "score": 0.42643763100950977,
+          "answer": "Hình ảnh hiển thị nội dung bài học hóa học về polime, không có cảnh phỏng vấn nhà sư."
+        },
+        {
+          "rank": 3,
+          "video_id": "L25_V021",
+          "frame_idx": 4049,
+          "score": 0.42615453836695794,
+          "answer": "Hình ảnh hiển thị nội dung học tập về đại cương polime, không có cảnh phỏng vấn nhà sư trong hang động."
+        },
+        {
+          "rank": 4,
+          "video_id": "L25_V021",
+          "frame_idx": 3299,
+          "score": 0.4252081435909415,
+          "answer": "Hình ảnh không chứa cảnh phỏng vấn nhà sư trong hang động."
+        },
+        {
+          "rank": 5,
+          "video_id": "L25_V021",
+          "frame_idx": 4199,
+          "score": 0.42482602352211934,
+          "answer": "Hình ảnh không phải cảnh phỏng vấn nhà sư trong hang động mà là slide bài giảng Đại cương polime."
+        },
+        {
+          "rank": 6,
+          "video_id": "L25_V021",
+          "frame_idx": 3749,
+          "score": 0.4235308270428703,
+          "answer": "Hình ảnh không hiển thị cảnh phỏng vấn nhà sư mặc áo nâu bên trong hang động."
+        },
+        {
+          "rank": 7,
+          "video_id": "L25_V021",
+          "frame_idx": 3149,
+          "score": 0.4233435483599203,
+          "answer": "Thích Minh Tuệ"
+        },
+        {
+          "rank": 8,
+          "video_id": "L25_V021",
+          "frame_idx": 3103,
+          "score": 0.4230965196587063,
+          "answer": "Hình ảnh không chứa cảnh phỏng vấn nhà sư trong hang động."
+        },
+        {
+          "rank": 9,
+          "video_id": "L25_V021",
+          "frame_idx": 3449,
+          "score": 0.4217930804786701,
+          "answer": "Hình ảnh không chứa cảnh phỏng vấn nhà sư mặc áo nâu bên trong hang động hay bảng tên có pháp danh của Đại đức."
+        },
+        {
+          "rank": 10,
+          "video_id": "L25_V021",
+          "frame_idx": 3599,
+          "score": 0.4214395417583878,
+          "answer": "Hình ảnh không chứa thông tin về cảnh phỏng vấn nhà sư trong hang động."
+        },
+        {
+          "rank": 11,
+          "video_id": "L24_V014",
+          "frame_idx": 12843,
+          "score": 0.3676982927713525,
+          "answer": "Hình ảnh không phải là cảnh phỏng vấn nhà sư trong hang động và không có bảng tên pháp danh."
+        },
+        {
+          "rank": 12,
+          "video_id": "L24_V025",
+          "frame_idx": 6687,
+          "score": 0.3657263749412115,
+          "answer": "Hình ảnh không có cảnh phỏng vấn nhà sư mặc áo nâu bên trong hang động."
+        },
+        {
+          "rank": 13,
+          "video_id": "L27_V008",
+          "frame_idx": 4412,
+          "score": 0.3184032290567825,
+          "answer": "Thích Minh Tuệ"
+        },
+        {
+          "rank": 14,
+          "video_id": "L21_V005",
+          "frame_idx": 21345,
+          "score": 0.2849610249993696,
+          "answer": "Thích Minh Tuệ"
+        },
+        {
+          "rank": 15,
+          "video_id": "L21_V029",
+          "frame_idx": 27647,
+          "score": 0.26892998356331865,
+          "answer": "Thích Minh Tuệ"
+        },
+        {
+          "rank": 16,
+          "video_id": "L28_V017",
+          "frame_idx": 11708,
+          "score": 0.26754929216973156,
+          "answer": "Thích Minh Tuệ"
+        },
+        {
+          "rank": 17,
+          "video_id": "L21_V029",
+          "frame_idx": 27806,
+          "score": 0.26468991653595997,
+          "answer": "Thích Minh Tuệ"
+        },
+        {
+          "rank": 18,
+          "video_id": "L28_V009",
+          "frame_idx": 23490,
+          "score": 0.2626744593580732,
+          "answer": "Thích Minh Tuệ"
+        },
+        {
+          "rank": 19,
+          "video_id": "L27_V007",
+          "frame_idx": 10125,
+          "score": 0.26196369975107775,
+          "answer": "Thích Minh Tuệ"
+        },
+        {
+          "rank": 20,
+          "video_id": "L27_V007",
+          "frame_idx": 10134,
+          "score": 0.2616597471770449,
+          "answer": "Thích Minh Tuệ"
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-37",
+      "Task": "KIS",
+      "Target Video": "L27_V013 [2382-2454]",
+      "Video Rank": "#1",
+      "Pos Rank": "#2",
+      "Perf Rank": "#2",
+      "R@1": "0.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.8000",
+      "Latency": "2208ms",
+      "Error Type": "PERFECT_IN_TOP5",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L27_V013",
+          "frame_idx": 2843,
+          "score": 0.21837419337827368,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L27_V013",
+          "frame_idx": 2382,
+          "score": 0.21493630149475043,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L27_V013",
+          "frame_idx": 2430,
+          "score": 0.21321642201037647,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L27_V013",
+          "frame_idx": 2970,
+          "score": 0.2063610497352906,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L27_V014",
+          "frame_idx": 13769,
+          "score": 0.19151752159722107,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L29_V018",
+          "frame_idx": 4455,
+          "score": 0.1914596414089958,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L27_V011",
+          "frame_idx": 3098,
+          "score": 0.18882315503911543,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L27_V011",
+          "frame_idx": 3072,
+          "score": 0.18694986301722843,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L28_V022",
+          "frame_idx": 9450,
+          "score": 0.18399204606646533,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L27_V011",
+          "frame_idx": 2054,
+          "score": 0.18291733348453482,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L29_V018",
+          "frame_idx": 3311,
+          "score": 0.17815702475649522,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L27_V013",
+          "frame_idx": 2835,
+          "score": 0.1768669193793204,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L27_V014",
+          "frame_idx": 13740,
+          "score": 0.1750973534469876,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L27_V013",
+          "frame_idx": 8100,
+          "score": 0.17508598419866345,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L27_V013",
+          "frame_idx": 2644,
+          "score": 0.17476638319129673,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L28_V022",
+          "frame_idx": 9410,
+          "score": 0.17395539960711906,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L27_V013",
+          "frame_idx": 944,
+          "score": 0.17314038980361776,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L27_V013",
+          "frame_idx": 9115,
+          "score": 0.17187489519943516,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L27_V011",
+          "frame_idx": 3233,
+          "score": 0.17141769852359154,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L27_V013",
+          "frame_idx": 2937,
+          "score": 0.16997576577689966,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-38",
+      "Task": "KIS",
+      "Target Video": "L27_V015 [11961-12059]",
+      "Video Rank": "#1",
+      "Pos Rank": "#2",
+      "Perf Rank": "#2",
+      "R@1": "0.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "0.8000",
+      "Latency": "1822ms",
+      "Error Type": "PERFECT_IN_TOP5",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L27_V015",
+          "frame_idx": 11626,
+          "score": 0.18134186341650285,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L27_V015",
+          "frame_idx": 12015,
+          "score": 0.18055979088190555,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L27_V015",
+          "frame_idx": 11961,
+          "score": 0.17249144468490285,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L27_V015",
+          "frame_idx": 12555,
+          "score": 0.10132822740665245,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L27_V015",
+          "frame_idx": 12503,
+          "score": 0.10068361370458781,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L27_V015",
+          "frame_idx": 11838,
+          "score": 0.09968117405012347,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L26_V020",
+          "frame_idx": 4455,
+          "score": 0.0979826786508131,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L26_V475",
+          "frame_idx": 3472,
+          "score": 0.09459339028522959,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L26_V020",
+          "frame_idx": 4452,
+          "score": 0.09367295478088794,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L27_V015",
+          "frame_idx": 11610,
+          "score": 0.0909590523149021,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L27_V015",
+          "frame_idx": 11880,
+          "score": 0.08786733310905127,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L26_V475",
+          "frame_idx": 3396,
+          "score": 0.08703500909097714,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L27_V015",
+          "frame_idx": 13769,
+          "score": 0.08671482361282747,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L27_V015",
+          "frame_idx": 13722,
+          "score": 0.08362576865959258,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L27_V015",
+          "frame_idx": 11475,
+          "score": 0.07937930234946204,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L26_V020",
+          "frame_idx": 4860,
+          "score": 0.07758950394084696,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L27_V007",
+          "frame_idx": 13147,
+          "score": 0.07639718907348228,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L28_V024",
+          "frame_idx": 27498,
+          "score": 0.07190737539651938,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L26_V237",
+          "frame_idx": 5713,
+          "score": 0.07152813707430353,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L26_V020",
+          "frame_idx": 4837,
+          "score": 0.06670103020646205,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-39",
+      "Task": "KIS",
+      "Target Video": "L28_V012 [5145-5290]",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "#1",
+      "R@1": "1.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "1.0000",
+      "Latency": "2324ms",
+      "Error Type": "PERFECT_RANK_1",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L28_V012",
+          "frame_idx": 5265,
+          "score": 0.1920549829116535,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L28_V012",
+          "frame_idx": 5145,
+          "score": 0.18175372240337653,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L28_V012",
+          "frame_idx": 5291,
+          "score": 0.16136778665656845,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L28_V012",
+          "frame_idx": 5400,
+          "score": 0.16013275504519842,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L28_V012",
+          "frame_idx": 5429,
+          "score": 0.13602143585573812,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L25_V079",
+          "frame_idx": 15878,
+          "score": 0.1294264942407608,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L25_V036",
+          "frame_idx": 25676,
+          "score": 0.12935996055603027,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L25_V064",
+          "frame_idx": 16598,
+          "score": 0.1292601078748703,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L25_V016",
+          "frame_idx": 19470,
+          "score": 0.1291474550962448,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L25_V020",
+          "frame_idx": 17549,
+          "score": 0.1288149356842041,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L25_V002",
+          "frame_idx": 16399,
+          "score": 0.12880495190620422,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L25_V001",
+          "frame_idx": 21008,
+          "score": 0.12875500321388245,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L25_V045",
+          "frame_idx": 18850,
+          "score": 0.12862737476825714,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L25_V010",
+          "frame_idx": 28162,
+          "score": 0.1285819262266159,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L25_V012",
+          "frame_idx": 17786,
+          "score": 0.12833431363105774,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L25_V088",
+          "frame_idx": 17283,
+          "score": 0.12795771658420563,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L28_V012",
+          "frame_idx": 5130,
+          "score": 0.1276746197275798,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L25_V074",
+          "frame_idx": 27780,
+          "score": 0.1276123821735382,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L25_V023",
+          "frame_idx": 23810,
+          "score": 0.12745872139930725,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L25_V015",
+          "frame_idx": 18514,
+          "score": 0.12724550068378448,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-qa-40",
+      "Task": "QA",
+      "Target Video": "L28_V018 [19091-19138]",
+      "Video Rank": "#2",
+      "Pos Rank": "MISS",
+      "Perf Rank": "MISS",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "0.00",
+      "R@100": "0.00",
+      "Final Score": "0.0000",
+      "Latency": "8513ms",
+      "Error Type": "TEMPORAL_NEAR_MISS (<=25f)",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L28_V017",
+          "frame_idx": 10930,
+          "score": 0.1779136690723564,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 2,
+          "video_id": "L28_V017",
+          "frame_idx": 10935,
+          "score": 0.17431005160336682,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 3,
+          "video_id": "L28_V018",
+          "frame_idx": 19091,
+          "score": 0.1705569845060236,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 4,
+          "video_id": "L28_V020",
+          "frame_idx": 7020,
+          "score": 0.13876523986826433,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 5,
+          "video_id": "L28_V018",
+          "frame_idx": 18987,
+          "score": 0.134999131365198,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 6,
+          "video_id": "L28_V017",
+          "frame_idx": 11559,
+          "score": 0.13445064956526628,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 7,
+          "video_id": "L28_V017",
+          "frame_idx": 12622,
+          "score": 0.1340094813051405,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 8,
+          "video_id": "L28_V018",
+          "frame_idx": 19028,
+          "score": 0.13280444802744468,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 9,
+          "video_id": "L27_V007",
+          "frame_idx": 8250,
+          "score": 0.12861900146261473,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 10,
+          "video_id": "L27_V008",
+          "frame_idx": 10768,
+          "score": 0.12770471268489075,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 11,
+          "video_id": "L28_V012",
+          "frame_idx": 23760,
+          "score": 0.11999917053207743,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 12,
+          "video_id": "L28_V017",
+          "frame_idx": 11708,
+          "score": 0.11774708739025709,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 13,
+          "video_id": "L27_V009",
+          "frame_idx": 14310,
+          "score": 0.11738257164832973,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 14,
+          "video_id": "L28_V012",
+          "frame_idx": 23710,
+          "score": 0.11728579970201806,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 15,
+          "video_id": "L28_V017",
+          "frame_idx": 11336,
+          "score": 0.11334984746791402,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 16,
+          "video_id": "L28_V017",
+          "frame_idx": 11610,
+          "score": 0.11302430448770337,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 17,
+          "video_id": "L28_V018",
+          "frame_idx": 17420,
+          "score": 0.11195869424648103,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 18,
+          "video_id": "L27_V008",
+          "frame_idx": 10800,
+          "score": 0.11058715924626439,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 19,
+          "video_id": "L27_V007",
+          "frame_idx": 9855,
+          "score": 0.1098624647618448,
+          "answer": "Bạch Động Thôn Vân"
+        },
+        {
+          "rank": 20,
+          "video_id": "L27_V010",
+          "frame_idx": 8640,
+          "score": 0.10984263559633273,
+          "answer": "Bạch Động Thôn Vân"
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-41",
+      "Task": "KIS",
+      "Target Video": "L28_V019 [20233-20314]",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "#1",
+      "R@1": "1.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "1.0000",
+      "Latency": "1946ms",
+      "Error Type": "PERFECT_RANK_1",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L28_V019",
+          "frame_idx": 20250,
+          "score": 0.1316231614512978,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L28_V019",
+          "frame_idx": 20170,
+          "score": 0.12413320911128928,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L28_V019",
+          "frame_idx": 20394,
+          "score": 0.12171757286134803,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L28_V019",
+          "frame_idx": 20324,
+          "score": 0.11563113993626442,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L30_V045",
+          "frame_idx": 6305,
+          "score": 0.11351276914019992,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L28_V015",
+          "frame_idx": 16193,
+          "score": 0.11079107533311416,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L28_V019",
+          "frame_idx": 21202,
+          "score": 0.10902075057312077,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L28_V015",
+          "frame_idx": 16278,
+          "score": 0.10584713724571905,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L30_V045",
+          "frame_idx": 6138,
+          "score": 0.10420469512182699,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L28_V019",
+          "frame_idx": 23198,
+          "score": 0.10393982839230678,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L28_V019",
+          "frame_idx": 22413,
+          "score": 0.10365425282494133,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L28_V019",
+          "frame_idx": 20385,
+          "score": 0.10357037570865073,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L28_V019",
+          "frame_idx": 22950,
+          "score": 0.09980627479341896,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L28_V015",
+          "frame_idx": 16328,
+          "score": 0.09920966639579425,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L28_V019",
+          "frame_idx": 22931,
+          "score": 0.09861480604247957,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L28_V015",
+          "frame_idx": 16140,
+          "score": 0.09790156504557591,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L30_V045",
+          "frame_idx": 7597,
+          "score": 0.09709114452279227,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L28_V019",
+          "frame_idx": 23085,
+          "score": 0.09599882883592215,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L28_V019",
+          "frame_idx": 20926,
+          "score": 0.09539827421445253,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L28_V019",
+          "frame_idx": 23220,
+          "score": 0.09249328219158622,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-42",
+      "Task": "KIS",
+      "Target Video": "L29_V005 [17179-17257]",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "#1",
+      "R@1": "1.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "1.0000",
+      "Latency": "2760ms",
+      "Error Type": "PERFECT_RANK_1",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L29_V005",
+          "frame_idx": 17179,
+          "score": 0.20610700009371058,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L29_V005",
+          "frame_idx": 17258,
+          "score": 0.1935122422439726,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L29_V005",
+          "frame_idx": 14175,
+          "score": 0.19289432236403414,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L29_V005",
+          "frame_idx": 17280,
+          "score": 0.19255453083983445,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L28_V012",
+          "frame_idx": 18900,
+          "score": 0.19102165082768052,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L29_V005",
+          "frame_idx": 17972,
+          "score": 0.19052549519061796,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L28_V012",
+          "frame_idx": 18884,
+          "score": 0.19035849360079807,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L29_V005",
+          "frame_idx": 20655,
+          "score": 0.18892296943896053,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L29_V005",
+          "frame_idx": 18289,
+          "score": 0.18792951448956258,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L29_V005",
+          "frame_idx": 17857,
+          "score": 0.18663054633231407,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L29_V005",
+          "frame_idx": 17145,
+          "score": 0.18408341282577567,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L29_V005",
+          "frame_idx": 18341,
+          "score": 0.18399088821537143,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L28_V020",
+          "frame_idx": 6615,
+          "score": 0.18368406840147694,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L28_V012",
+          "frame_idx": 19035,
+          "score": 0.18356557524359363,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L28_V007",
+          "frame_idx": 17685,
+          "score": 0.18344643944388328,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L29_V005",
+          "frame_idx": 18360,
+          "score": 0.18234046514590163,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L29_V005",
+          "frame_idx": 20528,
+          "score": 0.18204259368276468,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L29_V005",
+          "frame_idx": 17685,
+          "score": 0.18173402433795396,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L29_V005",
+          "frame_idx": 17820,
+          "score": 0.1801530015443271,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L28_V007",
+          "frame_idx": 22005,
+          "score": 0.1788079421529392,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-43",
+      "Task": "KIS",
+      "Target Video": "L29_V002 [3705-3808]",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "#1",
+      "R@1": "1.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "1.0000",
+      "Latency": "2412ms",
+      "Error Type": "PERFECT_RANK_1",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L29_V002",
+          "frame_idx": 3804,
+          "score": 0.1785609466811351,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L29_V002",
+          "frame_idx": 3629,
+          "score": 0.1711216987859686,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L29_V002",
+          "frame_idx": 3679,
+          "score": 0.16817975613152555,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L29_V002",
+          "frame_idx": 25820,
+          "score": 0.16110908070072177,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L29_V002",
+          "frame_idx": 25772,
+          "score": 0.1544519365818628,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L28_V016",
+          "frame_idx": 23457,
+          "score": 0.11740480190151673,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L29_V002",
+          "frame_idx": 14491,
+          "score": 0.11379393138371738,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L28_V012",
+          "frame_idx": 22140,
+          "score": 0.11167907606796892,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L29_V002",
+          "frame_idx": 13386,
+          "score": 0.1103837329509407,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L29_V006",
+          "frame_idx": 20250,
+          "score": 0.10944440075701267,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L29_V017",
+          "frame_idx": 695,
+          "score": 0.10885003954172134,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L29_V006",
+          "frame_idx": 9990,
+          "score": 0.10880262130470095,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L29_V017",
+          "frame_idx": 675,
+          "score": 0.10875612497329712,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L29_V018",
+          "frame_idx": 675,
+          "score": 0.1079617589712143,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L28_V012",
+          "frame_idx": 21904,
+          "score": 0.10724583788331893,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L29_V006",
+          "frame_idx": 9970,
+          "score": 0.10719888756826973,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L29_V011",
+          "frame_idx": 675,
+          "score": 0.10717430710792542,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L29_V018",
+          "frame_idx": 695,
+          "score": 0.10708245635032654,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L29_V014",
+          "frame_idx": 675,
+          "score": 0.1068669930100441,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L21_V002",
+          "frame_idx": 28743,
+          "score": 0.10683652013540268,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-qa-44",
+      "Task": "QA",
+      "Target Video": "L29_V015 [11202-11295]",
+      "Video Rank": "#1",
+      "Pos Rank": "MISS",
+      "Perf Rank": "MISS",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "0.00",
+      "R@100": "0.00",
+      "Final Score": "0.0000",
+      "Latency": "85272ms",
+      "Error Type": "TEMPORAL_NEAR_MISS (<=25f)",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L29_V015",
+          "frame_idx": 11475,
+          "score": 0.46619789615119755,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 2,
+          "video_id": "L21_V028",
+          "frame_idx": 10434,
+          "score": 0.3661978961511976,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 3,
+          "video_id": "L25_V008",
+          "frame_idx": 20099,
+          "score": 0.36268347901385334,
+          "answer": "Hình ảnh không chứa thông tin về rổ nhựa đựng ba khía trên bàn cân, đây là bài toán xác suất."
+        },
+        {
+          "rank": 4,
+          "video_id": "L21_V028",
+          "frame_idx": 10481,
+          "score": 0.3615356173577895,
+          "answer": "Hình ảnh không có chiếc rổ nhựa màu vàng đựng ba khía đặt trên bàn cân như câu hỏi đề cập."
+        },
+        {
+          "rank": 5,
+          "video_id": "L29_V015",
+          "frame_idx": 11205,
+          "score": 0.18288207844429022,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 6,
+          "video_id": "L29_V008",
+          "frame_idx": 16909,
+          "score": 0.18024386561674588,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 7,
+          "video_id": "L29_V015",
+          "frame_idx": 11202,
+          "score": 0.17886872792653752,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 8,
+          "video_id": "L29_V015",
+          "frame_idx": 11340,
+          "score": 0.17823611023873814,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 9,
+          "video_id": "L22_V020",
+          "frame_idx": 10926,
+          "score": 0.15268535934003669,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 10,
+          "video_id": "L29_V019",
+          "frame_idx": 22626,
+          "score": 0.1525950766166818,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 11,
+          "video_id": "L29_V008",
+          "frame_idx": 15390,
+          "score": 0.15158689216653676,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 12,
+          "video_id": "L29_V008",
+          "frame_idx": 13905,
+          "score": 0.1501410997870481,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 13,
+          "video_id": "L29_V016",
+          "frame_idx": 7868,
+          "score": 0.14958998635146512,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 14,
+          "video_id": "L21_V023",
+          "frame_idx": 25995,
+          "score": 0.14313114815722716,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 15,
+          "video_id": "L29_V006",
+          "frame_idx": 15287,
+          "score": 0.1416967979394474,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 16,
+          "video_id": "L21_V015",
+          "frame_idx": 11627,
+          "score": 0.14112799955561395,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 17,
+          "video_id": "L22_V020",
+          "frame_idx": 10542,
+          "score": 0.13996976011032997,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 18,
+          "video_id": "L29_V008",
+          "frame_idx": 15255,
+          "score": 0.139090904208276,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 19,
+          "video_id": "L29_V006",
+          "frame_idx": 7290,
+          "score": 0.13767622596796938,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        },
+        {
+          "rank": 20,
+          "video_id": "L29_V008",
+          "frame_idx": 13834,
+          "score": 0.13693711013627952,
+          "answer": "Màn hình số điện tử của chiếc cân hiển thị con số 25.14."
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-45",
+      "Task": "KIS",
+      "Target Video": "L30_V074 [4300-4424]",
+      "Video Rank": "#1",
+      "Pos Rank": "MISS",
+      "Perf Rank": "MISS",
+      "R@1": "0.00",
+      "R@5": "0.00",
+      "R@20": "0.00",
+      "R@50": "0.00",
+      "R@100": "0.00",
+      "Final Score": "0.0000",
+      "Latency": "2470ms",
+      "Error Type": "TEMPORAL_NEAR_MISS (<=25f)",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L30_V074",
+          "frame_idx": 2768,
+          "score": 0.16492026381659802,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L30_V027",
+          "frame_idx": 1560,
+          "score": 0.14423825891573475,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L30_V074",
+          "frame_idx": 630,
+          "score": 0.14131065388123165,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L30_V052",
+          "frame_idx": 5319,
+          "score": 0.130992105255129,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L30_V052",
+          "frame_idx": 2358,
+          "score": 0.12774947091813285,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L30_V074",
+          "frame_idx": 2762,
+          "score": 0.12745394745427438,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L30_V052",
+          "frame_idx": 5271,
+          "score": 0.12598650412603737,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L30_V052",
+          "frame_idx": 4111,
+          "score": 0.12533330581548902,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L30_V074",
+          "frame_idx": 4557,
+          "score": 0.12398391725706467,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L30_V052",
+          "frame_idx": 2381,
+          "score": 0.12337616851032263,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L30_V052",
+          "frame_idx": 816,
+          "score": 0.12170234843463168,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L30_V052",
+          "frame_idx": 3088,
+          "score": 0.12124049268149899,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L30_V074",
+          "frame_idx": 4292,
+          "score": 0.12109818951779101,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L30_V074",
+          "frame_idx": 4533,
+          "score": 0.12046233985448056,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L30_V052",
+          "frame_idx": 701,
+          "score": 0.12038570833663137,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L30_V074",
+          "frame_idx": 2489,
+          "score": 0.11677756485254388,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L30_V027",
+          "frame_idx": 7425,
+          "score": 0.11656977383357117,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L30_V052",
+          "frame_idx": 5151,
+          "score": 0.11639512354218695,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L30_V052",
+          "frame_idx": 5247,
+          "score": 0.11619502781903249,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L30_V052",
+          "frame_idx": 629,
+          "score": 0.11549225694073514,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-trake-46",
+      "Task": "TRAKE",
+      "Target Video": "L30_V005 (4 ev)",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "MISS",
+      "R@1": "0.50",
+      "R@5": "0.50",
+      "R@20": "0.50",
+      "R@50": "0.50",
+      "R@100": "0.50",
+      "Final Score": "0.5000",
+      "Latency": "12653ms",
+      "Error Type": "PARTIAL_HIT",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L30_V005",
+          "frame_idx": 522,
+          "score": 3.8026813969016073,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L22_V002",
+          "frame_idx": 3563,
+          "score": 2.0396294102072714,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L21_V023",
+          "frame_idx": 6072,
+          "score": 1.4567720875144006,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L30_V091",
+          "frame_idx": 4963,
+          "score": 1.1963618293404579,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L22_V012",
+          "frame_idx": 471,
+          "score": 1.0168867982923986,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L21_V024",
+          "frame_idx": 1768,
+          "score": 0.9113234050571919,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L30_V073",
+          "frame_idx": 1552,
+          "score": 0.8601965220911163,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L21_V013",
+          "frame_idx": 12080,
+          "score": 0.7898864179849625,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L22_V019",
+          "frame_idx": 6795,
+          "score": 0.7541135152180989,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L22_V025",
+          "frame_idx": 227,
+          "score": 0.691292991489172,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L22_V016",
+          "frame_idx": 2804,
+          "score": 0.6726867281577804,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L30_V092",
+          "frame_idx": 290,
+          "score": 0.6519718408584595,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L22_V028",
+          "frame_idx": 3185,
+          "score": 0.634255127952649,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L22_V021",
+          "frame_idx": 2397,
+          "score": 0.6064415016344615,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L22_V023",
+          "frame_idx": 2507,
+          "score": 0.598237331211567,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L22_V027",
+          "frame_idx": 7044,
+          "score": 0.5653621777892113,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L21_V015",
+          "frame_idx": 6060,
+          "score": 0.5558899209779851,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L22_V013",
+          "frame_idx": 440,
+          "score": 0.5402990880111853,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L22_V020",
+          "frame_idx": 1728,
+          "score": 0.5334759175777436,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L21_V011",
+          "frame_idx": 14512,
+          "score": 0.5291842478670572,
+          "answer": ""
+        }
+      ]
+    },
+    {
+      "Query ID": "test-kis-47",
+      "Task": "KIS",
+      "Target Video": "L30_V087 [3760-3858]",
+      "Video Rank": "#1",
+      "Pos Rank": "#1",
+      "Perf Rank": "#1",
+      "R@1": "1.00",
+      "R@5": "1.00",
+      "R@20": "1.00",
+      "R@50": "1.00",
+      "R@100": "1.00",
+      "Final Score": "1.0000",
+      "Latency": "1821ms",
+      "Error Type": "PERFECT_RANK_1",
+      "top_candidates": [
+        {
+          "rank": 1,
+          "video_id": "L30_V087",
+          "frame_idx": 3760,
+          "score": 0.22668963498185035,
+          "answer": ""
+        },
+        {
+          "rank": 2,
+          "video_id": "L30_V087",
+          "frame_idx": 3832,
+          "score": 0.20661535212442184,
+          "answer": ""
+        },
+        {
+          "rank": 3,
+          "video_id": "L22_V024",
+          "frame_idx": 17627,
+          "score": 0.1460387806677905,
+          "answer": ""
+        },
+        {
+          "rank": 4,
+          "video_id": "L30_V040",
+          "frame_idx": 544,
+          "score": 0.12320586592889803,
+          "answer": ""
+        },
+        {
+          "rank": 5,
+          "video_id": "L30_V040",
+          "frame_idx": 1539,
+          "score": 0.11999403514145249,
+          "answer": ""
+        },
+        {
+          "rank": 6,
+          "video_id": "L30_V040",
+          "frame_idx": 1418,
+          "score": 0.11765894012786325,
+          "answer": ""
+        },
+        {
+          "rank": 7,
+          "video_id": "L30_V040",
+          "frame_idx": 1008,
+          "score": 0.11755799778650186,
+          "answer": ""
+        },
+        {
+          "rank": 8,
+          "video_id": "L30_V040",
+          "frame_idx": 975,
+          "score": 0.11610203451997396,
+          "answer": ""
+        },
+        {
+          "rank": 9,
+          "video_id": "L21_V027",
+          "frame_idx": 30729,
+          "score": 0.11228440469476403,
+          "answer": ""
+        },
+        {
+          "rank": 10,
+          "video_id": "L30_V040",
+          "frame_idx": 545,
+          "score": 0.11210343111255451,
+          "answer": ""
+        },
+        {
+          "rank": 11,
+          "video_id": "L30_V040",
+          "frame_idx": 900,
+          "score": 0.10946121543920434,
+          "answer": ""
+        },
+        {
+          "rank": 12,
+          "video_id": "L30_V040",
+          "frame_idx": 554,
+          "score": 0.10841365060149506,
+          "answer": ""
+        },
+        {
+          "rank": 13,
+          "video_id": "L30_V040",
+          "frame_idx": 1419,
+          "score": 0.10693951672651825,
+          "answer": ""
+        },
+        {
+          "rank": 14,
+          "video_id": "L30_V062",
+          "frame_idx": 617,
+          "score": 0.10638651456667939,
+          "answer": ""
+        },
+        {
+          "rank": 15,
+          "video_id": "L30_V040",
+          "frame_idx": 1309,
+          "score": 0.10467569962289652,
+          "answer": ""
+        },
+        {
+          "rank": 16,
+          "video_id": "L30_V040",
+          "frame_idx": 1262,
+          "score": 0.1030277482352748,
+          "answer": ""
+        },
+        {
+          "rank": 17,
+          "video_id": "L30_V056",
+          "frame_idx": 1099,
+          "score": 0.10053682249029842,
+          "answer": ""
+        },
+        {
+          "rank": 18,
+          "video_id": "L30_V056",
+          "frame_idx": 948,
+          "score": 0.10001871811648537,
+          "answer": ""
+        },
+        {
+          "rank": 19,
+          "video_id": "L30_V062",
+          "frame_idx": 618,
+          "score": 0.09974977471072237,
+          "answer": ""
+        },
+        {
+          "rank": 20,
+          "video_id": "L27_V006",
+          "frame_idx": 412,
+          "score": 0.09964379668235779,
+          "answer": ""
+        }
+      ]
+    }
+  ]
+}

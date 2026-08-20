@@ -53,6 +53,8 @@ class SubmissionValidator:
             video_id = row[0].strip()
             if not video_id:
                 return {"valid": False, "error": f"Dòng {r_idx} trong {file_path.name} có video_id bị rỗng"}
+            if video_id.lower().endswith(".mp4"):
+                return {"valid": False, "error": f"Dòng {r_idx} trong {file_path.name} có video_id dính đuôi .mp4 ('{video_id}'), quy chế BTC yêu cầu không có .mp4"}
 
             if task_type == "kis":
                 if len(row) != 2:
@@ -133,7 +135,7 @@ class SubmissionValidator:
 
         with zipfile.ZipFile(output_zip, "w", zipfile.ZIP_DEFLATED) as z:
             for f in csv_files:
-                z.write(f, arcname=f.name)
+                z.write(f, arcname=f"submission/{f.name}")
 
         return {
             "success": True,

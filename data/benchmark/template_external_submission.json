@@ -1,0 +1,42 @@
+{
+  "system_name": "Tên hệ thống của bạn (Ví dụ: Team_B_Baseline)",
+  "predictions": {
+    "test-kis-01": [
+      {"video_id": "L28_V009", "frame_idx": 15900},
+      {"video_id": "L28_V009", "frame_idx": 15850},
+      {"video_id": "L28_V010", "frame_idx": 1200}
+    ],
+    "test-qa-02": [
+      {"video_id": "L27_V002", "frame_idx": 930, "answer": "mũ bảo hiểm"},
+      {"video_id": "L27_V002", "frame_idx": 950, "answer": "nón bảo hiểm"}
+    ],
+    "test-trake-03": [
+      {"video_id": "L26_V008", "event_frames": [4124, 4320, 4697, 4725, 4841]},
+      {"video_id": "L26_V342", "event_frames": [3072, 3654, 4096, 4662, 4715]}
+    ],
+    "test-kis-04": [
+      {"video_id": "L26_V355", "frame_idx": 4700}
+    ],
+    "test-kis-05": [
+      {"video_id": "L27_V012", "frame_idx": 11700}
+    ],
+    "test-kis-06": [
+      {"video_id": "L27_V013", "frame_idx": 10125}
+    ],
+    "test-qa-07": [
+      {"video_id": "L29_V013", "frame_idx": 21800, "answer": "Chủ vườn nho"}
+    ],
+    "test-kis-08": [
+      {"video_id": "L22_V003", "frame_idx": 17775}
+    ],
+    "test-trake-09": [
+      {"video_id": "L22_V006", "event_frames": [1200, 1450, 1800, 2100, 2400]}
+    ],
+    "test-kis-10": [
+      {"video_id": "L22_V001", "frame_idx": 14500}
+    ],
+    "test-kis-11": [
+      {"video_id": "L23_V017", "frame_idx": 380}
+    ]
+  }
+}

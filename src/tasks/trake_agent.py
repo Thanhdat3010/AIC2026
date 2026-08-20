@@ -145,16 +145,134 @@ class TRAKEAlignmentAgent:
         # Backtracking
         best_end_j = int(np.argmax(dp[N-1, :]))
         if dp[N-1, best_end_j] <= -1e8:
-            return [int(np.argmax(S_norm[i])) for i in range(N)]
+            chosen_j = [int(np.argmax(S_norm[i])) for i in range(N)]
+        else:
+            chosen_j = [0] * N
+            curr = best_end_j
+            for i in range(N - 1, -1, -1):
+                chosen_j[i] = curr
+                curr = parent[i, curr]
+                if curr == -1 and i > 0:
+                    curr = max(0, chosen_j[i] - 1)
 
-        chosen_j = [0] * N
-        curr = best_end_j
-        for i in range(N - 1, -1, -1):
-            chosen_j[i] = curr
-            curr = parent[i, curr]
-            if curr == -1 and i > 0:
-                curr = max(0, chosen_j[i] - 1)
+        self.last_dp_debug = {
+            "S_smooth": S_smooth,
+            "S_norm": S_norm,
+            "dp": dp,
+            "parent": parent,
+            "pts_times": pts_times,
+            "chosen_j": chosen_j
+        }
+        
+        return chosen_j
 
+    def _solve_segmental_dp(
+        self,
+        sim_matrix: np.ndarray,
+        pts_times: np.ndarray,
+        max_gap_sec: float = 240.0,
+        max_seg_len_frames: int = 5,
+        lambda_d: float = 0.02,
+        lambda_g: float = 0.001
+    ) -> list[int]:
+        """
+        Segmental Dynamic Programming Solver cho TRAKE:
+        - Gán sự kiện vào một phân đoạn [s, e] thay vì 1 frame duy nhất.
+        - Giới hạn chiều dài phân đoạn: max_seg_len_frames.
+        - Trừ điểm penalty nếu kéo giãn quá dài (lambda_d) hoặc gap quá xa (lambda_g).
+        """
+        N, M = sim_matrix.shape
+        if M < N:
+            return list(range(min(N, M))) + [M - 1] * max(0, N - M)
+
+        S_smooth = np.zeros_like(sim_matrix)
+        for i in range(N):
+            row = sim_matrix[i]
+            left = np.pad(row[:-1], (1, 0), mode='edge')
+            right = np.pad(row[1:], (0, 1), mode='edge')
+            S_smooth[i] = 0.2 * left + 0.6 * row + 0.2 * right
+
+        S_norm = np.zeros_like(S_smooth)
+        for i in range(N):
+            r_min = np.min(S_smooth[i])
+            r_max = np.max(S_smooth[i])
+            if r_max - r_min > 1e-6:
+                S_norm[i] = (S_smooth[i] - r_min) / (r_max - r_min)
+            else:
+                S_norm[i] = S_smooth[i]
+
+        dp = np.full((N, M), -1e9, dtype=np.float32)
+        parent_e = np.full((N, M), -1, dtype=np.int32)
+        seg_start = np.full((N, M), -1, dtype=np.int32)
+
+        # Event 0
+        for e in range(M):
+            max_s = max(0, e - max_seg_len_frames + 1)
+            for s in range(max_s, e + 1):
+                dur = e - s
+                score = np.mean(S_norm[0, s:e+1]) - lambda_d * dur
+                if score > dp[0, e]:
+                    dp[0, e] = score
+                    seg_start[0, e] = s
+
+        # Event 1 to N-1
+        for i in range(1, N):
+            best_prev = np.full(M, -1e9, dtype=np.float32)
+            best_prev_idx = np.full(M, -1, dtype=np.int32)
+            
+            for s in range(1, M):
+                prev_indices = np.arange(s)
+                valid_mask = dp[i-1, :s] > -1e8
+                if not np.any(valid_mask):
+                    continue
+                valid_prev_e = prev_indices[valid_mask]
+                valid_scores = dp[i-1, valid_prev_e]
+                
+                dt = pts_times[s] - pts_times[valid_prev_e]
+                excess_dt = np.maximum(0.0, dt - max_gap_sec)
+                penalties = lambda_g * excess_dt
+                
+                total_candidates = valid_scores - penalties
+                best_idx = int(np.argmax(total_candidates))
+                best_prev[s] = total_candidates[best_idx]
+                best_prev_idx[s] = valid_prev_e[best_idx]
+            
+            for e in range(1, M):
+                max_s = max(1, e - max_seg_len_frames + 1)
+                for s in range(max_s, e + 1):
+                    if best_prev[s] <= -1e8:
+                        continue
+                    dur = e - s
+                    seg_score_val = np.mean(S_norm[i, s:e+1]) - lambda_d * dur
+                    total_score = best_prev[s] + seg_score_val
+                    if total_score > dp[i, e]:
+                        dp[i, e] = total_score
+                        parent_e[i, e] = best_prev_idx[s]
+                        seg_start[i, e] = s
+
+        # Backtracking
+        best_end_e = int(np.argmax(dp[N-1, :]))
+        if dp[N-1, best_end_e] <= -1e8:
+            chosen_j = [int(np.argmax(S_norm[i])) for i in range(N)]
+        else:
+            chosen_j = [0] * N
+            curr_e = best_end_e
+            for i in range(N - 1, -1, -1):
+                s = seg_start[i, curr_e]
+                if s == -1: s = curr_e
+                # Chọn mid-point của phân đoạn để trả về
+                mid_point = (s + curr_e) // 2
+                chosen_j[i] = mid_point
+                curr_e = parent_e[i, curr_e]
+                if curr_e == -1 and i > 0:
+                    curr_e = max(0, s - 1)
+
+        self.last_dp_debug = {
+            "S_norm": S_norm,
+            "dp": dp,
+            "chosen_j": chosen_j
+        }
+        
         return chosen_j
 
     def align_events(
@@ -164,7 +282,8 @@ class TRAKEAlignmentAgent:
         top_k: int = 100,
         use_multi_query: bool = True,
         use_event_coverage: bool = True,
-        use_row_norm_dp: bool = True
+        use_row_norm_dp: bool = True,
+        use_segmental_dp: bool = False
     ) -> list[dict]:
         """
         Tìm kiếm và căn chỉnh chuỗi sự kiện bằng Multi-Query Retrieval & Calibrated Event Coverage.
@@ -262,7 +381,10 @@ class TRAKEAlignmentAgent:
             pts_times = cd["pts_times"]
             f_indices = cd["frame_indices"]
             
-            chosen_kf_indices = self._solve_monotonic_dp(sim_matrix, pts_times)
+            if use_segmental_dp:
+                chosen_kf_indices = self._solve_segmental_dp(sim_matrix, pts_times)
+            else:
+                chosen_kf_indices = self._solve_monotonic_dp(sim_matrix, pts_times)
             chosen_frames = [int(f_indices[j]) for j in chosen_kf_indices]
             
             # Điểm tương đồng thực tế của chuỗi được chọn
@@ -276,7 +398,9 @@ class TRAKEAlignmentAgent:
                 "video_id": v_id,
                 "frame_idx": chosen_frames[0] if chosen_frames else 0,
                 "event_frames": chosen_frames,
-                "score": v_rank_score
+                "score": v_rank_score,
+                "sim_matrix": sim_matrix,
+                "pts_times": pts_times
             })
 
         final_predictions.sort(key=lambda x: x["score"], reverse=True)
