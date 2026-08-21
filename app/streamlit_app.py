@@ -483,16 +483,39 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
 
             with col_vid_player:
                 st.markdown(f"#### 🎥 Trình Phát Video Trực Tiếp: `{insp_vid}.mp4`")
-                v_path = video_manager.get_video_path(insp_vid)
+                
+                play_mode = st.radio(
+                    "Chế độ phát:",
+                    ["⚡ Đoạn Ngắn Tối Ưu (60s - Siêu Mượt, 0.01s Load)", "🌐 Toàn Bộ Video Gốc"],
+                    horizontal=True,
+                    key=f"play_mode_{selected_q_name}_{insp_vid}"
+                )
 
-                if v_path and v_path.exists():
-                    st.video(str(v_path), start_time=int(max(0, pts_time_cur - 1.5)))
-                    st.caption(f"⏱️ Mốc thời gian tự động tua tới: `{cur_min_sec}` ({pts_time_cur:.1f}s) -> Frame `{active_f_cur}`")
-                else:
-                    st.warning(f"⚠️ Chưa tìm thấy file video MP4 gốc cho `{insp_vid}` trong `raw/batch_1/Videos/`. Đang hiển thị ảnh Keyframe thay thế.")
-                    kf_big = keyframe_loader.get_keyframe_image(insp_vid, active_f_cur)
-                    if kf_big:
-                        st.image(kf_big, use_container_width=True)
+                with st.spinner("⏳ Đang chuẩn bị luồng video tối ưu..."):
+                    if "Đoạn Ngắn" in play_mode:
+                        clip_path, clip_start, clip_dur = video_manager.get_optimized_clip(insp_vid, pts_time_cur, clip_window=60.0)
+                        if clip_path and clip_path.exists():
+                            offset_in_clip = max(0.0, pts_time_cur - clip_start)
+                            st.video(str(clip_path), start_time=int(offset_in_clip))
+                            c_start_m = f"{int(clip_start//60):02d}:{int(clip_start%60):02d}"
+                            c_end_m = f"{int((clip_start+clip_dur)//60):02d}:{int((clip_start+clip_dur)%60):02d}"
+                            st.caption(f"⚡ Đang phát đoạn ngắn tối ưu từ `{c_start_m}` đến `{c_end_m}` | Mốc chọn: `{cur_min_sec}` ({pts_time_cur:.1f}s) -> Frame `{active_f_cur}`")
+                        else:
+                            st.warning(f"⚠️ Đang hiển thị ảnh Keyframe thay thế cho `{insp_vid}`.")
+                            kf_big = keyframe_loader.get_keyframe_image(insp_vid, active_f_cur)
+                            if kf_big:
+                                st.image(kf_big, use_container_width=True)
+                    else:
+                        v_path = video_manager.get_video_path(insp_vid)
+                        if v_path and v_path.exists():
+                            size_mb = v_path.stat().st_size / (1024 * 1024)
+                            st.video(str(v_path), start_time=int(max(0, pts_time_cur - 1.5)))
+                            st.caption(f"📁 Video gốc ({size_mb:.1f} MB) | Mốc thời gian tua tới: `{cur_min_sec}` ({pts_time_cur:.1f}s) -> Frame `{active_f_cur}`")
+                        else:
+                            st.warning(f"⚠️ Chưa tìm thấy file video MP4 gốc cho `{insp_vid}`.")
+                            kf_big = keyframe_loader.get_keyframe_image(insp_vid, active_f_cur)
+                            if kf_big:
+                                st.image(kf_big, use_container_width=True)
 
                 st.markdown("##### ⏱️ Bắt Khung Hình Khi Xem Video (Nhập Phút:Giây hoặc Số Frame):")
                 

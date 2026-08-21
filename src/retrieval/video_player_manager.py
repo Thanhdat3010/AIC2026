@@ -93,3 +93,43 @@ class VideoPlayerManager:
             if cached_file.exists():
                 cached_file.unlink(missing_ok=True)
             return None
+
+    def get_optimized_clip(self, video_id: str, target_sec: float, clip_window: float = 60.0) -> Tuple[Optional[Path], float, float]:
+        """
+        Cắt siêu tốc đoạn clip ngắn (60 giây) bao quanh mốc target_sec với chuẩn +faststart
+        để trình duyệt phát tức thì không bị giật lag/buffering dù video gốc dài hàng tiếng (200MB+).
+        Trả về: (đường_dẫn_clip, thời_điểm_bắt_đầu_clip, độ_dài_clip)
+        """
+        clean_vid = video_id.strip()
+        full_mp4 = self.get_video_path(clean_vid)
+        if not full_mp4 or not full_mp4.exists():
+            return None, 0.0, 0.0
+
+        clip_start = max(0.0, float(target_sec) - 10.0)
+        clip_name = f"{clean_vid}_clip_{int(clip_start)}_{int(clip_window)}.mp4"
+        clip_path = self.cache_dir / clip_name
+
+        if clip_path.exists() and clip_path.stat().st_size > 1024:
+            return clip_path, clip_start, clip_window
+
+        try:
+            import imageio_ffmpeg
+            import subprocess
+            ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+            cmd = [
+                ffmpeg_exe, "-y",
+                "-ss", str(clip_start),
+                "-i", str(full_mp4),
+                "-t", str(clip_window),
+                "-c", "copy",
+                "-movflags", "+faststart",
+                str(clip_path)
+            ]
+            subprocess.run(cmd, capture_output=True, check=True)
+            if clip_path.exists() and clip_path.stat().st_size > 1024:
+                return clip_path, clip_start, clip_window
+        except Exception as e:
+            print(f"⚠️ Không thể tạo micro-clip qua ffmpeg: {e}", flush=True)
+
+        # Fallback về file gốc nếu không cắt được
+        return full_mp4, 0.0, 0.0
