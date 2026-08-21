@@ -108,11 +108,11 @@ You are an expert Multimodal Video Retrieval AI System for AI Challenge 2026.
 Analyze this Vietnamese query:
 "{raw_query}"
 
-Rules for Semantic Generalization & Modality Gating:
-1. has_ocr_signal: set to TRUE ONLY if the query explicitly mentions reading written text, signs, banners, titles, text in quotes, awards, numbers, license plates. If the query is purely about visual actions/people/objects, set to FALSE.
-   - If has_ocr_signal is true: provide `ocr_keywords` containing the normalized Vietnamese text entity AND likely OCR variants.
-2. has_asr_signal: set to TRUE ONLY if the query explicitly asks about spoken dialogue, interview speech, voice announcements.
-   - If has_asr_signal is true: provide `asr_keywords` containing normalized spoken phrases.
+Rules for Semantic Generalization, Entity Expansion & Modality Gating:
+1. has_ocr_signal: set to TRUE ONLY if the query explicitly mentions reading written text, signs, banners, titles, text in quotes, awards, numbers, license plates, or specific proper nouns / acronyms (e.g. "COVID-19", "Lausanne", "FANA"). If the query is purely about visual actions/people/objects, set to FALSE.
+   - If has_ocr_signal is true: provide `ocr_keywords` containing the normalized Vietnamese text entity AND likely OCR typo / diacritics variants (e.g. ["COVID-19", "covid 19", "covid19"], ["Lausanne", "Đại học Lausanne", "EPFL"], ["FANA", "CLB FANA", "FA NA"]).
+2. has_asr_signal: set to TRUE if the query mentions spoken dialogue, interview speech, poems, songs, voice announcements, OR mentions specific proper nouns, acronyms, club/organization/brand/event names (e.g. "FANA", "CLB FANA", "Lausanne", "Nguyễn Trung Trực") because news reportage voiceover narrations frequently speak these entity names aloud.
+   - If has_asr_signal is true: provide `asr_keywords` containing normalized spoken phrases, proper noun keywords, AND phonetic variants (e.g. ["fana", "clb fana", "câu lạc bộ fana"], ["Lô-xan", "Lô san", "lausanne"], ["Hỏa hồng Nhự Tảo oanh thiên địa"]).
 3. is_qa: set to TRUE if the query is a Question asking for specific entity/action/color/count/time/name.
 4. is_trake: set to TRUE if the query describes a chronological sequence of multiple distinct consecutive actions (First... then... then...).
 5. If is_trake is true: break down the chronological actions into granular atomic sub-steps in `trake_events` (in concise natural English).
@@ -132,9 +132,9 @@ Respond with ONLY a JSON object with this EXACT structure:
     "Short English list of key entities"
   ],
   "has_ocr_signal": true or false,
-  "ocr_keywords": ["normalized entity keywords"],
+  "ocr_keywords": ["normalized entity keywords", "typo/abbreviation variants"],
   "has_asr_signal": true or false,
-  "asr_keywords": ["spoken dialogue phrases"],
+  "asr_keywords": ["spoken dialogue phrases", "phonetic variants"],
   "is_qa": true or false,
   "is_trake": true or false,
   "trake_events": ["Short English event 1", "Short English event 2"]
@@ -158,13 +158,13 @@ Respond with ONLY a JSON object with this EXACT structure:
                     parsed["ocr_keywords"] = []
                     parsed["weights"]["ocr"] = 0.0
                 else:
-                    parsed["weights"]["ocr"] = 0.3
+                    parsed["weights"]["ocr"] = 1.5
 
                 if not parsed.get("has_asr_signal", False):
                     parsed["asr_keywords"] = []
                     parsed["weights"]["asr"] = 0.0
                 else:
-                    parsed["weights"]["asr"] = 0.3
+                    parsed["weights"]["asr"] = 1.2
 
                 return parsed
             except Exception as e:

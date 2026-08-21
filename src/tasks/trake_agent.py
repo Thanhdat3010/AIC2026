@@ -298,9 +298,10 @@ class TRAKEAlignmentAgent:
         q_global = self.text_encoder.encode_text(raw_query)[0].astype(np.float32)
 
         # 2. Stage-1 Candidate Retrieval (Multi-Query vs Single-Query)
+        fetch_k = max(500, top_k * 5)
         if use_multi_query:
             all_queries = np.vstack([event_vecs, q_global.reshape(1, -1)])
-            scores, indices = self.faiss_index.search(all_queries, 100)
+            scores, indices = self.faiss_index.search(all_queries, fetch_k)
             candidate_videos = set()
             for row_indices in indices:
                 for idx in row_indices:
@@ -308,12 +309,27 @@ class TRAKEAlignmentAgent:
                     if v_id in self.video_frames:
                         candidate_videos.add(v_id)
         else:
-            scores, indices = self.faiss_index.search(q_global.reshape(1, -1), 300)
+            scores, indices = self.faiss_index.search(q_global.reshape(1, -1), fetch_k * 2)
             candidate_videos = set()
             for idx in indices[0]:
                 v_id = self.df_frames.iloc[idx]["video_id"]
                 if v_id in self.video_frames:
                     candidate_videos.add(v_id)
+
+        # Đảm bảo tập ứng viên có đủ tối thiểu top_k video để xuất đủ số dòng theo quy chế BTC
+        if len(candidate_videos) < top_k:
+            scores_extra, indices_extra = self.faiss_index.search(q_global.reshape(1, -1), min(len(self.df_frames), 30000))
+            for idx in indices_extra[0]:
+                v_id = self.df_frames.iloc[idx]["video_id"]
+                if v_id in self.video_frames:
+                    candidate_videos.add(v_id)
+                if len(candidate_videos) >= top_k:
+                    break
+            if len(candidate_videos) < top_k:
+                for v_id in self.video_frames.keys():
+                    candidate_videos.add(v_id)
+                    if len(candidate_videos) >= top_k:
+                        break
 
         if self.siglip_features is None or not candidate_videos:
             return []
@@ -369,13 +385,13 @@ class TRAKEAlignmentAgent:
             for cd in candidate_data:
                 cd["v_score"] = cd["s_global"]
 
-        # Sắp xếp và chọn Top 50 videos tốt nhất đưa vào DP
+        # Sắp xếp và chọn Top candidate videos tốt nhất đưa vào DP (mặc định top_k = 100)
         candidate_data.sort(key=lambda x: x["v_score"], reverse=True)
-        top_50_cands = candidate_data[:50]
+        top_cands = candidate_data[:top_k]
 
         # 4. Stage-3: Row-Normalized Monotonic DP Alignment
         final_predictions = []
-        for v_idx, cd in enumerate(top_50_cands):
+        for v_idx, cd in enumerate(top_cands):
             v_id = cd["video_id"]
             sim_matrix = cd["sim_matrix"]
             pts_times = cd["pts_times"]

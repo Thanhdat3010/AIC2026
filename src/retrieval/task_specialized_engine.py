@@ -136,7 +136,6 @@ class TaskSpecializedEngine:
         candidate_videos = []
         seen_v = set()
 
-        # Luôn lấy Top các video thị giác tốt nhất từ SigLIP-2
         for idx in indices[0]:
             v = self.df_frames.iloc[idx]["video_id"]
             if v not in seen_v:
@@ -145,48 +144,84 @@ class TaskSpecializedEngine:
                 if len(candidate_videos) >= 20:
                     break
 
-        # Nếu LLM Router xác nhận có tín hiệu OCR/ASR rõ ràng, bổ sung video khớp từ khóa vào Top
+        # 4. Thu thập các frame trực tiếp và hợp nhất WRRF
+        final_scores = []
+        seen_keys = set()
+
+        # Nếu Router hoặc Gate xác nhận có tín hiệu OCR/ASR rõ ràng, bổ sung video & frames khớp từ khóa vào Top
         if use_rrf:
-            has_ocr = q_info.get("has_ocr_signal", False)
-            ocr_words = q_info.get("ocr_keywords", [])
+            has_ocr = gate_info.get("has_ocr_signal", False) or q_info.get("has_ocr_signal", False)
+            ocr_words = q_info.get("ocr_keywords", []) or gate_info.get("ocr_keywords", [])
+            w_ocr = gate_info.get("w_ocr", 1.5) if has_ocr else 0.0
+
             if has_ocr and ocr_words:
                 ocr_query_str = " ".join(ocr_words)
                 ocr_hits = self.bm25_indexer.search_ocr(ocr_query_str, top_k=20)
-                for doc in ocr_hits[:3]:
+                for r_ocr, doc in enumerate(ocr_hits, 1):
                     v_ocr = doc["video_id"]
                     if v_ocr not in seen_v:
                         candidate_videos.insert(0, v_ocr)
                         seen_v.add(v_ocr)
+                    f_idx = int(doc.get("frame_idx", 0))
+                    if f_idx <= 0 and v_ocr in self.video_to_keyframes and len(self.video_to_keyframes[v_ocr]["frame_indices"]) > 0:
+                        f_idx = int(self.video_to_keyframes[v_ocr]["frame_indices"][0])
+                    if f_idx > 0:
+                        key = (v_ocr, f_idx)
+                        if key not in seen_keys:
+                            seen_keys.add(key)
+                            wrrf_score = 0.35 + w_ocr * (1.0 / (self.k_rrf + r_ocr))
+                            final_scores.append({
+                                "video_id": v_ocr,
+                                "frame_idx": f_idx,
+                                "global_id": -1,
+                                "score": wrrf_score
+                            })
 
-            has_asr = q_info.get("has_asr_signal", False)
-            asr_words = q_info.get("asr_keywords", [])
+            has_asr = gate_info.get("has_asr_signal", False) or q_info.get("has_asr_signal", False)
+            asr_words = q_info.get("asr_keywords", []) or gate_info.get("asr_keywords", [])
+            w_asr = gate_info.get("w_asr", 1.2) if has_asr else 0.0
+
             if has_asr and asr_words:
                 asr_query_str = " ".join(asr_words)
                 asr_hits = self.bm25_indexer.search_asr(asr_query_str, top_k=20)
-                for doc in asr_hits[:3]:
+                for r_asr, doc in enumerate(asr_hits, 1):
                     v_asr = doc["video_id"]
                     if v_asr not in seen_v:
                         candidate_videos.insert(0, v_asr)
                         seen_v.add(v_asr)
+                    f_idx = int(doc.get("frame_idx", 0))
+                    if f_idx <= 0 and v_asr in self.video_to_keyframes and len(self.video_to_keyframes[v_asr]["frame_indices"]) > 0:
+                        f_idx = int(self.video_to_keyframes[v_asr]["frame_indices"][0])
+                    if f_idx > 0:
+                        key = (v_asr, f_idx)
+                        if key not in seen_keys:
+                            seen_keys.add(key)
+                            wrrf_score = 0.30 + w_asr * (1.0 / (self.k_rrf + r_asr))
+                            final_scores.append({
+                                "video_id": v_asr,
+                                "frame_idx": f_idx,
+                                "global_id": -1,
+                                "score": wrrf_score
+                            })
 
-        # 5. Nếu không bật Intra-Reranker, trả về kết quả FAISS trực tiếp
+        # 5. Nếu không bật Intra-Reranker, trả về kết quả FAISS & WRRF trực tiếp
         if not use_intra_reranker:
-            results = []
-            seen_k = set()
             for rank, (sim, idx) in enumerate(zip(scores[0], indices[0]), 1):
                 row = self.df_frames.iloc[idx]
                 k = (row["video_id"], int(row["frame_idx"]))
-                if k not in seen_k:
-                    seen_k.add(k)
-                    results.append({
-                        "rank": len(results) + 1,
+                if k not in seen_keys:
+                    seen_keys.add(k)
+                    final_scores.append({
                         "video_id": row["video_id"],
                         "frame_idx": int(row["frame_idx"]),
                         "global_id": int(row["global_id"]),
                         "score": float(sim)
                     })
-                if len(results) >= top_k:
-                    break
+            final_scores.sort(key=lambda x: x["score"], reverse=True)
+            results = []
+            for rank, item in enumerate(final_scores[:top_k], 1):
+                item["rank"] = rank
+                results.append(item)
             latency = (time.time() - t0) * 1000
             return results, {"en_prompt": en_prompt, "gate_info": gate_info}, latency
 
@@ -220,9 +255,6 @@ class TaskSpecializedEngine:
                 }
 
         # 7. Ghép điểm và áp dụng Keyframe Neighborhood Expansion
-        final_scores = []
-        seen_keys = set()
-
         for sim, idx in zip(scores[0], indices[0]):
             row = self.df_frames.iloc[idx]
             v_id = row["video_id"]
@@ -244,6 +276,20 @@ class TaskSpecializedEngine:
                 "global_id": int(row["global_id"]),
                 "score": mod_score
             })
+
+        # Bổ sung các frame từ candidate_videos (đặc biệt là video do OCR/ASR gợi ý) nếu chưa có trong FAISS Top 300
+        for v_id in candidate_videos:
+            if v_id in reranker.video_to_indices:
+                for f_idx in reranker.video_to_indices[v_id]["frame_indices"]:
+                    key = (v_id, int(f_idx))
+                    if key not in seen_keys and key in rescored_frame_deltas:
+                        seen_keys.add(key)
+                        final_scores.append({
+                            "video_id": v_id,
+                            "frame_idx": int(f_idx),
+                            "global_id": -1,
+                            "score": float(rescored_frame_deltas[key]["final_score"])
+                        })
 
         final_scores.sort(key=lambda x: x["score"], reverse=True)
 
@@ -327,21 +373,70 @@ class TaskSpecializedEngine:
         seen_keys = set()
 
         if use_rrf:
-            has_ocr = q_info.get("has_ocr_signal", False)
-            ocr_words = q_info.get("ocr_keywords", [])
+            has_ocr = gate_info.get("has_ocr_signal", False) or q_info.get("has_ocr_signal", False)
+            ocr_words = q_info.get("ocr_keywords", []) or gate_info.get("ocr_keywords", [])
+            w_ocr = gate_info.get("w_ocr", 1.5) if has_ocr else 0.0
+
             if has_ocr and ocr_words:
-                ocr_hits = self.bm25_indexer.search_ocr(" ".join(ocr_words), top_k=20)
-                for r_ocr, doc in enumerate(ocr_hits, 1):
+                all_ocr_hits = []
+                for kw in ocr_words:
+                    if len(kw.strip()) >= 2:
+                        all_ocr_hits.extend(self.bm25_indexer.search_ocr(kw, top_k=10))
+                all_ocr_hits.extend(self.bm25_indexer.search_ocr(" ".join(ocr_words), top_k=20))
+                seen_doc = {}
+                for h in all_ocr_hits:
+                    k = (h["video_id"], h.get("frame_idx", 0))
+                    if k not in seen_doc or h["score"] > seen_doc[k]["score"]:
+                        seen_doc[k] = h
+                sorted_ocr_hits = sorted(seen_doc.values(), key=lambda x: x["score"], reverse=True)[:25]
+
+                for r_ocr, doc in enumerate(sorted_ocr_hits, 1):
                     v = doc["video_id"]
-                    if doc["frame_idx"] > 0:
-                        key = (v, doc["frame_idx"])
+                    f_idx = int(doc.get("frame_idx", 0))
+                    if f_idx <= 0 and v in self.video_to_keyframes and len(self.video_to_keyframes[v]["frame_indices"]) > 0:
+                        f_idx = int(self.video_to_keyframes[v]["frame_indices"][0])
+                    if f_idx > 0:
+                        key = (v, f_idx)
                         if key not in seen_keys:
                             seen_keys.add(key)
                             candidates.append({
                                 "video_id": v,
-                                "frame_idx": doc["frame_idx"],
+                                "frame_idx": f_idx,
                                 "global_id": -1,
-                                "score": 0.35 + 1.0 / (self.k_rrf + r_ocr)
+                                "score": 0.55 + w_ocr * (1.0 / (self.k_rrf + r_ocr))
+                            })
+
+            has_asr = gate_info.get("has_asr_signal", False) or q_info.get("has_asr_signal", False)
+            asr_words = q_info.get("asr_keywords", []) or gate_info.get("asr_keywords", [])
+            w_asr = gate_info.get("w_asr", 1.5) if has_asr else 0.0
+
+            if has_asr and asr_words:
+                all_asr_hits = []
+                for kw in asr_words:
+                    if len(kw.strip()) >= 2:
+                        all_asr_hits.extend(self.bm25_indexer.search_asr(kw, top_k=10))
+                all_asr_hits.extend(self.bm25_indexer.search_asr(" ".join(asr_words), top_k=20))
+                seen_doc = {}
+                for h in all_asr_hits:
+                    k = (h["video_id"], h.get("start_frame", 0))
+                    if k not in seen_doc or h["score"] > seen_doc[k]["score"]:
+                        seen_doc[k] = h
+                sorted_asr_hits = sorted(seen_doc.values(), key=lambda x: x["score"], reverse=True)[:25]
+
+                for r_asr, doc in enumerate(sorted_asr_hits, 1):
+                    v = doc["video_id"]
+                    f_idx = int(doc.get("frame_idx", 0))
+                    if f_idx <= 0 and v in self.video_to_keyframes and len(self.video_to_keyframes[v]["frame_indices"]) > 0:
+                        f_idx = int(self.video_to_keyframes[v]["frame_indices"][0])
+                    if f_idx > 0:
+                        key = (v, f_idx)
+                        if key not in seen_keys:
+                            seen_keys.add(key)
+                            candidates.append({
+                                "video_id": v,
+                                "frame_idx": f_idx,
+                                "global_id": -1,
+                                "score": 0.55 + w_asr * (1.0 / (self.k_rrf + r_asr))
                             })
 
         for sc, idx in zip(scores[0], indices[0]):
@@ -427,9 +522,19 @@ class TaskSpecializedEngine:
         t0 = time.time()
 
         # 1. Phân rã các sự kiện
+        # Kiểm tra xem đề bài có đánh số tường minh E1, E2... không
+        explicit_events = re.findall(r'(?:^|\n)\s*(?:E\d+|Event\s*\d+)[\s:]+(.*?)(?=\n\s*(?:E\d+|Event\s*\d+)|\Z)', query_text, flags=re.DOTALL | re.IGNORECASE)
+        explicit_events = [ev.strip() for ev in explicit_events if ev.strip()]
+
         q_info = self.router.transform_query(query_text)
         events = q_info.get("trake_events", [])
-        if not events or len(events) < 2:
+
+        if explicit_events and len(explicit_events) >= 2:
+            # Nếu có danh sách E1, E2 rõ ràng thì số lượng events BẮT BUỘC phải khớp chính xác
+            if len(events) != len(explicit_events):
+                # Dùng trực tiếp danh sách explicit events để đảm bảo số lượng frame nộp chuẩn 100% BTC
+                events = explicit_events
+        elif not events or len(events) < 2:
             parts = [p.strip() for p in re.split(r"[,;]|\bvà\b|\btiếp tục\b|\bcuối cùng\b", query_text) if p.strip()]
             events = parts if len(parts) >= 2 else [query_text, query_text]
 

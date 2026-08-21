@@ -19,11 +19,12 @@ class ModalityGate:
     - Nếu có từ khóa cụ thể -> MỞ CỔNG BM25 và bóc tách từ khóa tìm kiếm chính xác.
     """
     def __init__(self):
-        # Từ khóa kích hoạt OCR
+        # Từ khóa kích hoạt OCR theo chuẩn VBS / TRECVID
         self.ocr_triggers = [
             r'"([^"]+)"',  # Chữ trong dấu ngoặc kép đôi: "Chúc mừng"
             r"'([^']+)'",  # Chữ trong dấu ngoặc kép đơn
             r'“([^”]+)”',  # Dấu ngoặc kép tiếng Việt
+            r'‘([^’]+)’',
             r'\bbiển số\b',
             r'\bbảng hiệu\b',
             r'\bdòng chữ\b',
@@ -34,18 +35,26 @@ class ModalityGate:
             r'\bbanner\b',
             r'\báp phích\b',
             r'\bsố áo\b',
-            r'\btên đường\b'
+            r'\btên đường\b',
+            r'\btên là\b',
+            r'\bmang tên\b',
+            r'\bkhắc chữ\b',
+            r'\bbảng tượng trưng\b',
+            r'\báo in\b',
+            r'\bchữ nổi\b'
         ]
 
         # Từ khóa kích hoạt ASR (Lời thoại / Âm thanh)
         self.asr_triggers = [
-            r'\b(hỏi|nói|trả lời|phỏng vấn|lời thoại|thuyết minh|phát biểu|chia sẻ|cho biết)\b',
-            r'\b(MC|người dẫn chương trình|phóng viên|nhân vật|chủ vườn)\s+(nói|hỏi|trả lời|kể|cho hay)\b'
+            r'\b(hỏi|nói|trả lời|phỏng vấn|lời thoại|thuyết minh|phát biểu|chia sẻ|cho biết|hát|ca ngợi|câu thơ)\b',
+            r'\b(MC|người dẫn chương trình|phóng viên|nhân vật|chủ vườn|bà cụ|ông cụ)\s+(nói|hỏi|trả lời|kể|cho hay|đọc)\b'
         ]
 
     def analyze(self, query_text: str) -> dict:
         """
-        Phân tích câu hỏi và trả về quyết định kích hoạt OCR / ASR.
+        Phân tích câu hỏi theo kiến trúc Tier-1 Fast Linguistic Gate:
+        - Xác định P(OCR | Q) và P(ASR | Q).
+        - Nếu câu hỏi thuần thị giác -> Gán w_ocr = 0.0, w_asr = 0.0 để triệt tiêu 100% nhiễu chéo.
         """
         q_lower = query_text.lower()
 
@@ -54,10 +63,21 @@ class ModalityGate:
         ocr_keywords = []
 
         # Trích xuất các chuỗi trong ngoặc kép
-        quotes = re.findall(r'["\'“]([^"\'”]+)["\'”]', query_text)
+        quotes = re.findall(r'["\'“‘]([^"\'”’]+)["\'”’]', query_text)
         if quotes:
             has_ocr = True
             ocr_keywords.extend(quotes)
+
+        # Trích xuất tên riêng viết hoa / từ viết tắt (VD: COVID-19, FANA, Lausanne, Steven Spielberg)
+        named_entities = re.findall(r'\b[A-ZĐ][a-zA-Z0-9\-_]{2,}\b(?:\s+[A-ZĐ][a-zA-Z0-9\-_]+)*', query_text)
+        # Lọc bỏ các từ viết hoa đầu câu phổ biến
+        filtered_entities = [e for e in named_entities if e.lower() not in ["tìm", "đoạn", "trong", "trên", "hãy", "video", "clip", "mẩu", "phân", "khi", "có"]]
+        if filtered_entities:
+            # Nếu có tên riêng đặc thù (như COVID-19, FANA, Lausanne)
+            for ent in filtered_entities:
+                if any(c.isupper() for c in ent) or '-' in ent:
+                    has_ocr = True
+                    ocr_keywords.append(ent)
 
         for pat in self.ocr_triggers:
             if re.search(pat, q_lower):
@@ -73,17 +93,26 @@ class ModalityGate:
                 break
 
         if has_asr:
-            # Lấy các từ khóa quan trọng của câu hỏi
             clean_q = re.sub(r'[^\w\s]', ' ', query_text)
-            words = [w for w in clean_q.split() if len(w) > 1 and w.lower() not in ["trong", "khi", "người", "đang", "của", "và", "là", "cho", "vào"]]
-            asr_keywords = words[:6]
+            words = [w for w in clean_q.split() if len(w) > 1 and w.lower() not in ["trong", "khi", "người", "đang", "của", "và", "là", "cho", "vào", "đoạn", "video", "clip"]]
+            asr_keywords = words[:8]
+
+        # Trọng số WRRF chuẩn hóa
+        w_visual = 1.0
+        w_ocr = 1.5 if has_ocr else 0.0
+        w_asr = 1.2 if has_asr else 0.0
 
         return {
             "has_ocr": has_ocr,
-            "ocr_keywords": ocr_keywords,
+            "has_ocr_signal": has_ocr,
+            "ocr_keywords": list(dict.fromkeys(ocr_keywords)),
             "has_asr": has_asr,
-            "asr_keywords": asr_keywords,
-            "is_pure_visual": (not has_ocr and not has_asr)
+            "has_asr_signal": has_asr,
+            "asr_keywords": list(dict.fromkeys(asr_keywords)),
+            "is_pure_visual": (not has_ocr and not has_asr),
+            "w_visual": w_visual,
+            "w_ocr": w_ocr,
+            "w_asr": w_asr
         }
 
 if __name__ == "__main__":

@@ -13,15 +13,55 @@ if hasattr(sys.stdout, 'reconfigure'):
 if hasattr(sys.stderr, 'reconfigure'):
     sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
-def tokenize_text(text: str) -> list[str]:
+import unicodedata
+
+def remove_vietnamese_accents(text: str) -> str:
+    """Chuyển đổi chuỗi tiếng Việt có dấu thành không dấu nhanh và chính xác."""
+    text = unicodedata.normalize('NFD', text)
+    text = re.sub(r'[\u0300-\u036f]', '', text)
+    text = text.replace('đ', 'd').replace('Đ', 'd')
+    return unicodedata.normalize('NFC', text)
+
+def tokenize_text(text: str, include_unaccented: bool = True) -> list[str]:
     """
-    Tách từ đơn giản và nhanh cho tiếng Việt và tiếng Anh (lowercase, tách từ).
+    Chuẩn hóa và tách từ nâng cao cho OCR / ASR theo SOTA VBS/TRECVID:
+    1. Chuẩn hóa Unicode NFC và lowercase.
+    2. Tách từ ghép, mã hiệu đặc biệt (VD: COVID-19 -> ['covid-19', 'covid19', 'covid', '19']).
+    3. Lọc bỏ ký tự rác 1 chữ cái (nhiễu texture OCR).
+    4. Sinh song song tokens không dấu để chống lỗi OCR mất dấu (Dual Inverted Indexing).
     """
     if not isinstance(text, str) or not text.strip():
         return []
-    # Giữ lại các ký tự chữ cái và số
-    cleaned = re.sub(r'[^\w\s]', ' ', text.lower())
-    return [token for token in cleaned.split() if len(token) > 0]
+    
+    # 1. NFC Normalization & Lowercase
+    text = unicodedata.normalize('NFC', text).lower()
+    
+    # 2. Bóc tách các mã hiệu đặc biệt (như covid-19, fana-clb, q1-2026)
+    special_tokens = set()
+    hyphen_matches = re.findall(r'[a-z0-9]+-[a-z0-9]+', text)
+    for m in hyphen_matches:
+        special_tokens.add(m)
+        special_tokens.add(m.replace('-', ''))
+
+    # 3. Làm sạch ký tự đặc biệt, chỉ giữ chữ cái và số
+    cleaned = re.sub(r'[^\w\s]', ' ', text)
+    raw_tokens = [t for t in cleaned.split() if len(t) > 0]
+    
+    tokens = set()
+    for t in raw_tokens:
+        # Lọc bỏ ký tự rác 1 chữ cái (trừ khi là chữ số 0-9)
+        if len(t) == 1 and not t.isdigit() and t not in ('a', 'y', 'ở', 'ổ', 'ố', 'á', 'à'):
+            continue
+        tokens.add(t)
+        
+        # 4. Thêm dạng không dấu nếu cần (Dual Inverted Indexing)
+        if include_unaccented:
+            unacc = remove_vietnamese_accents(t)
+            if unacc != t and len(unacc) > 1:
+                tokens.add(unacc)
+                
+    tokens.update(special_tokens)
+    return list(tokens)
 
 class BM25MultiIndexer:
     """
@@ -84,18 +124,13 @@ class BM25MultiIndexer:
         print(f"[*] Đang xử lý {ocr_file.name} để tạo BM25 OCR...", flush=True)
         df_ocr = pd.read_parquet(ocr_file)
         
-        tokenized_corpus = []
-        docs = []
-        for _, row in df_ocr.iterrows():
-            text = str(row.get("ocr_text", "") or "")
-            tokens = tokenize_text(text)
-            tokenized_corpus.append(tokens)
-            docs.append({
-                "video_id": row["video_id"],
-                "frame_idx": int(row["frame_idx"]),
-                "pts_time": float(row.get("pts_time", 0.0)),
-                "text": text
-            })
+        texts = df_ocr["ocr_text"].fillna("").astype(str).tolist()
+        vids = df_ocr["video_id"].tolist()
+        fidxs = df_ocr["frame_idx"].tolist()
+        pts = df_ocr["pts_time"].fillna(0.0).tolist() if "pts_time" in df_ocr.columns else [0.0] * len(texts)
+
+        tokenized_corpus = [tokenize_text(t) for t in texts]
+        docs = [{"video_id": v, "frame_idx": int(f), "pts_time": float(p), "text": t} for v, f, p, t in zip(vids, fidxs, pts, texts)]
 
         print(f"[*] Đang khởi tạo BM25Okapi trên {len(docs):,} OCR documents...", flush=True)
         self.ocr_index = BM25Okapi(tokenized_corpus)
@@ -123,20 +158,16 @@ class BM25MultiIndexer:
         print(f"[*] Đang xử lý {asr_file.name} để tạo BM25 ASR...", flush=True)
         df_asr = pd.read_parquet(asr_file)
         
-        tokenized_corpus = []
-        docs = []
-        for _, row in df_asr.iterrows():
-            text = str(row.get("transcript", "") or "")
-            tokens = tokenize_text(text)
-            tokenized_corpus.append(tokens)
-            docs.append({
-                "video_id": row["video_id"],
-                "start_frame": int(row.get("start_frame", 0)),
-                "end_frame": int(row.get("end_frame", 0)),
-                "start_time": float(row.get("start_time", 0.0)),
-                "end_time": float(row.get("end_time", 0.0)),
-                "text": text
-            })
+        texts = df_asr["transcript"].fillna("").astype(str).tolist()
+        vids = df_asr["video_id"].tolist()
+        sf = df_asr["start_frame"].fillna(0).tolist() if "start_frame" in df_asr.columns else [0] * len(texts)
+        ef = df_asr["end_frame"].fillna(0).tolist() if "end_frame" in df_asr.columns else [0] * len(texts)
+        st = df_asr["start_time"].fillna(0.0).tolist() if "start_time" in df_asr.columns else [0.0] * len(texts)
+        et = df_asr["end_time"].fillna(0.0).tolist() if "end_time" in df_asr.columns else [0.0] * len(texts)
+
+        tokenized_corpus = [tokenize_text(t) for t in texts]
+        docs = [{"video_id": v, "start_frame": int(s), "end_frame": int(e), "start_time": float(stt), "end_time": float(ett), "text": t} 
+                for v, s, e, stt, ett, t in zip(vids, sf, ef, st, et, texts)]
 
         print(f"[*] Đang khởi tạo BM25Okapi trên {len(docs):,} ASR sentences...", flush=True)
         self.asr_index = BM25Okapi(tokenized_corpus)

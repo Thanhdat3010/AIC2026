@@ -89,18 +89,18 @@ with st.sidebar:
     active_tab = st.radio(
         "Chế độ làm việc:",
         [
-            "📊 Benchmark & Ground Truth (11 Câu Đã Eval)",
-            "📂 Đề Thi Chính Thức BTC (24 Câu Batch 1)",
+            "📊 Báo Cáo Thí Nghiệm & Ablation Leaderboard",
+            "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submission Console)",
             "🔍 Tìm kiếm Trực tiếp (Live Search)"
         ]
     )
 
 # =============================================================================
-# TAB 1: BENCHMARK & GROUND TRUTH REVIEW CONSOLE (11 CÂU ĐÃ EVAL)
+# TAB 1: BENCHMARK & GROUND TRUTH REVIEW CONSOLE (47 CÂU EVALUATION)
 # =============================================================================
-if active_tab == "📊 Benchmark & Ground Truth (11 Câu Đã Eval)":
-    st.title("📊 Benchmark & Ground Truth Review Console (Config 16 SOTA)")
-    st.caption("Xem lại toàn bộ 11 câu hỏi kiểm chuẩn đã chạy trong Cấu hình 16, soi Top 10 ảnh ứng viên, đổi ngôi Rank 1 và tinh chỉnh vi sai tức thời.")
+if active_tab == "📊 Báo Cáo Thí Nghiệm & Ablation Leaderboard":
+    st.title("📊 Báo Cáo Thí Nghiệm & Ma Trận Ablation Study (AIC 2026)")
+    st.caption("Tổng hợp kết quả ma trận thí nghiệm Ablation Study 5 bước (Config 22 → Config 26), soi chi tiết 47 câu benchmark và Top 10 ảnh ứng viên.")
 
     # Đọc kết quả Benchmark mới nhất nếu có
     latest_bench_path = PROJECT_ROOT / "data" / "benchmark" / "latest_ablation_results.json"
@@ -394,87 +394,131 @@ if active_tab == "📊 Benchmark & Ground Truth (11 Câu Đã Eval)":
                                 st.info(f"Frame {pf}")
 
 # =============================================================================
-# TAB 2: KIỂM DUYỆT TOÀN BỘ ĐỀ THI BTC (24 CÂU BATCH 1)
+# TAB 2: DUYỆT & CHỈNH SỬA KẾT QUẢ NỘP BÀI (SUBMISSION CONSOLE)
 # =============================================================================
-elif active_tab == "📂 Đề Thi Chính Thức BTC (24 Câu Batch 1)":
-    st.title("📂 Đề Thi Chính Thức & Thử Nghiệm BTC")
-    st.caption("Kiểm duyệt toàn bộ các câu hỏi, chạy tự động, chỉnh sửa tay trực quan và tự động đồng bộ file submission.zip chuẩn 100% BTC.")
+elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submission Console)":
+    st.title("📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submission Console)")
+    st.caption("Kiểm duyệt toàn bộ các câu hỏi trong thư mục output, chỉnh sửa tay trực quan và tự động đồng bộ file submission.zip chuẩn 100% BTC.")
 
-    pkg_choice = st.selectbox(
-        "📦 Chọn Gói Đề Thi / Thư Mục Nộp Bài:",
-        [
-            "🧪 Gói Thử Nghiệm: query/THUNGHIEM-bo-de-thi → thunghiem/submission",
-            "📂 Gói Batch 1 Group A: query/batch_1/query-p1-groupA → output/batch_1"
-        ]
-    )
+    output_root = PROJECT_ROOT / "output"
+    output_root.mkdir(parents=True, exist_ok=True)
 
-    if "THUNGHIEM" in pkg_choice:
-        query_dir = PROJECT_ROOT / "query" / "THUNGHIEM-bo-de-thi"
-        output_dir = PROJECT_ROOT / "thunghiem" / "submission"
-        zip_output_path = PROJECT_ROOT / "thunghiem" / "submission.zip"
-    else:
-        query_dir = PROJECT_ROOT / "query" / "batch_1" / "query-p1-groupA"
-        output_dir = PROJECT_ROOT / "output" / "batch_1"
-        zip_output_path = PROJECT_ROOT / "output" / "submission.zip"
+    # Liệt kê tất cả các thư mục con bên trong output/
+    output_subdirs = [d.name for d in output_root.iterdir() if d.is_dir()]
+    if not output_subdirs:
+        output_subdirs = ["thunghiem", "chinhthuc"]
+    # Sắp xếp thunghiem lên đầu nếu có
+    output_subdirs = sorted(list(set(output_subdirs)), key=lambda x: (0 if x == "thunghiem" else 1, x))
 
+    col_pkg1, col_pkg2 = st.columns([1, 1])
+    with col_pkg1:
+        selected_pkg = st.selectbox(
+            "📁 Chọn Thư Mục Output (Bên trong output/):",
+            output_subdirs,
+            index=0,
+            help="Hệ thống chỉ quét và lưu trữ các kết quả nằm bên trong thư mục output/"
+        )
+
+    selected_output_folder = output_root / selected_pkg
+    output_dir = selected_output_folder / "submission"
+    zip_output_path = selected_output_folder / "submission.zip"
     output_dir.mkdir(parents=True, exist_ok=True)
-    query_files = sorted(list(query_dir.glob("*.txt"))) if query_dir.exists() else []
 
-    if not query_files:
-        st.error(f"Không tìm thấy query trong {query_dir}!")
+    # Tìm thư mục query tương ứng trong query/
+    query_root = PROJECT_ROOT / "query"
+    possible_query_dirs = [d for d in query_root.rglob("*") if d.is_dir() and any(d.glob("*.txt"))]
+    query_dir_options = {d.name: d for d in possible_query_dirs}
+
+    default_q_name = None
+    for q_name in query_dir_options.keys():
+        if selected_pkg.lower() in q_name.lower():
+            default_q_name = q_name
+            break
+    if not default_q_name and "THUNGHIEM-bo-de-thi" in query_dir_options:
+        default_q_name = "THUNGHIEM-bo-de-thi"
+    elif not default_q_name and query_dir_options:
+        default_q_name = list(query_dir_options.keys())[0]
+
+    with col_pkg2:
+        if query_dir_options:
+            q_choice = st.selectbox(
+                "📝 Chọn Thư Mục Đề Bài (.txt) tương ứng:",
+                list(query_dir_options.keys()),
+                index=list(query_dir_options.keys()).index(default_q_name) if default_q_name in query_dir_options else 0
+            )
+            query_dir = query_dir_options[q_choice]
+        else:
+            query_dir = query_root / "THUNGHIEM-bo-de-thi"
+            st.caption(f"Thư mục đề bài: `{query_dir}`")
+
+    # Thu thập danh sách câu hỏi từ query_dir hoặc từ các file CSV sẵn có trong output_dir
+    query_files = sorted(list(query_dir.glob("*.txt"))) if query_dir.exists() else []
+    existing_csv_files = sorted(list(output_dir.glob("*.csv")))
+
+    st.info(f"📂 Đang trỏ tới: **`output/{selected_pkg}/submission`** ({len(existing_csv_files)} file CSV) | File zip nộp bài: **`output/{selected_pkg}/submission.zip`**")
+
+    if not query_files and not existing_csv_files:
+        st.warning(f"Chưa có file đề bài (.txt) trong `{query_dir}` và chưa có file CSV trong `{output_dir}`!")
     else:
         # Batch Runner: Chạy toàn bộ câu tự động
-        st.markdown("### ⚡ Chạy Tự Động Toàn Bộ Batch (Batch Auto-Run)")
-        batch_col1, batch_col2 = st.columns([3, 1])
-        with batch_col1:
-            st.caption(f"Chạy toàn bộ {len(query_files)} câu hỏi qua mô hình SOTA (Full 3-Layer + VLM + DP) và tự động ghi đè file CSV & ZIP.")
-        with batch_col2:
-            run_all_btn = st.button(f"🔥 Chạy Full {len(query_files)} Câu Tự Động", type="primary", use_container_width=True)
+        if query_files:
+            st.markdown("### ⚡ Chạy Tự Động Toàn Bộ Đề Bài (Batch Auto-Run - SOTA Config 25)")
+            batch_col1, batch_col2 = st.columns([3, 1])
+            with batch_col1:
+                st.caption(f"Chạy toàn bộ {len(query_files)} câu hỏi qua mô hình SOTA WRRF (Config 25) và tự động ghi đè file CSV & ZIP vào `output/{selected_pkg}/`.")
+            with batch_col2:
+                run_all_btn = st.button(f"🔥 Chạy Full {len(query_files)} Câu Tự Động", type="primary", use_container_width=True)
 
-        if run_all_btn:
-            progress_bar = st.progress(0)
-            status_text = st.empty()
-            for idx, q_path in enumerate(query_files):
-                status_text.text(f"Đang xử lý [{idx+1}/{len(query_files)}]: {q_path.name}...")
-                with open(q_path, "r", encoding="utf-8") as f:
-                    content = f.read().strip()
-                is_qa = "qa" in q_path.name.lower()
-                is_trake = "trake" in q_path.name.lower()
-                if is_qa:
-                    preds, info, _ = engine.search_qa(content, top_k=100, use_intra_reranker=True, use_cue=True, use_multimodal=True)
-                elif is_trake:
-                    preds, info, _ = engine.search_trake(content, top_k=100)
-                else:
-                    preds, info, _ = engine.search_kis(content, top_k=100, use_intra_reranker=True, use_dense_video_refiner=True)
+            if run_all_btn:
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+                for idx, q_path in enumerate(query_files):
+                    status_text.text(f"Đang xử lý [{idx+1}/{len(query_files)}]: {q_path.name}...")
+                    with open(q_path, "r", encoding="utf-8") as f:
+                        content = f.read().strip()
+                    is_qa = "qa" in q_path.name.lower()
+                    is_trake = "trake" in q_path.name.lower()
+                    if is_qa:
+                        preds, info, _ = engine.search_qa(content, top_k=100, use_intra_reranker=True, use_cue=True, use_multimodal=True, use_rrf=True)
+                    elif is_trake:
+                        preds, info, _ = engine.search_trake(content, top_k=100, use_multi_query=True, use_event_coverage=True, use_row_norm_dp=True, use_segmental_dp=True)
+                    else:
+                        preds, info, _ = engine.search_kis(content, top_k=100, use_intra_reranker=True, use_cue=True, use_multimodal=True, use_rrf=True)
 
-                out_csv = output_dir / f"{q_path.stem}.csv"
-                with open(out_csv, "w", encoding="utf-8") as f:
-                    for p in preds:
-                        if is_qa:
-                            ans = p.get("answer", info.get("generated_qa_answer", ""))
-                            ans_clean = f'"{ans}"' if ans else '""'
-                            f.write(f"{p['video_id']},{p['frame_idx']},{ans_clean}\n")
-                        elif is_trake and "event_frames" in p:
-                            ev_str = ",".join([str(x) for x in p["event_frames"]])
-                            f.write(f"{p['video_id']},{ev_str}\n")
-                        else:
-                            f.write(f"{p['video_id']},{p['frame_idx']}\n")
-                progress_bar.progress((idx + 1) / len(query_files))
-            sync_submission_zip(output_dir, zip_output_path)
-            status_text.success(f"🎉 Đã hoàn tất chạy toàn bộ {len(query_files)} câu và tự động cập nhật submission.zip!")
-            st.rerun()
+                    out_csv = output_dir / f"{q_path.stem}.csv"
+                    with open(out_csv, "w", encoding="utf-8") as f:
+                        for p in preds:
+                            if is_qa:
+                                ans = p.get("answer", info.get("generated_qa_answer", ""))
+                                ans_clean = f'"{ans}"' if ans else '""'
+                                f.write(f"{p['video_id']},{p['frame_idx']},{ans_clean}\n")
+                            elif is_trake and "event_frames" in p:
+                                ev_str = ",".join([str(x) for x in p["event_frames"]])
+                                f.write(f"{p['video_id']},{ev_str}\n")
+                            else:
+                                f.write(f"{p['video_id']},{p['frame_idx']}\n")
+                    progress_bar.progress((idx + 1) / len(query_files))
+                sync_submission_zip(output_dir, zip_output_path)
+                status_text.success(f"🎉 Đã hoàn tất chạy toàn bộ {len(query_files)} câu và tự động cập nhật submission.zip!")
+                st.rerun()
 
-        st.divider()
+            st.divider()
 
         # Query Selector phong phú hiển thị cả tên và nội dung ngắn
         query_map = {}
-        for q_p in query_files:
-            with open(q_p, "r", encoding="utf-8") as f:
-                txt = f.read().strip()
-            task_tag = "QA" if "qa" in q_p.name.lower() else ("TRAKE" if "trake" in q_p.name.lower() else "KIS")
-            short_txt = txt[:55] + "..." if len(txt) > 55 else txt
-            label = f"[{task_tag}] {q_p.name} - {short_txt}"
-            query_map[label] = (q_p, txt, task_tag)
+        if query_files:
+            for q_p in query_files:
+                with open(q_p, "r", encoding="utf-8") as f:
+                    txt = f.read().strip()
+                task_tag = "QA" if "qa" in q_p.name.lower() else ("TRAKE" if "trake" in q_p.name.lower() else "KIS")
+                short_txt = txt[:55] + "..." if len(txt) > 55 else txt
+                label = f"[{task_tag}] {q_p.name} - {short_txt}"
+                query_map[label] = (q_p, txt, task_tag)
+        else:
+            for csv_p in existing_csv_files:
+                task_tag = "QA" if "qa" in csv_p.name.lower() else ("TRAKE" if "trake" in csv_p.name.lower() else "KIS")
+                label = f"[{task_tag}] {csv_p.name}"
+                query_map[label] = (csv_p, f"Query từ kết quả {csv_p.name}", task_tag)
 
         selected_label = st.selectbox("📂 Chọn câu hỏi để soi Top 10 và hiệu chỉnh:", list(query_map.keys()))
         selected_q_path, q_content, task_tag = query_map[selected_label]
@@ -498,14 +542,10 @@ elif active_tab == "📂 Đề Thi Chính Thức BTC (24 Câu Batch 1)":
         csv_stem = selected_q_path.stem
         target_csv_path = output_dir / f"{csv_stem}.csv"
 
-        # Nút chạy riêng cho 1 câu nếu cần
-        col_act1, col_act2 = st.columns([1, 1])
-        with col_act1:
-            run_btn = st.button("⚡ Chạy Lại Riêng Câu Này (GPU)", use_container_width=True)
-        with col_act2:
-            layer3_btn = st.button("🔬 Chạy Kèm GPU Layer 3 Vi Sai", use_container_width=True)
+        # Nút chạy riêng cho 1 câu
+        run_btn = st.button("⚡ Chạy Lại Riêng Câu Này Trên GPU (SOTA Engine)", type="primary", use_container_width=True)
 
-        if run_btn or layer3_btn:
+        if run_btn:
             with st.spinner("Đang chạy mô hình AI trên GPU..."):
                 is_qa = (task_tag == "QA")
                 is_trake = (task_tag == "TRAKE")
@@ -515,7 +555,7 @@ elif active_tab == "📂 Đề Thi Chính Thức BTC (24 Câu Batch 1)":
                 elif is_trake:
                     preds, info, lat = engine.search_trake(q_content, top_k=100)
                 else:
-                    preds, info, lat = engine.search_kis(q_content, top_k=100, use_intra_reranker=True, use_dense_video_refiner=layer3_btn)
+                    preds, info, lat = engine.search_kis(q_content, top_k=100, use_intra_reranker=True, use_dense_video_refiner=False)
 
                 # Lưu vào target_csv_path
                 with open(target_csv_path, "w", encoding="utf-8") as f:

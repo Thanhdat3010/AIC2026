@@ -322,6 +322,98 @@ def run_ablation_experiment(config_code: str, pipeline_cache: dict = None) -> di
             if pipeline_cache is not None:
                 pipeline_cache["task_specialized"] = pipeline
 
+    elif config_code == "23":
+        config_name = "Cấu hình 23 (Ablation 5): Config 22 + Tier-1 Fast Linguistic Gate (Zero-Noise Mode)"
+        mode = "specialized"
+        use_intra_reranker = True
+        use_neighbor = True
+        use_cue = True
+        use_multimodal = True
+        use_vlm_verification = True
+        use_dense_video_refiner = False
+        use_rrf = True
+        use_neighbor_expansion = True
+        use_multi_crop = True
+        use_multi_query = True
+        use_event_coverage = True
+        use_row_norm_dp = True
+        use_segmental_dp = True
+        if pipeline_cache and "task_specialized" in pipeline_cache:
+            pipeline = pipeline_cache["task_specialized"]
+        else:
+            pipeline = TaskSpecializedEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["task_specialized"] = pipeline
+
+    elif config_code == "24":
+        config_name = "Cấu hình 24 (Ablation 6): Config 23 + Tier-2 Agentic Query Entity Expansion & Cleaned Dual Index"
+        mode = "specialized"
+        use_intra_reranker = True
+        use_neighbor = True
+        use_cue = True
+        use_multimodal = True
+        use_vlm_verification = True
+        use_dense_video_refiner = False
+        use_rrf = True
+        use_neighbor_expansion = True
+        use_multi_crop = True
+        use_multi_query = True
+        use_event_coverage = True
+        use_row_norm_dp = True
+        use_segmental_dp = True
+        if pipeline_cache and "task_specialized" in pipeline_cache:
+            pipeline = pipeline_cache["task_specialized"]
+        else:
+            pipeline = TaskSpecializedEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["task_specialized"] = pipeline
+
+    elif config_code == "25":
+        config_name = "Cấu hình 25 (Ablation 7): Config 24 + Tier-3 Weighted Reciprocal Rank Fusion (WRRF)"
+        mode = "specialized"
+        use_intra_reranker = True
+        use_neighbor = True
+        use_cue = True
+        use_multimodal = True
+        use_vlm_verification = True
+        use_dense_video_refiner = False
+        use_rrf = True
+        use_neighbor_expansion = True
+        use_multi_crop = True
+        use_multi_query = True
+        use_event_coverage = True
+        use_row_norm_dp = True
+        use_segmental_dp = True
+        if pipeline_cache and "task_specialized" in pipeline_cache:
+            pipeline = pipeline_cache["task_specialized"]
+        else:
+            pipeline = TaskSpecializedEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["task_specialized"] = pipeline
+
+    elif config_code == "26":
+        config_name = "Cấu hình 26 (Master SOTA): Full Tiered Modality Routing Pipeline (Visual + OCR + ASR)"
+        mode = "specialized"
+        use_intra_reranker = True
+        use_neighbor = True
+        use_cue = True
+        use_multimodal = True
+        use_vlm_verification = True
+        use_dense_video_refiner = False
+        use_rrf = True
+        use_neighbor_expansion = True
+        use_multi_crop = True
+        use_multi_query = True
+        use_event_coverage = True
+        use_row_norm_dp = True
+        use_segmental_dp = True
+        if pipeline_cache and "task_specialized" in pipeline_cache:
+            pipeline = pipeline_cache["task_specialized"]
+        else:
+            pipeline = TaskSpecializedEngine(engine="siglip2")
+            if pipeline_cache is not None:
+                pipeline_cache["task_specialized"] = pipeline
+
     else:
         print(f"⚠️ Cấu hình {config_code} không hợp lệ!")
         return None
@@ -349,9 +441,9 @@ def run_ablation_experiment(config_code: str, pipeline_cache: dict = None) -> di
                     query_text=qtext,
                     top_k=100,
                     use_intra_reranker=use_intra_reranker,
-                    use_neighbor=True,
-                    use_cue=False,
-                    use_multimodal=False,
+                    use_neighbor=use_neighbor,
+                    use_cue=use_cue,
+                    use_multimodal=use_multimodal,
                     use_vlm_verification=use_vlm_verification,
                     use_dense_video_refiner=use_dense_video_refiner,
                     use_rrf=use_rrf,
@@ -545,22 +637,28 @@ def update_leaderboard(current_results: list[dict], lb_path: Path, run_id: str):
 
 def main():
     parser = argparse.ArgumentParser(description="Chạy Ablation Benchmark kèm chẩn đoán Stage-1 Video Recall")
-    parser.add_argument("--config", type=str, default=None, help="Mã cấu hình ('18', '19', '20', '21', '22')")
-    parser.add_argument("--all_configs", "--all", action="store_true", help="Chạy toàn bộ cấu hình từ 0 đến 22")
-    parser.add_argument("--v4", "--v4_ablation", action="store_true", help="Chạy ablation study từ Config 18 đến 22")
+    parser.add_argument("--config", type=str, default=None, help="Mã cấu hình ('22', '23', '24', '25', '26' hoặc danh sách phẩy '22,23,26')")
+    parser.add_argument("--all_configs", "--all", dest="all_configs", action="store_true", help="Chạy toàn bộ cấu hình")
+    parser.add_argument("--v4", "--v4_ablation", dest="v4", action="store_true", help="Chạy ablation study từ Config 18 đến 22")
+    parser.add_argument("--v5", "--matrix", dest="v5", action="store_true", help="Chạy ma trận Ablation Study Tiered Modality Routing (Config 22 đến 26)")
     args = parser.parse_args()
 
     pipeline_cache = {}
     md_output_path = BASE_DIR / "docs" / "ABLATION_STUDY_RESULTS.md"
 
-    if args.v4:
+    if args.v5:
+        configs_to_test = ["22", "23", "24", "25", "26"]
+    elif args.v4:
         configs_to_test = ["18", "19", "20", "21", "22"]
     elif args.all_configs:
-        configs_to_test = ["0", "1", "11", "12", "14", "15", "16", "17", "18", "19", "20", "21", "22"]
+        configs_to_test = ["0", "1", "11", "12", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26"]
     elif args.config is not None:
-        configs_to_test = [args.config]
+        if "," in args.config:
+            configs_to_test = [c.strip() for c in args.config.split(",") if c.strip()]
+        else:
+            configs_to_test = [args.config.strip()]
     else:
-        configs_to_test = ["21"]
+        configs_to_test = ["26"]
 
     print(f"\n🚀 BẮT ĐẦU CHẠY THỬ NGHIỆM ABLATION STUDY TRÊN 20 TEST CASES...")
     print(f"[*] Danh sách cấu hình kiểm tra: {configs_to_test}\n")
