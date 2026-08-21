@@ -151,21 +151,12 @@ class TaskSpecializedEngine:
         final_scores = []
         seen_keys = set()
 
-        # Xác định tín hiệu OCR/ASR và trọng số (có hỗ trợ override từ UI)
-        has_ocr = gate_info.get("has_ocr_signal", False) or q_info.get("has_ocr_signal", False) or (w_ocr_override is not None and w_ocr_override > 0.0)
-        ocr_words = q_info.get("ocr_keywords", []) or gate_info.get("ocr_keywords", [])
-        if not ocr_words and has_ocr:
-            ocr_words = [w for w in query_text.split() if len(w) > 2]
-        w_ocr = w_ocr_override if w_ocr_override is not None else (q_info.get("weights", {}).get("ocr", gate_info.get("w_ocr", 1.8)))
+        # Nếu Router hoặc Gate xác nhận có tín hiệu OCR/ASR rõ ràng, bổ sung video & frames khớp từ khóa vào Top
+        if use_rrf:
+            has_ocr = gate_info.get("has_ocr_signal", False) or q_info.get("has_ocr_signal", False)
+            ocr_words = q_info.get("ocr_keywords", []) or gate_info.get("ocr_keywords", [])
+            w_ocr = w_ocr_override if w_ocr_override is not None else (gate_info.get("w_ocr", 1.5) if has_ocr else 0.0)
 
-        has_asr = gate_info.get("has_asr_signal", False) or q_info.get("has_asr_signal", False) or (w_asr_override is not None and w_asr_override > 0.0)
-        asr_words = q_info.get("asr_keywords", []) or gate_info.get("asr_keywords", [])
-        if not asr_words and has_asr:
-            asr_words = [w for w in query_text.split() if len(w) > 2]
-        w_asr = w_asr_override if w_asr_override is not None else (q_info.get("weights", {}).get("asr", gate_info.get("w_asr", 1.8)))
-
-        # Nếu có cờ RRF hoặc có tín hiệu OCR/ASR rõ ràng -> Quét BM25 và hợp nhất
-        if use_rrf or has_ocr or has_asr:
             if has_ocr and ocr_words:
                 ocr_query_str = " ".join(ocr_words)
                 ocr_hits = self.bm25_indexer.search_ocr(ocr_query_str, top_k=20)
@@ -181,16 +172,17 @@ class TaskSpecializedEngine:
                         key = (v_ocr, f_idx)
                         if key not in seen_keys:
                             seen_keys.add(key)
-                            # Ưu tiên cực cao cho thực thể khớp chính xác
-                            bm_val = float(doc.get("score", 1.0))
-                            boost_base = 0.60 if bm_val >= 3.5 else 0.35
-                            wrrf_score = boost_base + w_ocr * (1.0 / (self.k_rrf + r_ocr)) + 0.02 * bm_val
+                            wrrf_score = 0.35 + w_ocr * (1.0 / (self.k_rrf + r_ocr))
                             final_scores.append({
                                 "video_id": v_ocr,
                                 "frame_idx": f_idx,
                                 "global_id": -1,
                                 "score": wrrf_score
                             })
+
+            has_asr = gate_info.get("has_asr_signal", False) or q_info.get("has_asr_signal", False)
+            asr_words = q_info.get("asr_keywords", []) or gate_info.get("asr_keywords", [])
+            w_asr = w_asr_override if w_asr_override is not None else (gate_info.get("w_asr", 1.2) if has_asr else 0.0)
 
             if has_asr and asr_words:
                 asr_query_str = " ".join(asr_words)
@@ -207,10 +199,7 @@ class TaskSpecializedEngine:
                         key = (v_asr, f_idx)
                         if key not in seen_keys:
                             seen_keys.add(key)
-                            # Ưu tiên cực cao cho thực thể khớp chính xác
-                            bm_val = float(doc.get("score", 1.0))
-                            boost_base = 0.60 if bm_val >= 3.5 else 0.30
-                            wrrf_score = boost_base + w_asr * (1.0 / (self.k_rrf + r_asr)) + 0.02 * bm_val
+                            wrrf_score = 0.30 + w_asr * (1.0 / (self.k_rrf + r_asr))
                             final_scores.append({
                                 "video_id": v_asr,
                                 "frame_idx": f_idx,

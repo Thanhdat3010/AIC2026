@@ -157,23 +157,18 @@ Respond with ONLY a JSON object with this EXACT structure:
                 if "weights" not in parsed:
                     parsed["weights"] = {"visual": 1.0, "ocr": 0.0, "asr": 0.0}
                 
-                # Adaptive Modality Gating & Entity-Specificity Boosting
-                has_ocr = parsed.get("has_ocr_signal", False)
-                has_asr = parsed.get("has_asr_signal", False)
-
-                if not has_ocr:
+                # Adaptive Modality Gating (giữ nguyên trọng số an toàn gốc)
+                if not parsed.get("has_ocr_signal", False):
                     parsed["ocr_keywords"] = []
                     parsed["weights"]["ocr"] = 0.0
                 else:
-                    # Tăng trọng số OCR lên 3.0 nếu chứa thực thể tên riêng/số năm
-                    parsed["weights"]["ocr"] = 3.0 if any(len(k.split()) >= 2 or any(c.isupper() for c in k) for k in parsed.get("ocr_keywords", [])) else 1.8
+                    parsed["weights"]["ocr"] = 1.5
 
-                if not has_asr:
+                if not parsed.get("has_asr_signal", False):
                     parsed["asr_keywords"] = []
                     parsed["weights"]["asr"] = 0.0
                 else:
-                    # Tăng trọng số ASR lên 3.0 nếu chứa thực thể tên riêng/tri thức
-                    parsed["weights"]["asr"] = 3.0 if any(len(k.split()) >= 2 or any(c.isupper() for c in k) or any(char.isdigit() for char in k) for k in parsed.get("asr_keywords", [])) else 1.8
+                    parsed["weights"]["asr"] = 1.2
 
                 return parsed
             except Exception as e:
