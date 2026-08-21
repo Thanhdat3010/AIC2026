@@ -242,42 +242,7 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
 
     st.divider()
 
-    # Nút Auto-Run toàn bộ gói đề thi nếu cần
-    if query_files:
-        with st.expander("⚡ Chạy Tự Động Toàn Bộ Gói Đề Thi (Batch Auto-Run)", expanded=False):
-            st.info(f"Phát hiện {len(query_files)} câu hỏi trong `{selected_query_dir.name}`. Bấm nút dưới để chạy tự động toàn bộ bằng Config 25 SOTA.")
-            if st.button("🚀 BẮT ĐẦU CHẠY TOÀN BỘ CÂU HỎI TRÊN GPU", type="primary"):
-                progress_bar = st.progress(0.0)
-                status_text = st.empty()
-                for idx, q_path in enumerate(query_files):
-                    status_text.text(f"[{idx+1}/{len(query_files)}] Đang xử lý câu: {q_path.name}...")
-                    with open(q_path, "r", encoding="utf-8") as f:
-                        content = f.read().strip()
-                    is_qa = "qa" in q_path.name.lower()
-                    is_trake = "trake" in q_path.name.lower()
-                    if is_qa:
-                        preds, info, _ = engine.search_qa(content, top_k=100, use_intra_reranker=True, use_cue=True, use_multimodal=True, use_rrf=True)
-                    elif is_trake:
-                        preds, info, _ = engine.search_trake(content, top_k=100, use_multi_query=True, use_event_coverage=True, use_row_norm_dp=True, use_segmental_dp=True)
-                    else:
-                        preds, info, _ = engine.search_kis(content, top_k=100, use_intra_reranker=True, use_cue=True, use_multimodal=True, use_rrf=True)
 
-                    out_csv = output_dir / f"{q_path.stem}.csv"
-                    with open(out_csv, "w", encoding="utf-8") as f:
-                        for p in preds:
-                            if is_qa:
-                                ans = p.get("answer", info.get("generated_qa_answer", ""))
-                                ans_clean = f'"{ans}"' if ans else '""'
-                                f.write(f"{p['video_id']},{p['frame_idx']},{ans_clean}\n")
-                            elif is_trake and "event_frames" in p:
-                                ev_str = ",".join([str(x) for x in p["event_frames"]])
-                                f.write(f"{p['video_id']},{ev_str}\n")
-                            else:
-                                f.write(f"{p['video_id']},{p['frame_idx']}\n")
-                    progress_bar.progress((idx + 1) / len(query_files))
-                sync_submission_zip(output_dir, zip_output_path)
-                status_text.success(f"🎉 Đã hoàn tất {len(query_files)} câu và tự động cập nhật submission.zip!")
-                st.rerun()
 
     # Query Selector
     query_map = {}
