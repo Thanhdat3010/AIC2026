@@ -139,8 +139,22 @@ class KeyframeZipLoader:
         df_v = self.df_frames[(self.df_frames["video_id"] == video_id) & (self.df_frames["frame_idx"] == frame_idx)]
         if not df_v.empty and "pts_time" in df_v.columns:
             return float(df_v.iloc[0]["pts_time"])
-        # Fallback 25 fps
+        # Nếu frame nằm giữa 2 keyframes, tính chuẩn theo FPS thực của video
+        df_vid = self.df_frames[self.df_frames["video_id"] == video_id]
+        if not df_vid.empty and "fps" in df_vid.columns:
+            fps = float(df_vid.iloc[0]["fps"])
+            if fps > 0:
+                return float(frame_idx) / fps
         return float(frame_idx) / 25.0
+
+    def get_exact_frame_from_time(self, video_id: str, time_sec: float) -> int:
+        """Tính toán chính xác frame_idx từ mốc thời gian giây dựa trên FPS thực của video."""
+        df_v = self.df_frames[self.df_frames["video_id"] == video_id]
+        if not df_v.empty and "fps" in df_v.columns:
+            fps = float(df_v.iloc[0]["fps"])
+            if fps > 0:
+                return int(round(time_sec * fps))
+        return int(round(time_sec * 25.0))
 
     def get_nearest_frame_from_time(self, video_id: str, time_sec: float) -> int:
         """Tra cứu chính xác frame_idx từ mốc thời gian giây dựa trên frames.parquet (chuẩn 100% BTC)."""

@@ -291,11 +291,13 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
         </div>
         """, unsafe_allow_html=True)
 
-        # Hàng nút điều khiển chính: SOTA Cân Bằng, Boost ASR, Boost OCR
+        # Hàng nút điều khiển chính: SOTA Cân Bằng, Pure Visual, Boost ASR, Boost OCR
         st.markdown("##### ⚡ Điều Khiển Chạy Lại & Tăng Cường Đa Phương Thức (Modality Boost Controls):")
-        col_btn_gpu, col_btn_asr, col_btn_ocr = st.columns([1.4, 1.3, 1.3])
+        col_btn_gpu, col_btn_vis, col_btn_asr, col_btn_ocr = st.columns([1.3, 1.4, 1.2, 1.2])
         with col_btn_gpu:
             run_gpu_btn = st.button("⚡ SOTA Engine (Tự Động)", type="primary", use_container_width=True, help="Tự động nhận diện thực thể và cân bằng đa phương thức")
+        with col_btn_vis:
+            run_vis_btn = st.button("👁️ Pure Visual (SigLIP + Dịch LLM)", use_container_width=True, help="Tắt hoàn toàn ASR & OCR, chỉ dùng bản dịch LLM tiếng Anh và tính toán tương đồng trực quan SigLIP2 + Intra-Video Reranker")
         with col_btn_asr:
             run_asr_btn = st.button("🎙️ Boost ASR (3.5x - Lời Thoại)", use_container_width=True, help="Ưu tiên cực cao cho lời thuyết minh, phỏng vấn, tên riêng, năm sản xuất, đạo diễn...")
         with col_btn_ocr:
@@ -318,23 +320,45 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                 custom_w_asr = st.slider("🎙️ Trọng số ASR (Lời thoại):", 0.0, 5.0, 1.8, 0.2, key="slider_w_asr")
                 custom_w_ocr = st.slider("🔤 Trọng số OCR (Chữ in):", 0.0, 5.0, 1.8, 0.2, key="slider_w_ocr")
 
-        if run_gpu_btn or run_asr_btn or run_ocr_btn:
-            override_asr = 3.5 if run_asr_btn else (custom_w_asr if run_gpu_btn else 0.0)
-            override_ocr = 3.5 if run_ocr_btn else (custom_w_ocr if run_gpu_btn else 0.0)
+        if run_gpu_btn or run_vis_btn or run_asr_btn or run_ocr_btn:
+            override_asr = 3.5 if run_asr_btn else (0.0 if run_vis_btn else (custom_w_asr if run_gpu_btn else 0.0))
+            override_ocr = 3.5 if run_ocr_btn else (0.0 if run_vis_btn else (custom_w_ocr if run_gpu_btn else 0.0))
 
-            status_label = "🎙️ Đang chạy với ASR Boost 3.5x..." if run_asr_btn else ("🔤 Đang chạy với OCR Boost 3.5x..." if run_ocr_btn else "⚡ Đang chạy SOTA Engine...")
+            if run_vis_btn:
+                status_label = "👁️ Đang chạy Pure Visual (SigLIP2 + Bản Dịch Gemini LLM, Tắt ASR/OCR)..."
+            elif run_asr_btn:
+                status_label = "🎙️ Đang chạy với ASR Boost 3.5x..."
+            elif run_ocr_btn:
+                status_label = "🔤 Đang chạy với OCR Boost 3.5x..."
+            else:
+                status_label = "⚡ Đang chạy SOTA Engine..."
+
             with st.spinner(status_label):
                 if task_tag == "QA":
-                    preds, info, lat = engine.search_qa(q_content, top_k=100, use_intra_reranker=True, use_cue=True, use_multimodal=True, use_rrf=True)
+                    preds, info, lat = engine.search_qa(
+                        q_content,
+                        top_k=100,
+                        use_intra_reranker=True,
+                        use_cue=(not run_vis_btn),
+                        use_multimodal=(not run_vis_btn),
+                        use_rrf=(not run_vis_btn)
+                    )
                 elif task_tag == "TRAKE":
-                    preds, info, lat = engine.search_trake(q_content, top_k=100, use_multi_query=True, use_event_coverage=True, use_row_norm_dp=True, use_segmental_dp=True)
+                    preds, info, lat = engine.search_trake(
+                        q_content,
+                        top_k=100,
+                        use_multi_query=True,
+                        use_event_coverage=True,
+                        use_row_norm_dp=True,
+                        use_segmental_dp=True
+                    )
                 else:
                     preds, info, lat = engine.search_kis(
                         q_content,
                         top_k=100,
                         use_intra_reranker=True,
-                        use_multimodal=True,
-                        use_rrf=True,
+                        use_multimodal=(not run_vis_btn),
+                        use_rrf=(not run_vis_btn),
                         w_asr_override=override_asr,
                         w_ocr_override=override_ocr
                     )
@@ -613,15 +637,8 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                         else:
                             t_sec = float(clean_ts)
 
-                        # Tra cứu frame an toàn từ frames.parquet
-                        new_f = None
-                        if hasattr(keyframe_loader, "df_frames") and keyframe_loader.df_frames is not None:
-                            df_v = keyframe_loader.df_frames[keyframe_loader.df_frames["video_id"] == insp_vid]
-                            if not df_v.empty and "pts_time" in df_v.columns:
-                                diffs = (df_v["pts_time"] - t_sec).abs()
-                                new_f = int(df_v.loc[diffs.idxmin()]["frame_idx"])
-                        if new_f is None:
-                            new_f = int(t_sec * 25.0)
+                        # Tính chính xác frame theo FPS thực của video
+                        new_f = keyframe_loader.get_exact_frame_from_time(insp_vid, t_sec)
 
                         st.session_state[fidx_widget_key] = new_f
                         st.session_state["inspect_target"]["frame_idx"] = new_f
