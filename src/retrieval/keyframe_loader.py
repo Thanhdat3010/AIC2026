@@ -127,14 +127,29 @@ class KeyframeZipLoader:
             })
         return results
 
+    def get_all_video_keyframes(self, video_id: str) -> list[int]:
+        """Trả về danh sách toàn bộ các frame_idx đã trích xuất của video đó theo thứ tự tăng dần."""
+        df_v = self.df_frames[self.df_frames["video_id"] == video_id].sort_values("frame_idx")
+        if df_v.empty:
+            return []
+        return [int(x) for x in df_v["frame_idx"].tolist()]
+
+    def get_pts_time(self, video_id: str, frame_idx: int) -> float:
+        """Trả về mốc thời gian giây (pts_time) của frame đó."""
+        df_v = self.df_frames[(self.df_frames["video_id"] == video_id) & (self.df_frames["frame_idx"] == frame_idx)]
+        if not df_v.empty and "pts_time" in df_v.columns:
+            return float(df_v.iloc[0]["pts_time"])
+        # Fallback 25 fps
+        return float(frame_idx) / 25.0
+
     def get_dense_video_frame(self, video_id: str, frame_idx: int) -> Image.Image:
         """
         Trích xuất frame video chính xác từng frame từ file MP4 gốc qua OpenCV.
         """
         try:
             import cv2
-            from src.reranking.dense_video_refiner import VideoZipManager
-            zm = VideoZipManager()
+            from src.retrieval.video_player_manager import VideoPlayerManager
+            zm = VideoPlayerManager()
             v_path = zm.get_video_path(video_id)
             if not v_path or not v_path.exists():
                 return None

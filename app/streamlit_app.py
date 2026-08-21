@@ -3,6 +3,7 @@ import os
 import time
 import json
 import io
+import re
 import zipfile
 from pathlib import Path
 import streamlit as st
@@ -15,10 +16,11 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.retrieval.task_specialized_engine import TaskSpecializedEngine
 from src.retrieval.keyframe_loader import KeyframeZipLoader
+from src.retrieval.video_player_manager import VideoPlayerManager
 from src.submission.submission_validator import SubmissionValidator
 
 st.set_page_config(
-    page_title="AIC 2026 SOTA Multimodal Search & Review Console",
+    page_title="AIC 2026 SOTA Multimodal Search & Championship Console",
     layout="wide",
     page_icon="🏆",
     initial_sidebar_state="expanded"
@@ -35,21 +37,49 @@ st.markdown("""
         margin-bottom: 10px;
         color: white;
     }
-    .rank-badge {
-        background: #3b82f6;
-        color: white;
-        padding: 3px 8px;
-        border-radius: 6px;
-        font-weight: bold;
-        font-size: 0.85rem;
+    .candidate-card {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 12px;
+        transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    .candidate-card:hover {
+        transform: translateY(-3px);
+        border-color: #3b82f6;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
     }
     .rank-badge-1 {
-        background: #eab308;
-        color: black;
-        padding: 4px 10px;
-        border-radius: 6px;
+        background: linear-gradient(135deg, #eab308, #ca8a04);
+        color: #0f172a;
+        padding: 3px 8px;
+        border-radius: 5px;
+        font-weight: 800;
+        font-size: 0.85rem;
+    }
+    .rank-badge-top5 {
+        background: #3b82f6;
+        color: white;
+        padding: 3px 7px;
+        border-radius: 5px;
         font-weight: bold;
-        font-size: 0.95rem;
+        font-size: 0.8rem;
+    }
+    .rank-badge-normal {
+        background: #475569;
+        color: #f1f5f9;
+        padding: 3px 6px;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 0.8rem;
+    }
+    .event-card {
+        background: #0f172a;
+        border: 1px solid #f59e0b;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -63,11 +93,16 @@ def get_keyframe_loader():
     return KeyframeZipLoader()
 
 @st.cache_resource
+def get_video_manager():
+    return VideoPlayerManager()
+
+@st.cache_resource
 def get_validator():
     return SubmissionValidator()
 
 engine = get_engine()
 keyframe_loader = get_keyframe_loader()
+video_manager = get_video_manager()
 validator = get_validator()
 
 def sync_submission_zip(csv_dir: Path, zip_dest: Path):
@@ -75,15 +110,44 @@ def sync_submission_zip(csv_dir: Path, zip_dest: Path):
     if not csv_dir.exists():
         return
     zip_dest.parent.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(zip_dest, "w", zipfile.ZIP_DEFLATED) as z:
-        for csv_f in sorted(list(csv_dir.glob("*.csv"))):
-            z.write(csv_f, arcname=f"submission/{csv_f.name}")
+    temp_zip = zip_dest.parent / f"{zip_dest.stem}_temp.zip"
+    try:
+        with zipfile.ZipFile(temp_zip, "w", zipfile.ZIP_DEFLATED) as z:
+            for csv_f in sorted(list(csv_dir.glob("*.csv"))):
+                z.write(csv_f, arcname=f"submission/{csv_f.name}")
+        if temp_zip.exists():
+            if zip_dest.exists():
+                zip_dest.unlink(missing_ok=True)
+            temp_zip.rename(zip_dest)
+    except Exception as e:
+        print(f"⚠️ Lỗi đồng bộ zip: {e}", flush=True)
+        if temp_zip.exists():
+            temp_zip.unlink(missing_ok=True)
+
+def parse_trake_subevents(query_text: str) -> list[str]:
+    """Bóc tách các sự kiện con E1, E2, ... từ văn bản truy vấn tiếng Việt."""
+    lines = [l.strip() for l in query_text.split("\n") if l.strip()]
+    events = []
+    for l in lines:
+        if re.search(r'^(sự kiện|event|bước|e)\s*\d+[:.-]', l, re.IGNORECASE) or re.search(r'^\d+[\.\)]', l):
+            cleaned = re.sub(r'^(sự kiện|event|bước|e)\s*\d+[:.-]\s*', '', l, flags=re.IGNORECASE)
+            cleaned = re.sub(r'^\d+[\.\)]\s*', '', cleaned)
+            if cleaned:
+                events.append(cleaned)
+    if not events:
+        # Fallback tách theo dấu chấm hoặc gạch đầu dòng
+        parts = [p.strip() for p in re.split(r'[\n;]', query_text) if len(p.strip()) > 8]
+        if len(parts) >= 2:
+            events = parts
+        else:
+            events = ["Sự kiện 1", "Sự kiện 2", "Sự kiện 3"]
+    return events
 
 # Sidebar
 with st.sidebar:
     st.image("https://img.shields.io/badge/AIC_2026-CHAMPIONSHIP_CONSOLE-gold?style=for-the-badge&logo=google", use_container_width=True)
     st.header("⚙️ Trung tâm Điều khiển")
-    st.caption("Engine: **Google SigLIP-2 (1152d)** + **Gemini 2.5 Flash Lite** + **GPU Layer 3 (RTX 3050)**")
+    st.caption("Engine: **Google SigLIP-2 (1152d)** + **Gemini 2.5 Flash Lite** + **On-Demand Video Player**")
     
     st.divider()
     active_tab = st.radio(
@@ -99,381 +163,94 @@ with st.sidebar:
 # TAB 1: BENCHMARK & GROUND TRUTH REVIEW CONSOLE (47 CÂU EVALUATION)
 # =============================================================================
 if active_tab == "📊 Báo Cáo Thí Nghiệm & Ablation Leaderboard":
-    st.title("📊 Báo Cáo Thí Nghiệm & Ma Trận Ablation Study (AIC 2026)")
-    st.caption("Tổng hợp kết quả ma trận thí nghiệm Ablation Study 5 bước (Config 22 → Config 26), soi chi tiết 47 câu benchmark và Top 10 ảnh ứng viên.")
+    st.title("🏆 AIC 2026: Ablation Leaderboard & Diagnostic Matrix")
+    st.caption("Bảng tổng sắp hiệu năng 47 test cases chuẩn BTC trên tập dữ liệu Video Retrieval")
 
-    # Đọc kết quả Benchmark mới nhất nếu có
-    latest_bench_path = PROJECT_ROOT / "data" / "benchmark" / "latest_ablation_results.json"
-    bench_data = {}
-    if latest_bench_path.exists():
-        try:
-            with open(latest_bench_path, "r", encoding="utf-8") as f:
-                bench_data = json.load(f)
-        except Exception:
-            pass
+    # Load dữ liệu benchmark mới nhất
+    latest_res_file = PROJECT_ROOT / "data" / "benchmark" / "latest_ablation_results.json"
+    if latest_res_file.exists():
+        with open(latest_res_file, "r", encoding="utf-8") as f:
+            bench_data = json.load(f)
 
-    final_sc = bench_data.get("final_score", 0.7091)
-    kis_sc = bench_data.get("kis_score", 0.7143)
-    qa_sc = bench_data.get("qa_score", 0.8000)
-    trake_sc = bench_data.get("trake_score", 0.6000)
-    cfg_name = bench_data.get("config_name", "Cấu hình 16: 🔥 FULL 3-LAYER MASTER (GPU Accelerated)")
-    run_time = bench_data.get("timestamp", "Mới nhất")
+        s = bench_data.get("summary", {})
+        m1, m2, m3, m4 = st.columns(4)
+        with m1:
+            st.metric("🏆 Macro BTC Score", f"{s.get('final_score', 0.0):.4f}", "Config 25 Quán Quân")
+        with m2:
+            st.metric("🎯 Video Recall@100", f"{s.get('video_recall_100', 0.0):.1f}%", "46/47 Video")
+        with m3:
+            st.metric("🥇 Video Recall@1", f"{s.get('video_recall_1', 0.0):.1f}%", "Rank 1 Tuyệt Đối")
+        with m4:
+            st.metric("⚡ Độ trễ TB", f"{s.get('latency_ms', 0.0):.0f} ms", "Real-time Ready")
 
-    st.caption(f"Đang hiển thị kết quả từ: **{cfg_name}** | Thời gian chạy: `{run_time}`")
+        st.divider()
 
-    # Dashboard Metrics Động
-    m1, m2, m3, m4 = st.columns(4)
-    with m1:
-        st.metric("🏆 BTC Final Score", f"{final_sc * 100:.2f}%", "+16.8% vs Baseline")
-    with m2:
-        st.metric("🎯 KIS Score", f"{kis_sc:.4f}", "6 câu KIS")
-    with m3:
-        st.metric("❓ QA Score", f"{qa_sc:.4f}", "2 câu QA")
-    with m4:
-        st.metric("⏱️ TRAKE Score", f"{trake_sc:.4f}", "+150% tăng trưởng")
+        # Bảng Leaderboard
+        st.subheader("🥇 Bảng Tổng Sắp Cấu Hình (Leaderboard)")
+        lb_records = [
+            {"Cấu hình": "Config 25 (WRRF SOTA)", "Macro": 0.5532, "KIS": 0.6500, "QA": 0.3714, "TRAKE": 0.5200, "Video-R@100": "97.9%", "Video-R@20": "87.2%", "Status": "🥇 Quán Quân"},
+            {"Cấu hình": "Config 22 (Baseline SOTA)", "Macro": 0.5415, "KIS": 0.6286, "QA": 0.3714, "TRAKE": 0.5300, "Video-R@100": "93.6%", "Video-R@20": "80.9%", "Status": "🥈 Top 2"},
+            {"Cấu hình": "Config 24 (Dual Indexing)", "Macro": 0.5064, "KIS": 0.6214, "QA": 0.2857, "TRAKE": 0.4800, "Video-R@100": "91.5%", "Video-R@20": "80.9%", "Status": "🥉 Top 3"},
+            {"Cấu hình": "Config 23 (Fast Linguistic Gate)", "Macro": 0.5021, "KIS": 0.5786, "QA": 0.3286, "TRAKE": 0.5600, "Video-R@100": "93.6%", "Video-R@20": "80.9%", "Status": "#4"},
+            {"Cấu hình": "Config 26 (Master Tri-Modal)", "Macro": 0.4989, "KIS": 0.6000, "QA": 0.3000, "TRAKE": 0.4900, "Video-R@100": "95.7%", "Video-R@20": "83.0%", "Status": "#5"}
+        ]
+        st.dataframe(pd.DataFrame(lb_records), use_container_width=True)
+
+# =============================================================================
+# TAB 2: DUYỆT & CHỈNH SỬA KẾT QUẢ NỘP BÀI (SUBMISSION CONSOLE - REALTIME)
+# =============================================================================
+elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submission Console)":
+    st.title("📂 AIC 2026: Championship Submission Console")
+    st.caption("Giao diện kiểm duyệt trực quan, phát Video MP4 On-Demand, hiệu chỉnh Rank 1, QA Text và Chuỗi sự kiện TRAKE thời gian thực.")
+
+    # 1. Quét động các thư mục con bên trong output/
+    output_base_dir = PROJECT_ROOT / "output"
+    output_base_dir.mkdir(parents=True, exist_ok=True)
+    available_subdirs = [p.name for p in output_base_dir.iterdir() if p.is_dir() and not p.name.startswith(".")]
+
+    if not available_subdirs:
+        available_subdirs = ["thunghiem"]
+        (output_base_dir / "thunghiem" / "submission").mkdir(parents=True, exist_ok=True)
+
+    default_sub_idx = 0
+    if "thunghiem" in available_subdirs:
+        default_sub_idx = available_subdirs.index("thunghiem")
+
+    col_cfg1, col_cfg2, col_cfg3 = st.columns([1.5, 1.5, 1.5])
+    with col_cfg1:
+        selected_subdir_name = st.selectbox("📁 Gói kết quả (trong output/):", available_subdirs, index=default_sub_idx)
+
+    output_dir = output_base_dir / selected_subdir_name / "submission"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    zip_output_path = output_base_dir / selected_subdir_name / "submission.zip"
+
+    # Thư mục đề bài tương ứng (nếu có)
+    query_base_dir = PROJECT_ROOT / "query"
+    avail_q_dirs = [p.name for p in query_base_dir.iterdir() if p.is_dir() and not p.name.startswith(".")] if query_base_dir.exists() else []
+    
+    with col_cfg2:
+        selected_qdir_name = st.selectbox("📋 Gói đề bài (trong query/):", avail_q_dirs if avail_q_dirs else ["Không có"])
+
+    selected_query_dir = query_base_dir / selected_qdir_name if selected_qdir_name != "Không có" else None
+
+    # Quét danh sách câu hỏi
+    query_files = sorted(list(selected_query_dir.glob("*.txt"))) if selected_query_dir and selected_query_dir.exists() else []
+    existing_csv_files = sorted(list(output_dir.glob("*.csv")))
+
+    with col_cfg3:
+        st.metric("📊 Tiến độ nộp bài", f"{len(existing_csv_files)} / {len(query_files) if query_files else len(existing_csv_files)} câu", f"Zip: {zip_output_path.name}")
 
     st.divider()
 
-    gt_path = PROJECT_ROOT / "data" / "benchmark" / "ground_truth.json"
-    if not gt_path.exists():
-        st.error("Không tìm thấy file ground_truth.json!")
-    else:
-        with open(gt_path, "r", encoding="utf-8") as f:
-            gt_data = json.load(f)
-        
-        test_cases = gt_data.get("test_cases", [])
-        bench_records = {r.get("Query ID", ""): r for r in bench_data.get("records", [])}
-
-        # Tạo danh sách hiển thị động kèm điểm số thực tế từ lần chạy Benchmark mới nhất
-        case_options = {}
-        for c in test_cases:
-            qid = c["query_id"]
-            ttype = c["task_type"].upper()
-            gt = c["ground_truth"]
-            target_vid = gt.get("video_id", "N/A")
-            q_text_short = c["query_text"][:55] + "..." if len(c["query_text"]) > 55 else c["query_text"]
-            
-            # Lấy điểm động từ benchmark run
-            rec = bench_records.get(qid, {})
-            score_str = rec.get("Final Score", "N/A")
-            v_rank = rec.get("Video Rank", "#?")
-            f_rank = rec.get("Frame Rank", "#?")
-
-            if score_str == "1.0000":
-                status_icon = "🥇 [1.0000]"
-            elif score_str in ["0.8000", "0.7000"]:
-                status_icon = "✅ [0.8000]"
-            elif score_str in ["0.6000", "0.5000", "0.4000"]:
-                status_icon = f"🔹 [{score_str}]"
-            elif score_str == "0.0000":
-                status_icon = "⚠️ [0.0000] (CẦN REVIEW)"
-            else:
-                status_icon = f"📋 [{score_str}]"
-
-            label = f"{status_icon} {qid} ({ttype}) | {target_vid} (Video {v_rank}, Frame {f_rank}) - {q_text_short}"
-            case_options[label] = c
-
-        selected_label = st.selectbox("📂 Chọn câu hỏi Benchmark để kiểm tra và tinh chỉnh:", list(case_options.keys()), index=7)
-        selected_case = case_options[selected_label]
-
-        qid = selected_case["query_id"]
-        ttype = selected_case["task_type"]
-        qtext = selected_case["query_text"]
-        gt = selected_case["ground_truth"]
-        target_vid = gt.get("video_id", "N/A")
-
-        # Ground truth info box
-        if ttype in ["kis", "qa"]:
-            gt_interval_str = f"[{gt.get('start_frame', 0)} - {gt.get('end_frame', 0)}]"
-        else:
-            gt_interval_str = f"{len(gt.get('events', []))} sự kiện con"
-
-        st.markdown(f"### 📝 Thông Tin Câu Hỏi: `{qid}` ({ttype.upper()})")
-        st.info(f"**Nội dung truy vấn:** {qtext}\n\n🎯 **Mục tiêu Ground Truth:** Video: `{target_vid}` | Khung hình chuẩn: `{gt_interval_str}`")
-
-        # Nút Chạy Truy Xuất
-        c_act1, c_act2, c_act3 = st.columns([1, 1, 1])
-        with c_act1:
-            run_fast_btn = st.button("⚡ Chạy Nhanh (Layer 1 + 2)", use_container_width=True, type="primary")
-        with c_act2:
-            run_gpu_l3 = st.button("🔬 Chạy Kèm GPU Layer 3 Vi Sai", use_container_width=True)
-        with c_act3:
-            st.caption("Dùng GPU RTX 3050 quét vi sai")
-
-        # Session state cache cho kết quả câu đang chọn
-        cache_key = f"preds_{qid}"
-        if run_fast_btn or run_gpu_l3 or cache_key not in st.session_state:
-            with st.spinner("Đang chạy mô hình AI trên GPU..."):
-                if ttype == "qa":
-                    preds, qinfo, lat = engine.search_qa(qtext, top_k=20, use_intra_reranker=True, use_cue=True, use_multimodal=True)
-                elif ttype == "trake":
-                    preds, qinfo, lat = engine.search_trake(qtext, top_k=20)
-                else:
-                    preds, qinfo, lat = engine.search_kis(qtext, top_k=20, use_intra_reranker=True, use_dense_video_refiner=run_gpu_l3)
-
-                st.session_state[cache_key] = preds
-                st.session_state[f"info_{qid}"] = qinfo
-                st.session_state[f"lat_{qid}"] = lat
-
-        preds = st.session_state.get(cache_key, [])
-        qinfo = st.session_state.get(f"info_{qid}", {})
-        lat = st.session_state.get(f"lat_{qid}", 0.0)
-
-        # Đánh giá xem Top 1 hiện tại có trúng Ground Truth không
-        if preds:
-            top1_v = preds[0]["video_id"]
-            top1_f = preds[0]["frame_idx"]
-            
-            if ttype in ["kis", "qa"]:
-                s_f = gt.get("start_frame", 0)
-                e_f = gt.get("end_frame", 0)
-                is_hit = (top1_v == target_vid) and (s_f <= top1_f <= e_f)
-            else:
-                is_hit = (top1_v == target_vid)
-
-            if is_hit:
-                st.success(f"🎉 **TRÚNG ĐÁP ÁN ĐÚNG!** Rank #1: `{top1_v}` (Frame: `{top1_f}`) nằm trọn trong Ground Truth `{gt_interval_str}`! -> **Điểm số: 1.0000** 🏆")
-            else:
-                st.warning(f"⚠️ **Chưa ở Top 1:** Rank #1 hiện tại là `{top1_v}` (Frame: `{top1_f}`). Hãy xem Ma trận Top 10 bên dưới để bấm **⭐ Đưa lên Rank #1**!")
-
-        st.divider()
-
-        # Ma trận Top 10 Visual Matrix
-        st.markdown("### 🖼️ Ma Trận Hình Ảnh Top 10 Ứng Viên:")
-        
-        # Grid 5 cột x 2 hàng = Top 10
-        cols_row1 = st.columns(5)
-        cols_row2 = st.columns(5)
-        all_cols = cols_row1 + cols_row2
-
-        for r_idx, cand in enumerate(preds[:10]):
-            col = all_cols[r_idx]
-            with col:
-                c_vid = cand["video_id"]
-                c_fidx = cand["frame_idx"]
-                c_score = cand.get("score", 0.0)
-                is_target = (c_vid == target_vid)
-
-                badge_color = "#eab308" if r_idx == 0 else ("#10b981" if is_target else "#3b82f6")
-                target_tag = " 🎯 [TARGET ĐÚNG]" if is_target else ""
-
-                st.markdown(f"""
-                <div style="background:#1e293b; padding:8px; border-radius:8px; border:2px solid {badge_color}; margin-bottom:8px; text-align:center;">
-                    <span style="font-weight:bold; color:{badge_color};">#{r_idx+1}: {c_vid}{target_tag}</span><br/>
-                    <small style="color:#94a3b8;">Frame: {c_fidx} | Score: {c_score:.3f}</small>
-                </div>
-                """, unsafe_allow_html=True)
-
-                # Nạp ảnh thực tế từ keyframe_loader
-                img = keyframe_loader.get_keyframe_image(c_vid, c_fidx)
-                if img:
-                    st.image(img, use_container_width=True)
-                else:
-                    st.info(f"Frame {c_fidx}")
-
-                # Nút 1-Click Promote nếu không phải Rank 1
-                if r_idx > 0:
-                    if st.button(f"⭐ Đưa lên #1", key=f"promo_gt_{qid}_{r_idx}", use_container_width=True):
-                        # Hoán đổi candidate r_idx lên vị trí đầu
-                        target_item = preds.pop(r_idx)
-                        preds.insert(0, target_item)
-                        # Đánh lại số thứ tự rank
-                        for new_r, p in enumerate(preds, 1):
-                            p["rank"] = new_r
-                        st.session_state[cache_key] = preds
-                        st.toast(f"✅ Đã đưa {c_vid} lên Rank #1 thành công!")
-                        st.rerun()
-
-                # Expander soi dải phim ngữ cảnh xung quanh
-                with st.expander("🎬 Soi Dải Phim Ngữ Cảnh (5 Keyframes)", expanded=False):
-                    surr_kfs = keyframe_loader.get_surrounding_keyframes(c_vid, c_fidx, count=5)
-                    if surr_kfs:
-                        s_cols = st.columns(len(surr_kfs))
-                        for s_i, sk in enumerate(surr_kfs):
-                            with s_cols[s_i]:
-                                is_cur = sk["is_current"]
-                                st.caption(f"{'🎯 ' if is_cur else ''}{sk['frame_idx']}")
-                                if sk["image"]:
-                                    st.image(sk["image"], use_container_width=True)
-
-        # =====================================================================
-        # KÍNH LÚP VI SAI & TRÍCH XUẤT FRAME TRỰC TIẾP TỪ MP4 GỐC (LAYER 3)
-        # =====================================================================
-        st.divider()
-        st.subheader("🔬 Kính Lúp Vi Sai & Trích Xuất Frame Video Trực Tiếp (Dense Video Inspector)")
-        st.caption("Trích xuất từng khung hình trực tiếp từ video MP4 trên GPU để bắt trọn hành động trong vùng mù.")
-
-        if preds:
-            top_cand = preds[0]
-            top_vid = top_cand["video_id"]
-            top_fidx = top_cand["frame_idx"]
-
-            col_insp1, col_insp2 = st.columns([1, 1])
-            with col_insp1:
-                st.markdown(f"**Khung hình hiện tại của Rank #1 (`{top_vid}`): `{top_fidx}`**")
-                slider_f = st.slider(
-                    "Kéo thanh trượt để quét từng frame liên tục:",
-                    min_value=max(0, top_fidx - 100),
-                    max_value=top_fidx + 100,
-                    value=top_fidx,
-                    step=1,
-                    key=f"dense_slider_{qid}"
-                )
-
-                col_btn1, col_btn2 = st.columns([1, 1])
-                with col_btn1:
-                    if st.button(f"💾 Cập nhật Rank #1 thành Frame {slider_f}", type="primary", use_container_width=True):
-                        top_cand["frame_idx"] = slider_f
-                        st.session_state[cache_key] = preds
-                        st.rerun()
-                with col_btn2:
-                    if st.button("⚡ Đặt mốc chuẩn SOTA (17780)", use_container_width=True):
-                        top_cand["frame_idx"] = 17780
-                        st.session_state[cache_key] = preds
-                        st.rerun()
-
-            with col_insp2:
-                # Nạp frame video trực tiếp từ file MP4 qua OpenCV
-                live_img = keyframe_loader.get_dense_video_frame(top_vid, slider_f)
-                if live_img is not None:
-                    st.image(live_img, caption=f"📸 Khung hình Video thực tế (Frame {slider_f}) từ {top_vid}.mp4", use_container_width=True)
-                else:
-                    kf_img = keyframe_loader.get_keyframe_image(top_vid, slider_f)
-                    if kf_img:
-                        st.image(kf_img, caption=f"Keyframe gần nhất (Frame {slider_f})", use_container_width=True)
-                    else:
-                        st.info(f"Đang chờ nạp frame {slider_f}...")
-
-            # Hiển thị câu trả lời QA cho Tab Benchmark nếu là bài toán QA
-            if ttype == "qa":
-                st.divider()
-                st.subheader("💬 Câu Trả Lời QA & Đáp Án Chuẩn (QA Answer Evaluation)")
-                gt_ans = gt.get("answer", "N/A")
-                model_ans = qinfo.get("generated_qa_answer", "")
-                if not model_ans and preds and "answer" in preds[0]:
-                    model_ans = preds[0]["answer"]
-
-                ans_col1, ans_col2 = st.columns(2)
-                with ans_col1:
-                    st.info(f"🎯 **Đáp án Ground Truth BTC:** `{gt_ans}`")
-                with ans_col2:
-                    if model_ans:
-                        st.success(f"🤖 **Câu trả lời Gemini VLM:** `{model_ans}`")
-                    else:
-                        st.warning("⚠️ Chưa có câu trả lời từ VLM")
-
-            # Hiển thị chuỗi sự kiện TRAKE cho Tab Benchmark nếu là bài toán TRAKE
-            elif ttype == "trake":
-                st.divider()
-                st.subheader("⏱️ Chuỗi Sự Kiện TRAKE & Khung Hình Chuẩn BTC (Event Sequence Timeline)")
-                gt_events = gt.get("events", [])
-                pred_events = preds[0].get("event_frames", []) if preds else []
-
-                if gt_events and pred_events:
-                    ev_cols = st.columns(len(gt_events))
-                    for e_i, gte in enumerate(gt_events):
-                        with ev_cols[e_i]:
-                            eid = gte.get("event_id", f"E{e_i+1}")
-                            s_f = gte.get("start_frame", 0)
-                            e_f = gte.get("end_frame", 0)
-                            pf = pred_events[e_i] if e_i < len(pred_events) else 0
-                            hit_ev = (s_f <= pf <= e_f)
-                            e_badge = "#10b981" if hit_ev else "#ef4444"
-
-                            st.markdown(f"""
-                            <div style="background:#1e293b; padding:6px; border-radius:6px; border:2px solid {e_badge}; text-align:center; margin-bottom:6px;">
-                                <span style="font-weight:bold; color:{e_badge};">{eid}: {pf} {'✅' if hit_ev else '❌'}</span><br/>
-                                <small style="color:#94a3b8;">GT: [{s_f} - {e_f}]</small>
-                            </div>
-                            """, unsafe_allow_html=True)
-
-                            e_img = keyframe_loader.get_dense_video_frame(target_vid, pf) or keyframe_loader.get_keyframe_image(target_vid, pf)
-                            if e_img:
-                                st.image(e_img, use_container_width=True)
-                            else:
-                                st.info(f"Frame {pf}")
-
-# =============================================================================
-# TAB 2: DUYỆT & CHỈNH SỬA KẾT QUẢ NỘP BÀI (SUBMISSION CONSOLE)
-# =============================================================================
-elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submission Console)":
-    st.title("📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submission Console)")
-    st.caption("Kiểm duyệt toàn bộ các câu hỏi trong thư mục output, chỉnh sửa tay trực quan và tự động đồng bộ file submission.zip chuẩn 100% BTC.")
-
-    output_root = PROJECT_ROOT / "output"
-    output_root.mkdir(parents=True, exist_ok=True)
-
-    # Liệt kê tất cả các thư mục con bên trong output/
-    output_subdirs = [d.name for d in output_root.iterdir() if d.is_dir()]
-    if not output_subdirs:
-        output_subdirs = ["thunghiem", "chinhthuc"]
-    # Sắp xếp thunghiem lên đầu nếu có
-    output_subdirs = sorted(list(set(output_subdirs)), key=lambda x: (0 if x == "thunghiem" else 1, x))
-
-    col_pkg1, col_pkg2 = st.columns([1, 1])
-    with col_pkg1:
-        selected_pkg = st.selectbox(
-            "📁 Chọn Thư Mục Output (Bên trong output/):",
-            output_subdirs,
-            index=0,
-            help="Hệ thống chỉ quét và lưu trữ các kết quả nằm bên trong thư mục output/"
-        )
-
-    selected_output_folder = output_root / selected_pkg
-    output_dir = selected_output_folder / "submission"
-    zip_output_path = selected_output_folder / "submission.zip"
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    # Tìm thư mục query tương ứng trong query/
-    query_root = PROJECT_ROOT / "query"
-    possible_query_dirs = [d for d in query_root.rglob("*") if d.is_dir() and any(d.glob("*.txt"))]
-    query_dir_options = {d.name: d for d in possible_query_dirs}
-
-    default_q_name = None
-    for q_name in query_dir_options.keys():
-        if selected_pkg.lower() in q_name.lower():
-            default_q_name = q_name
-            break
-    if not default_q_name and "THUNGHIEM-bo-de-thi" in query_dir_options:
-        default_q_name = "THUNGHIEM-bo-de-thi"
-    elif not default_q_name and query_dir_options:
-        default_q_name = list(query_dir_options.keys())[0]
-
-    with col_pkg2:
-        if query_dir_options:
-            q_choice = st.selectbox(
-                "📝 Chọn Thư Mục Đề Bài (.txt) tương ứng:",
-                list(query_dir_options.keys()),
-                index=list(query_dir_options.keys()).index(default_q_name) if default_q_name in query_dir_options else 0
-            )
-            query_dir = query_dir_options[q_choice]
-        else:
-            query_dir = query_root / "THUNGHIEM-bo-de-thi"
-            st.caption(f"Thư mục đề bài: `{query_dir}`")
-
-    # Thu thập danh sách câu hỏi từ query_dir hoặc từ các file CSV sẵn có trong output_dir
-    query_files = sorted(list(query_dir.glob("*.txt"))) if query_dir.exists() else []
-    existing_csv_files = sorted(list(output_dir.glob("*.csv")))
-
-    st.info(f"📂 Đang trỏ tới: **`output/{selected_pkg}/submission`** ({len(existing_csv_files)} file CSV) | File zip nộp bài: **`output/{selected_pkg}/submission.zip`**")
-
-    if not query_files and not existing_csv_files:
-        st.warning(f"Chưa có file đề bài (.txt) trong `{query_dir}` và chưa có file CSV trong `{output_dir}`!")
-    else:
-        # Batch Runner: Chạy toàn bộ câu tự động
-        if query_files:
-            st.markdown("### ⚡ Chạy Tự Động Toàn Bộ Đề Bài (Batch Auto-Run - SOTA Config 25)")
-            batch_col1, batch_col2 = st.columns([3, 1])
-            with batch_col1:
-                st.caption(f"Chạy toàn bộ {len(query_files)} câu hỏi qua mô hình SOTA WRRF (Config 25) và tự động ghi đè file CSV & ZIP vào `output/{selected_pkg}/`.")
-            with batch_col2:
-                run_all_btn = st.button(f"🔥 Chạy Full {len(query_files)} Câu Tự Động", type="primary", use_container_width=True)
-
-            if run_all_btn:
-                progress_bar = st.progress(0)
+    # Nút Auto-Run toàn bộ gói đề thi nếu cần
+    if query_files:
+        with st.expander("⚡ Chạy Tự Động Toàn Bộ Gói Đề Thi (Batch Auto-Run)", expanded=False):
+            st.info(f"Phát hiện {len(query_files)} câu hỏi trong `{selected_query_dir.name}`. Bấm nút dưới để chạy tự động toàn bộ bằng Config 25 SOTA.")
+            if st.button("🚀 BẮT ĐẦU CHẠY TOÀN BỘ CÂU HỎI TRÊN GPU", type="primary"):
+                progress_bar = st.progress(0.0)
                 status_text = st.empty()
                 for idx, q_path in enumerate(query_files):
-                    status_text.text(f"Đang xử lý [{idx+1}/{len(query_files)}]: {q_path.name}...")
+                    status_text.text(f"[{idx+1}/{len(query_files)}] Đang xử lý câu: {q_path.name}...")
                     with open(q_path, "r", encoding="utf-8") as f:
                         content = f.read().strip()
                     is_qa = "qa" in q_path.name.lower()
@@ -499,83 +276,92 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                                 f.write(f"{p['video_id']},{p['frame_idx']}\n")
                     progress_bar.progress((idx + 1) / len(query_files))
                 sync_submission_zip(output_dir, zip_output_path)
-                status_text.success(f"🎉 Đã hoàn tất chạy toàn bộ {len(query_files)} câu và tự động cập nhật submission.zip!")
+                status_text.success(f"🎉 Đã hoàn tất {len(query_files)} câu và tự động cập nhật submission.zip!")
                 st.rerun()
 
-            st.divider()
+    # Query Selector
+    query_map = {}
+    if query_files:
+        for q_p in query_files:
+            with open(q_p, "r", encoding="utf-8") as f:
+                txt = f.read().strip()
+            task_tag = "QA" if "qa" in q_p.name.lower() else ("TRAKE" if "trake" in q_p.name.lower() else "KIS")
+            short_txt = txt[:60] + "..." if len(txt) > 60 else txt
+            label = f"[{task_tag}] {q_p.name} - {short_txt}"
+            query_map[label] = (q_p, txt, task_tag)
+    else:
+        for csv_p in existing_csv_files:
+            task_tag = "QA" if "qa" in csv_p.name.lower() else ("TRAKE" if "trake" in csv_p.name.lower() else "KIS")
+            label = f"[{task_tag}] {csv_p.name}"
+            query_map[label] = (csv_p, f"Query từ kết quả {csv_p.name}", task_tag)
 
-        # Query Selector phong phú hiển thị cả tên và nội dung ngắn
-        query_map = {}
-        if query_files:
-            for q_p in query_files:
-                with open(q_p, "r", encoding="utf-8") as f:
-                    txt = f.read().strip()
-                task_tag = "QA" if "qa" in q_p.name.lower() else ("TRAKE" if "trake" in q_p.name.lower() else "KIS")
-                short_txt = txt[:55] + "..." if len(txt) > 55 else txt
-                label = f"[{task_tag}] {q_p.name} - {short_txt}"
-                query_map[label] = (q_p, txt, task_tag)
-        else:
-            for csv_p in existing_csv_files:
-                task_tag = "QA" if "qa" in csv_p.name.lower() else ("TRAKE" if "trake" in csv_p.name.lower() else "KIS")
-                label = f"[{task_tag}] {csv_p.name}"
-                query_map[label] = (csv_p, f"Query từ kết quả {csv_p.name}", task_tag)
-
-        selected_label = st.selectbox("📂 Chọn câu hỏi để soi Top 10 và hiệu chỉnh:", list(query_map.keys()))
+    if not query_map:
+        st.warning("⚠️ Chưa tìm thấy câu hỏi hoặc kết quả nào. Hãy kiểm tra lại thư mục query/ hoặc output/.")
+    else:
+        selected_label = st.selectbox("📂 Chọn câu hỏi để soi ứng viên và hiệu chỉnh:", list(query_map.keys()))
         selected_q_path, q_content, task_tag = query_map[selected_label]
         selected_q_name = selected_q_path.name
+        csv_stem = selected_q_path.stem
+        target_csv_path = output_dir / f"{csv_stem}.csv"
 
-        # KHUNG HIỂN THỊ TRUY VẤN GỐC NỔI BẬT ĐỂ SUY XÉT
+        # Khung hiển thị đề bài
         tag_color = "#3b82f6" if task_tag == "KIS" else ("#10b981" if task_tag == "QA" else "#f59e0b")
         st.markdown(f"""
-        <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 18px; border-radius: 12px; border-left: 6px solid {tag_color}; border: 1px solid #334155; margin-bottom: 15px;">
+        <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 16px; border-radius: 10px; border-left: 6px solid {tag_color}; border: 1px solid #334155; margin-bottom: 15px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="font-weight: bold; font-size: 1.1rem; color: #f8fafc;">📋 ĐỀ BÀI TRUY VẤN GỐC ({selected_q_name})</span>
+                <span style="font-weight: bold; font-size: 1.1rem; color: #f8fafc;">📋 ĐỀ BÀI TRUY VẤN: {selected_q_name}</span>
                 <span style="background: {tag_color}; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem;">{task_tag} TASK</span>
             </div>
-            <div style="font-size: 1.05rem; line-height: 1.6; color: #e2e8f0; font-style: italic; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 8px;">
+            <div style="font-size: 1.05rem; line-height: 1.6; color: #e2e8f0; font-style: italic; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px;">
                 "{q_content}"
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # Xác định file CSV đầu ra tương ứng
-        csv_stem = selected_q_path.stem
-        target_csv_path = output_dir / f"{csv_stem}.csv"
+        # Hàng nút điều khiển chính & Bộ chọn Top-K
+        col_btn_gpu, col_topk, col_filter = st.columns([1.5, 1.2, 1.3])
+        with col_btn_gpu:
+            run_gpu_btn = st.button("⚡ Chạy Lại Riêng Câu Này Trên GPU (SOTA Engine)", type="primary", use_container_width=True)
 
-        # Nút chạy riêng cho 1 câu
-        run_btn = st.button("⚡ Chạy Lại Riêng Câu Này Trên GPU (SOTA Engine)", type="primary", use_container_width=True)
+        with col_topk:
+            display_top_k = st.selectbox(
+                "👀 Số lượng ứng viên hiển thị:",
+                [10, 20, 30, 50, 100],
+                index=1, # Mặc định Top 20
+                key="disp_top_k_select"
+            )
 
-        if run_btn:
+        with col_filter:
+            filter_kw = st.text_input("🔍 Lọc nhanh theo Video ID:", placeholder="ví dụ: L26, L30...", key="filter_vid_kw")
+
+        if run_gpu_btn:
             with st.spinner("Đang chạy mô hình AI trên GPU..."):
-                is_qa = (task_tag == "QA")
-                is_trake = (task_tag == "TRAKE")
-
-                if is_qa:
-                    preds, info, lat = engine.search_qa(q_content, top_k=100, use_intra_reranker=True, use_cue=True, use_multimodal=True)
-                elif is_trake:
-                    preds, info, lat = engine.search_trake(q_content, top_k=100)
+                if task_tag == "QA":
+                    preds, info, lat = engine.search_qa(q_content, top_k=100, use_intra_reranker=True, use_cue=True, use_multimodal=True, use_rrf=True)
+                elif task_tag == "TRAKE":
+                    preds, info, lat = engine.search_trake(q_content, top_k=100, use_multi_query=True, use_event_coverage=True, use_row_norm_dp=True, use_segmental_dp=True)
                 else:
                     preds, info, lat = engine.search_kis(q_content, top_k=100, use_intra_reranker=True, use_dense_video_refiner=False)
 
-                # Lưu vào target_csv_path
                 with open(target_csv_path, "w", encoding="utf-8") as f:
                     for p in preds:
-                        if is_qa:
+                        if task_tag == "QA":
                             ans = p.get("answer", info.get("generated_qa_answer", ""))
                             ans_clean = f'"{ans}"' if ans else '""'
                             f.write(f"{p['video_id']},{p['frame_idx']},{ans_clean}\n")
-                        elif is_trake and "event_frames" in p:
+                        elif task_tag == "TRAKE" and "event_frames" in p:
                             ev_str = ",".join([str(x) for x in p["event_frames"]])
                             f.write(f"{p['video_id']},{ev_str}\n")
                         else:
                             f.write(f"{p['video_id']},{p['frame_idx']}\n")
 
                 sync_submission_zip(output_dir, zip_output_path)
-                st.success(f"✅ Đã tạo và lưu kết quả vào `{target_csv_path.name}` ({len(preds)} dòng) & tự động cập nhật `{zip_output_path.name}`!")
+                st.success(f"✅ Đã chạy xong và cập nhật kết quả vào `{target_csv_path.name}` ({len(preds)} dòng) & tự động đồng bộ `{zip_output_path.name}`!")
+                st.rerun()
 
-        # Đọc dữ liệu CSV hiện tại để hiển thị và chỉnh sửa
+        # Đọc dữ liệu CSV hiện tại
+        rows = []
         if target_csv_path.exists():
-            rows = []
             with open(target_csv_path, "r", encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
@@ -583,235 +369,323 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                         parts = line.split(",")
                         rows.append(parts)
 
-            st.divider()
-            st.subheader(f"🖼️ Bảng Soi Ảnh Trực Quan (Top 10 Ứng Viên - {target_csv_path.name})")
+        if not rows:
+            st.info("Chưa có kết quả dự đoán nào cho câu hỏi này. Hãy bấm 'Chạy Lại Riêng Câu Này Trên GPU' ở trên.")
+        else:
+            # Lọc theo từ khóa nếu có
+            filtered_rows_with_idx = []
+            for original_idx, r in enumerate(rows):
+                if filter_kw.strip():
+                    if filter_kw.strip().lower() in r[0].lower():
+                        filtered_rows_with_idx.append((original_idx, r))
+                else:
+                    filtered_rows_with_idx.append((original_idx, r))
 
-            # Hiển thị Top 10 dạng thẻ kèm nút 1-Click Promote
-            top10_cols = st.columns(5)
-            for idx, r in enumerate(rows[:10]):
-                col = top10_cols[idx % 5]
+            st.markdown(f"### 🖼️ Lưới Ứng Viên Đa Tầng (Hiển thị {min(display_top_k, len(filtered_rows_with_idx))} / {len(rows)} dòng)")
+
+            # Khởi tạo session_state cho video inspector nếu chưa có
+            if "inspect_target" not in st.session_state or st.session_state["inspect_target"].get("query") != selected_q_name:
+                st.session_state["inspect_target"] = {
+                    "query": selected_q_name,
+                    "video_id": rows[0][0],
+                    "frame_idx": int(rows[0][1]) if len(rows[0]) > 1 and rows[0][1].isdigit() else 0,
+                    "rank": 1
+                }
+
+            # Hiển thị Lưới 5 Cột
+            cols_5 = st.columns(5)
+            for render_count, (orig_idx, r) in enumerate(filtered_rows_with_idx[:display_top_k]):
+                col = cols_5[render_count % 5]
                 with col:
                     vid = r[0]
                     f_idx = int(r[1]) if len(r) > 1 and r[1].isdigit() else 0
                     img = keyframe_loader.get_keyframe_image(vid, f_idx)
+                    pts_sec = keyframe_loader.get_pts_time(vid, f_idx)
+                    min_sec_str = f"{int(pts_sec // 60):02d}:{int(pts_sec % 60):02d}"
 
-                    if idx == 0:
-                        st.markdown(f"<span class='rank-badge-1'>👑 RANK #1</span> **{vid}** : `{f_idx}`", unsafe_allow_html=True)
+                    # Header thẻ ứng viên
+                    if orig_idx == 0:
+                        st.markdown(f"<span class='rank-badge-1'>👑 RANK #1</span> **{vid}**", unsafe_allow_html=True)
+                    elif orig_idx < 5:
+                        st.markdown(f"<span class='rank-badge-top5'>RANK #{orig_idx+1}</span> **{vid}**", unsafe_allow_html=True)
                     else:
-                        st.markdown(f"<span class='rank-badge'>RANK #{idx+1}</span> **{vid}** : `{f_idx}`", unsafe_allow_html=True)
+                        st.markdown(f"<span class='rank-badge-normal'>#{orig_idx+1}</span> **{vid}**", unsafe_allow_html=True)
 
                     if img is not None:
                         st.image(img, use_container_width=True)
                     else:
-                        st.info(f"Frame: {f_idx}")
+                        st.info(f"Frame {f_idx}")
 
-                    if len(r) > 2:
-                        st.caption(f"Ans: `{','.join(r[2:])}`")
+                    st.caption(f"Frame: `{f_idx}` ({min_sec_str})")
+                    if task_tag == "QA" and len(r) > 2:
+                        ans_display = ",".join(r[2:]).strip('"')
+                        st.caption(f"Ans: `{ans_display[:20]}`")
+                    elif task_tag == "TRAKE":
+                        st.caption(f"Chuỗi: `{len(r)-1} events`")
 
-                    # Nút 1-Click Promote to Rank 1
-                    if idx > 0:
-                        if st.button(f"⭐ Đặt làm Rank #1", key=f"promote_{idx}", use_container_width=True):
-                            promoted = rows.pop(idx)
-                            rows.insert(0, promoted)
-                            # Ghi lại file CSV ngay lập tức & đồng bộ ZIP
-                            with open(target_csv_path, "w", encoding="utf-8") as f:
-                                for item in rows:
-                                    f.write(",".join(item) + "\n")
-                            sync_submission_zip(output_dir, zip_output_path)
+                    col_c1, col_c2 = st.columns([1, 1])
+                    with col_c1:
+                        if orig_idx > 0:
+                            if st.button("⭐ Đặt R1", key=f"promo_btn_{orig_idx}_{selected_q_name}", use_container_width=True):
+                                item_to_promote = rows.pop(orig_idx)
+                                rows.insert(0, item_to_promote)
+                                with open(target_csv_path, "w", encoding="utf-8") as f:
+                                    for row_item in rows:
+                                        f.write(",".join(row_item) + "\n")
+                                sync_submission_zip(output_dir, zip_output_path)
+                                st.session_state["inspect_target"] = {
+                                    "query": selected_q_name,
+                                    "video_id": item_to_promote[0],
+                                    "frame_idx": int(item_to_promote[1]) if len(item_to_promote) > 1 and item_to_promote[1].isdigit() else 0,
+                                    "rank": 1
+                                }
+                                st.rerun()
+
+                    with col_c2:
+                        if st.button("🎬 Soi Video", key=f"inspect_btn_{orig_idx}_{selected_q_name}", use_container_width=True):
+                            st.session_state["inspect_target"] = {
+                                "query": selected_q_name,
+                                "video_id": vid,
+                                "frame_idx": f_idx,
+                                "rank": orig_idx + 1
+                            }
                             st.rerun()
 
-                    # Expander soi dải phim ngữ cảnh
-                    with st.expander("🎬 Soi Dải Phim", expanded=False):
-                        surr_kfs = keyframe_loader.get_surrounding_keyframes(vid, f_idx, count=5)
-                        if surr_kfs:
-                            for sk in surr_kfs:
-                                is_cur = sk["is_current"]
-                                st.caption(f"{'🎯 ' if is_cur else ''}{sk['frame_idx']}")
-                                if sk["image"]:
-                                    st.image(sk["image"], use_container_width=True)
-
-            # Hiệu chỉnh thời gian vi sai (Micro-Slider & Dense Video Inspector) cho Rank 1
+            # =================================================================
+            # TRÌNH PHÁT VIDEO MP4 ON-DEMAND & KÍNH HIỂN VI KEYFRAME
+            # =================================================================
             st.divider()
-            st.subheader("🔬 Kính Lúp Vi Sai & Trích Xuất Frame Video Trực Tiếp (Dense Video Inspector)")
-            st.caption("Trích xuất từng khung hình trực tiếp từ video MP4 trên GPU để bắt trọn hành động trong vùng mù.")
-            if rows:
-                r1_vid = rows[0][0]
-                r1_fidx = int(rows[0][1]) if len(rows[0]) > 1 and rows[0][1].isdigit() else 0
-                
-                col_insp1, col_insp2 = st.columns([1, 1])
-                with col_insp1:
-                    st.markdown(f"**Khung hình hiện tại của Rank #1 (`{r1_vid}`): `{r1_fidx}`**")
-                    adj_offset = st.slider(
-                        f"Dịch chuyển khung hình xung quanh {r1_vid} (Gốc: {r1_fidx}):",
-                        min_value=-100,
-                        max_value=100,
-                        value=0,
-                        step=1,
-                        key=f"btc_slider_{selected_q_name}"
-                    )
-                    curr_adj_frame = max(0, r1_fidx + adj_offset)
+            cur_insp = st.session_state.get("inspect_target", {"video_id": rows[0][0], "frame_idx": int(rows[0][1]), "rank": 1})
+            insp_vid = cur_insp.get("video_id", rows[0][0])
+            insp_fidx = cur_insp.get("frame_idx", int(rows[0][1]))
+            insp_rank = cur_insp.get("rank", 1)
 
-                    if st.button(f"💾 Cập nhật Rank #1 thành Frame {curr_adj_frame}", type="primary", use_container_width=True):
-                        rows[0][1] = str(curr_adj_frame)
+            st.subheader(f"🎬 Studio Soi Video MP4 & Keyframe Filmstrip: `{insp_vid}` (Đang chọn từ Rank #{insp_rank})")
+            st.caption("Xem video thực tế với đầy đủ âm thanh/chuyển động, tua dòng thời gian và gán ngay frame ưng ý nhất vào file nộp bài.")
+
+            col_vid_player, col_kf_strip = st.columns([1.2, 1.0])
+
+            with col_vid_player:
+                st.markdown(f"#### 🎥 Trình Phát Video Trực Tiếp: `{insp_vid}.mp4`")
+                v_path = video_manager.get_video_path(insp_vid)
+                pts_time_cur = keyframe_loader.get_pts_time(insp_vid, insp_fidx)
+
+                if v_path and v_path.exists():
+                    st.video(str(v_path), start_time=int(max(0, pts_time_cur - 2.0)))
+                    st.caption(f"⏱️ Mốc thời gian tự động tua tới: `{int(pts_time_cur//60):02d}:{int(pts_time_cur%60):02d}` ({pts_time_cur:.1f}s)")
+                else:
+                    st.warning(f"⚠️ Chưa tìm thấy file video MP4 gốc cho `{insp_vid}` trong `raw/batch_1/Videos/`. Đang hiển thị ảnh Keyframe thay thế.")
+                    kf_big = keyframe_loader.get_keyframe_image(insp_vid, insp_fidx)
+                    if kf_big:
+                        st.image(kf_big, use_container_width=True)
+
+                # Nút xác nhận frame cho Rank 1
+                col_cfm1, col_cfm2 = st.columns([1.5, 1.0])
+                with col_cfm1:
+                    custom_f_input = st.number_input(
+                        f"Nhập Frame chính xác cho Rank #1 (`{insp_vid}`):",
+                        min_value=0,
+                        max_value=300000,
+                        value=insp_fidx,
+                        step=5,
+                        key=f"custom_fidx_{selected_q_name}"
+                    )
+                with col_cfm2:
+                    st.markdown("<div style='margin-top:28px;'></div>", unsafe_allow_html=True)
+                    if st.button("📌 Chốt Frame Này Làm Rank #1", type="primary", use_container_width=True):
+                        # Cập nhật dòng Rank 1
+                        if rows[0][0] == insp_vid:
+                            rows[0][1] = str(custom_f_input)
+                        else:
+                            # Swap video này lên Rank 1
+                            target_row = [insp_vid, str(custom_f_input)]
+                            if len(rows[0]) > 2:
+                                target_row.append(rows[0][2])
+                            rows.insert(0, target_row)
+
                         with open(target_csv_path, "w", encoding="utf-8") as f:
-                            for item in rows:
-                                f.write(",".join(item) + "\n")
+                            for row_item in rows:
+                                f.write(",".join(row_item) + "\n")
                         sync_submission_zip(output_dir, zip_output_path)
-                        st.success(f"✅ Đã cập nhật Rank 1 thành Frame {curr_adj_frame} và tự động cập nhật submission.zip!")
+                        st.success(f"🎉 Đã chốt Rank #1: `{insp_vid}` - Frame `{custom_f_input}` & tự động cập nhật submission.zip!")
                         st.rerun()
 
-                with col_insp2:
-                    # Trích xuất và hiển thị ảnh trực tiếp từ file MP4 hoặc Keyframe
-                    live_img = keyframe_loader.get_dense_video_frame(r1_vid, curr_adj_frame)
-                    if live_img is not None:
-                        st.image(live_img, caption=f"📸 Khung hình Video thực tế (Frame {curr_adj_frame}) từ {r1_vid}.mp4", use_container_width=True)
-                    else:
-                        kf_img = keyframe_loader.get_keyframe_image(r1_vid, curr_adj_frame)
-                        if kf_img:
-                            st.image(kf_img, caption=f"Keyframe gần nhất (Frame {curr_adj_frame})", use_container_width=True)
-                        else:
-                            st.info(f"Đang chờ nạp frame {curr_adj_frame}...")
+            with col_kf_strip:
+                st.markdown("#### 🎞️ Dải Phim Ngữ Cảnh (Surrounding Keyframes)")
+                surr_kfs = keyframe_loader.get_surrounding_keyframes(insp_vid, insp_fidx, count=8)
+                if surr_kfs:
+                    k_cols = st.columns(4)
+                    for k_idx, sk in enumerate(surr_kfs):
+                        with k_cols[k_idx % 4]:
+                            is_curr = sk["is_current"]
+                            f_val = sk["frame_idx"]
+                            border_style = "border:2px solid #eab308;" if is_curr else "border:1px solid #334155;"
+                            st.markdown(f"<div style='text-align:center; padding:2px; {border_style} border-radius:4px;'>", unsafe_allow_html=True)
+                            if sk["image"]:
+                                st.image(sk["image"], use_container_width=True)
+                            st.caption(f"{'🎯 ' if is_curr else ''}`{f_val}`")
+                            if st.button(f"Chọn", key=f"pick_kf_{insp_vid}_{f_val}_{k_idx}"):
+                                st.session_state["inspect_target"]["frame_idx"] = f_val
+                                st.rerun()
+                            st.markdown("</div>", unsafe_allow_html=True)
+                else:
+                    st.info("Chưa có dải phim keyframe.")
 
-            # =====================================================================
-            # BỘ CHỈNH SỬA CÂU TRẢ LỜI QA CHUYÊN DỤNG (NẾU LÀ TASK QA)
-            # =====================================================================
-            if task_tag == "QA":
+            # =================================================================
+            # STUDIO TRAKE CHUYÊN DỤNG (REBUILT FOR MULTI-EVENT SEQUENCE)
+            # =================================================================
+            if task_tag == "TRAKE":
                 st.divider()
-                st.subheader("💬 Bộ Chỉnh Sửa Câu Trả Lời Hỏi - Đáp (QA Answer Editor)")
-                st.caption("Chỉnh sửa trực tiếp nội dung văn bản câu trả lời để nộp chuẩn quy chế BTC.")
+                st.subheader("⏱️ Studio Căn Chỉnh Chuỗi Sự Kiện TRAKE Đa Tầng (Interactive TRAKE Sequencer)")
+                st.caption("Xem từng sự kiện con theo thứ tự thời gian, vi chỉnh độc lập từng khung hình và tự động kiểm tra quy chế BTC ($E_1 < E_2 < E_3$).")
 
-                # Lấy câu trả lời hiện tại từ dòng Rank 1
+                # Bóc tách các mô tả sự kiện con từ câu hỏi
+                parsed_events = parse_trake_subevents(q_content)
+                
+                # Cho phép chọn bất kỳ video ứng viên nào trong Top 10 để chỉnh sửa chuỗi sự kiện
+                trake_cand_options = [f"Rank #{i+1}: {r[0]} ({len(r)-1} events)" for i, r in enumerate(rows[:10])]
+                selected_trake_cand = st.selectbox("🎯 Chọn Video ứng viên để chỉnh sửa chuỗi sự kiện:", trake_cand_options, index=0)
+                selected_trake_idx = int(selected_trake_cand.split(":")[0].replace("Rank #", "")) - 1
+                trake_row = rows[selected_trake_idx]
+                trake_vid = trake_row[0]
+                trake_frames = [int(x) for x in trake_row[1:] if x.isdigit()]
+
+                if not trake_frames:
+                    # Fallback lấy frame mặc định từ video đó
+                    all_kfs = keyframe_loader.get_all_video_keyframes(trake_vid)
+                    trake_frames = all_kfs[:len(parsed_events)] if len(all_kfs) >= len(parsed_events) else [100 * (i+1) for i in range(len(parsed_events))]
+
+                num_events = max(len(trake_frames), len(parsed_events))
+                # Đồng bộ độ dài
+                while len(trake_frames) < num_events:
+                    trake_frames.append(trake_frames[-1] + 100 if trake_frames else 100)
+
+                ev_cols = st.columns(num_events)
+                updated_trake_frames = []
+
+                all_vid_kfs = keyframe_loader.get_all_video_keyframes(trake_vid)
+                min_f = all_vid_kfs[0] if all_vid_kfs else 0
+                max_f = all_vid_kfs[-1] if all_vid_kfs else 200000
+
+                for e_idx in range(num_events):
+                    ev_desc = parsed_events[e_idx] if e_idx < len(parsed_events) else f"Sự kiện {e_idx+1}"
+                    cur_f = trake_frames[e_idx]
+
+                    with ev_cols[e_idx]:
+                        st.markdown(f"""
+                        <div class="event-card">
+                            <span style="font-weight:bold; color:#f59e0b;">SỰ KIỆN E{e_idx+1}</span><br/>
+                            <small style="color:#cbd5e1; font-style:italic;">"{ev_desc[:40]}"</small>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                        ev_img = keyframe_loader.get_dense_video_frame(trake_vid, cur_f) or keyframe_loader.get_keyframe_image(trake_vid, cur_f)
+                        if ev_img:
+                            st.image(ev_img, use_container_width=True)
+                        else:
+                            st.info(f"Frame {cur_f}")
+
+                        # Điều khiển tăng giảm
+                        new_f_val = st.number_input(
+                            f"Frame E{e_idx+1}:",
+                            min_value=0,
+                            max_value=300000,
+                            value=cur_f,
+                            step=5,
+                            key=f"trake_num_{selected_q_name}_{selected_trake_idx}_{e_idx}"
+                        )
+                        updated_trake_frames.append(new_f_val)
+
+                # Kiểm tra tính đơn điệu
+                is_valid_monotonic = all(updated_trake_frames[i] < updated_trake_frames[i+1] for i in range(len(updated_trake_frames)-1))
+
+                st.markdown("<br/>", unsafe_allow_html=True)
+                col_val_stat, col_val_btn = st.columns([2, 1])
+
+                with col_val_stat:
+                    chain_repr = " ➔ ".join([f"E{i+1}({f})" for i, f in enumerate(updated_trake_frames)])
+                    if is_valid_monotonic:
+                        st.success(f"✅ **Chuỗi thời gian HỢP LỆ chuẩn quy chế BTC ($E_1 < E_2 < \dots < E_n$):**\n`{chain_repr}`")
+                    else:
+                        st.error(f"⚠️ **LỖI THỨ TỰ THỜI GIAN:** Các khung hình sự kiện bắt buộc phải tăng dần theo thời gian!\n`{chain_repr}`")
+
+                with col_val_btn:
+                    if st.button("💾 Lưu Chuỗi TRAKE & Đặt Làm Rank 1", type="primary", use_container_width=True, disabled=not is_valid_monotonic):
+                        # Cập nhật chuỗi sự kiện và đưa lên Rank 1
+                        new_row = [trake_vid] + [str(x) for x in updated_trake_frames]
+                        if selected_trake_idx > 0:
+                            rows.pop(selected_trake_idx)
+                        else:
+                            rows.pop(0)
+                        rows.insert(0, new_row)
+
+                        with open(target_csv_path, "w", encoding="utf-8") as f:
+                            for row_item in rows:
+                                f.write(",".join(row_item) + "\n")
+                        sync_submission_zip(output_dir, zip_output_path)
+                        st.success(f"🎉 Đã lưu chuỗi sự kiện TRAKE cho `{trake_vid}` lên Rank #1 & tự động cập nhật submission.zip!")
+                        st.rerun()
+
+            # =================================================================
+            # STUDIO CHỈNH SỬA ĐÁP ÁN QA CHUYÊN DỤNG
+            # =================================================================
+            elif task_tag == "QA":
+                st.divider()
+                st.subheader("💬 Studio Chỉnh Sửa Đáp Án Visual Q&A")
+                st.caption("Nhập hoặc sửa câu trả lời cho Rank #1, tự động định dạng chuẩn CSV dạng `video_id,frame_idx,\"câu trả lời\"`.")
+
                 curr_qa_ans = ""
                 if rows and len(rows[0]) > 2:
                     curr_qa_ans = ",".join(rows[0][2:]).strip().strip('"')
 
-                qa_col1, qa_col2 = st.columns([2, 1])
-                with qa_col1:
-                    new_qa_ans = st.text_input(
-                        "📝 Nhập / Chỉnh sửa câu trả lời cho Rank #1 (1 - 5 từ):",
+                qa_c1, qa_c2 = st.columns([2, 1])
+                with qa_c1:
+                    new_qa_text = st.text_input(
+                        "📝 Câu trả lời chính thức cho Rank #1:",
                         value=curr_qa_ans,
-                        key=f"qa_input_{selected_q_name}",
-                        placeholder="ví dụ: mũ bảo hiểm, UNIVERSITY, áo hoodie tím..."
+                        key=f"qa_input_box_{selected_q_name}",
+                        placeholder="ví dụ: Giang Ly, bánh xèo, mũ bảo hiểm..."
                     )
-
-                with qa_col2:
+                with qa_c2:
                     st.markdown("<div style='margin-top:28px;'></div>", unsafe_allow_html=True)
-                    btn_save_qa = st.button("💾 Lưu Câu Trả Lời QA", type="primary", use_container_width=True)
-
-                if btn_save_qa:
-                    clean_ans_to_save = new_qa_ans.strip()
-                    # Cập nhật dòng 0
-                    if len(rows[0]) >= 2:
-                        rows[0] = [rows[0][0], rows[0][1], f'"{clean_ans_to_save}"']
-                    # Ghi đè vào file CSV & đồng bộ ZIP
-                    with open(target_csv_path, "w", encoding="utf-8") as f:
-                        for item in rows:
-                            if len(item) > 2:
-                                f.write(f'{item[0]},{item[1]},{item[2]}\n')
-                            else:
-                                f.write(f'{item[0]},{item[1]},"{clean_ans_to_save}"\n')
-                    sync_submission_zip(output_dir, zip_output_path)
-                    st.success(f'🎉 Đã lưu câu trả lời QA: `"{clean_ans_to_save}"` & tự động cập nhật submission.zip!')
-                    st.rerun()
-
-            # =====================================================================
-            # BỘ STUDIO TINH CHỈNH CHUỖI SỰ KIỆN TRAKE CHUYÊN DỤNG (NẾU LÀ TASK TRAKE)
-            # =====================================================================
-            elif task_tag == "TRAKE":
-                st.divider()
-                st.subheader("⏱️ Studio Tinh Chỉnh Chuỗi Sự Kiện TRAKE (Multi-Event Sequence Studio)")
-                st.caption("Xem song song toàn bộ các sự kiện con theo thứ tự thời gian, vi chỉnh từng khung hình độc lập và kiểm tra tính đơn điệu tự động.")
-
-                if rows:
-                    r1_vid = rows[0][0]
-                    event_frame_strs = rows[0][1:]
-                    current_events = [int(x) for x in event_frame_strs if x.isdigit()]
-
-                    if not current_events:
-                        st.warning("Chưa có danh sách khung hình sự kiện cho video này.")
-                    else:
-                        num_ev = len(current_events)
-                        ev_cols = st.columns(num_ev)
-                        updated_events = []
-
-                        for e_idx, ef in enumerate(current_events):
-                            with ev_cols[e_idx]:
-                                st.markdown(f"""
-                                <div style="background:#1e293b; padding:6px; border-radius:6px; border:1px solid #f59e0b; text-align:center; margin-bottom:6px;">
-                                    <span style="font-weight:bold; color:#f59e0b;">SỰ KIỆN E{e_idx+1}</span><br/>
-                                    <small style="color:#cbd5e1;">Frame: {ef}</small>
-                                </div>
-                                """, unsafe_allow_html=True)
-
-                                # Hiển thị ảnh của sự kiện
-                                e_img = keyframe_loader.get_dense_video_frame(r1_vid, ef) or keyframe_loader.get_keyframe_image(r1_vid, ef)
-                                if e_img:
-                                    st.image(e_img, use_container_width=True)
+                    if st.button("💾 Lưu Đáp Án QA", type="primary", use_container_width=True):
+                        clean_qa_ans = new_qa_text.strip()
+                        if len(rows[0]) >= 2:
+                            rows[0] = [rows[0][0], rows[0][1], f'"{clean_qa_ans}"']
+                        with open(target_csv_path, "w", encoding="utf-8") as f:
+                            for row_item in rows:
+                                if len(row_item) > 2:
+                                    f.write(f'{row_item[0]},{row_item[1]},{row_item[2]}\n')
                                 else:
-                                    st.info(f"Frame {ef}")
+                                    f.write(f'{row_item[0]},{row_item[1]},"{clean_qa_ans}"\n')
+                        sync_submission_zip(output_dir, zip_output_path)
+                        st.success(f'🎉 Đã lưu đáp án QA: `"{clean_qa_ans}"` & tự động cập nhật submission.zip!')
+                        st.rerun()
 
-                                # Ô nhập hoặc slider vi chỉnh khung hình của sự kiện này
-                                new_ef = st.number_input(
-                                    f"Frame E{e_idx+1}:",
-                                    min_value=0,
-                                    max_value=200000,
-                                    value=ef,
-                                    step=5,
-                                    key=f"num_trake_{selected_q_name}_{e_idx}"
-                                )
-                                updated_events.append(new_ef)
+            # =================================================================
+            # XUẤT VÀ KIỂM TRA SUBMISSION.ZIP
+            # =================================================================
+            st.divider()
+            st.subheader("📦 Kiểm Tra Chuẩn Quy Chế & Tải Gói Nộp Bài (.ZIP)")
+            sync_submission_zip(output_dir, zip_output_path)
+            
+            val_res = validator.validate_directory(output_dir)
+            if val_res.get("all_valid", False):
+                st.success(f"🎉 Toàn bộ {val_res['total_files']} file CSV trong thư mục `{output_dir.name}` đều HỢP LỆ 100% chuẩn quy chế BTC!")
+            else:
+                st.warning(f"⚠️ Kiểm tra file CSV: {val_res.get('error', 'Một số file cần kiểm tra thêm')}")
 
-                        # Kiểm tra tính đơn điệu (Monotonicity Check)
-                        is_monotonic = all(updated_events[i] < updated_events[i+1] for i in range(len(updated_events)-1))
-
-                        st.markdown("<br/>", unsafe_allow_html=True)
-                        col_t_stat, col_t_btn = st.columns([2, 1])
-                        with col_t_stat:
-                            if is_monotonic:
-                                chain_str = " → ".join([f"E{i+1}({f})" for i, f in enumerate(updated_events)])
-                                st.success(f"✅ **Chuỗi thời gian chuẩn quy chế BTC (Đơn điệu tăng):**\n`{chain_str}`")
-                            else:
-                                st.error("⚠️ **LỖI THỨ TỰ THỜI GIAN:** Các khung hình sự kiện chưa theo thứ tự tăng dần thời gian ($E_1 < E_2 < \dots < E_n$). Hãy chỉnh lại khung hình!")
-
-                        with col_t_btn:
-                            if st.button("💾 Lưu Toàn Bộ Chuỗi TRAKE vào CSV", type="primary", use_container_width=True, disabled=not is_monotonic):
-                                rows[0] = [r1_vid] + [str(x) for x in updated_events]
-                                with open(target_csv_path, "w", encoding="utf-8") as f:
-                                    for item in rows:
-                                        f.write(",".join(item) + "\n")
-                                sync_submission_zip(output_dir, zip_output_path)
-                                st.success(f"🎉 Đã lưu chuỗi {len(updated_events)} sự kiện TRAKE của `{r1_vid}` & tự động cập nhật submission.zip!")
-                                st.rerun()
-
-        # =====================================================================
-        # BỘ ĐÓNG GÓI & KIỂM TRA ĐỊNH DẠNG NỘP BÀI CHUẨN BTC
-        # =====================================================================
-        st.divider()
-        st.subheader("📦 Kiểm tra Toàn Diện & Xuất Gói Nộp Bài (.ZIP)")
-
-        # Đảm bảo file ZIP trên đĩa luôn đồng bộ mới nhất
-        sync_submission_zip(output_dir, zip_output_path)
-
-        val_summary = validator.validate_directory(output_dir)
-        if val_summary.get("all_valid", False):
-            st.success(f"🎉 Toàn bộ {val_summary['total_files']} file CSV trong thư mục `{output_dir.name}` đều HỢP LỆ 100% chuẩn quy chế BTC!")
             if zip_output_path.exists():
-                st.info(f"💾 **File ZIP trên đĩa đã tự động cập nhật:** `{zip_output_path}` ({zip_output_path.stat().st_size / 1024:.1f} KB)")
-        else:
-            st.warning(f"⚠️ Phát hiện vấn đề: {val_summary.get('error', 'Một số file chưa đạt chuẩn')}")
-
-        if zip_output_path.exists():
-            with open(zip_output_path, "rb") as fz:
-                zip_bytes = fz.read()
-
-            st.download_button(
-                label="📦 Tải Gói Nộp Bài Đầy Đủ (submission.zip)",
-                data=zip_bytes,
-                file_name="submission.zip",
-                mime="application/zip",
-                type="primary",
-                use_container_width=True
-            )
+                with open(zip_output_path, "rb") as fz:
+                    zip_data_bytes = fz.read()
+                st.download_button(
+                    label="📦 TẢI GÓI NỘP BÀI CHÍNH THỨC (submission.zip)",
+                    data=zip_data_bytes,
+                    file_name="submission.zip",
+                    mime="application/zip",
+                    type="primary",
+                    use_container_width=True
+                )
 
 # =============================================================================
 # TAB 3: TÌM KIẾM TRỰC TIẾP (LIVE SEARCH)
@@ -857,7 +731,7 @@ else:
                     sc = cand.get("score", 0.0)
                     img = keyframe_loader.get_keyframe_image(vid, f_idx)
                     
-                    st.markdown(f"<span class='rank-badge'>Rank #{idx+1}</span> **{vid}** : `{f_idx}`", unsafe_allow_html=True)
+                    st.markdown(f"<span class='rank-badge-normal'>Rank #{idx+1}</span> **{vid}** : `{f_idx}`", unsafe_allow_html=True)
                     if img is not None:
                         st.image(img, use_container_width=True)
                     else:
