@@ -492,7 +492,8 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                 )
 
                 with st.spinner("⏳ Đang chuẩn bị luồng video tối ưu..."):
-                    if "Đoạn Ngắn" in play_mode:
+                    is_short_clip = "Đoạn Ngắn" in play_mode and hasattr(video_manager, "get_optimized_clip")
+                    if is_short_clip:
                         clip_path, clip_start, clip_dur = video_manager.get_optimized_clip(insp_vid, pts_time_cur, clip_window=60.0)
                         if clip_path and clip_path.exists():
                             offset_in_clip = max(0.0, pts_time_cur - clip_start)
