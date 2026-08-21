@@ -213,7 +213,9 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
         (output_base_dir / "thunghiem" / "submission").mkdir(parents=True, exist_ok=True)
 
     default_sub_idx = 0
-    if "thunghiem" in available_subdirs:
+    if "sotuyen1" in available_subdirs:
+        default_sub_idx = available_subdirs.index("sotuyen1")
+    elif "thunghiem" in available_subdirs:
         default_sub_idx = available_subdirs.index("thunghiem")
 
     col_cfg1, col_cfg2, col_cfg3 = st.columns([1.5, 1.5, 1.5])
@@ -228,8 +230,14 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
     query_base_dir = PROJECT_ROOT / "query"
     avail_q_dirs = [p.name for p in query_base_dir.iterdir() if p.is_dir() and not p.name.startswith(".")] if query_base_dir.exists() else []
     
+    default_q_idx = 0
+    if "SOTUYEN1-bo-de-thi" in avail_q_dirs:
+        default_q_idx = avail_q_dirs.index("SOTUYEN1-bo-de-thi")
+    elif "THUNGHIEM-bo-de-thi" in avail_q_dirs:
+        default_q_idx = avail_q_dirs.index("THUNGHIEM-bo-de-thi")
+
     with col_cfg2:
-        selected_qdir_name = st.selectbox("📋 Gói đề bài (trong query/):", avail_q_dirs if avail_q_dirs else ["Không có"])
+        selected_qdir_name = st.selectbox("📋 Gói đề bài (trong query/):", avail_q_dirs if avail_q_dirs else ["Không có"], index=default_q_idx)
 
     selected_query_dir = query_base_dir / selected_qdir_name if selected_qdir_name != "Không có" else None
 

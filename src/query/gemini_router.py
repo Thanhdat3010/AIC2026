@@ -172,10 +172,33 @@ Respond with ONLY a JSON object with this EXACT structure:
 
                 return parsed
             except Exception as e:
-                print(f"⚠️ JSON parsing error: {e}", flush=True)
+                # Trích xuất Regex nếu chuỗi JSON bị lỗi format nhẹ
+                try:
+                    vp_match = re.search(r'"visual_prompts"\s*:\s*\[(.*?)\]', cleaned, re.DOTALL)
+                    if vp_match:
+                        prompts = re.findall(r'"([^"\\]*(?:\\.[^"\\]*)*)"', vp_match.group(1))
+                        if prompts:
+                            return {
+                                "visual_prompts": prompts[:3] if len(prompts) >= 3 else (prompts + [prompts[0]] * (3 - len(prompts))),
+                                "has_ocr_signal": '"has_ocr_signal": true' in cleaned.lower(),
+                                "ocr_keywords": [],
+                                "has_asr_signal": '"has_asr_signal": true' in cleaned.lower(),
+                                "asr_keywords": [],
+                                "is_qa": '"is_qa": true' in cleaned.lower(),
+                                "is_trake": '"is_trake": true' in cleaned.lower(),
+                                "trake_events": [],
+                                "weights": {"visual": 1.0, "ocr": 1.5 if '"has_ocr_signal": true' in cleaned.lower() else 0.0, "asr": 1.2 if '"has_asr_signal": true' in cleaned.lower() else 0.0}
+                            }
+                except Exception:
+                    pass
+
+        # Fallback dịch chuẩn tiếng Anh chất lượng cao 1-shot (Tuyệt đối không dùng tiếng Việt thô)
+        trans_prompt = f"Translate this Vietnamese video search query into a highly detailed and rich English visual description for video retrieval (no filler words, just describe subjects, actions, setting, colors):\n\"{raw_query}\""
+        trans_res = self._call_gemini(trans_prompt)
+        best_en = trans_res.strip().replace('"', '') if trans_res else raw_query
 
         return {
-            "visual_prompts": [raw_query, raw_query, raw_query],
+            "visual_prompts": [best_en, best_en, best_en],
             "has_ocr_signal": False,
             "ocr_keywords": [],
             "has_asr_signal": False,

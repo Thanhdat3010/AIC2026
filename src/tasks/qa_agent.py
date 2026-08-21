@@ -158,40 +158,41 @@ Trả về ĐÚNG định dạng JSON thuần túy:
 }}"""
             contents.append(prompt)
 
-            key = self.key_pool.get_next_key()
-            client = genai.Client(api_key=key)
-
-            try:
-                response = client.models.generate_content(
-                    model="gemini-3.5-flash-lite",
-                    contents=contents,
-                    config=types.GenerateContentConfig(
-                        response_mime_type="application/json",
-                        temperature=0.0 # Temperature 0.0 for deterministic verification
+            # Multi-Key Failover Call
+            keys = list(self.key_pool.gemini_keys)
+            for key in keys:
+                try:
+                    client = genai.Client(api_key=key)
+                    response = client.models.generate_content(
+                        model="gemini-3.5-flash-lite",
+                        contents=contents,
+                        config=types.GenerateContentConfig(
+                            response_mime_type="application/json",
+                            temperature=0.0
+                        )
                     )
-                )
-                res_json = json.loads(response.text.strip())
-                status = res_json.get("status", "insufficient")
-                ans = res_json.get("answer", "").strip()
-                evidence = res_json.get("evidence", [])
+                    res_json = json.loads(response.text.strip())
+                    status = res_json.get("status", "insufficient")
+                    ans = res_json.get("answer", "").strip()
+                    evidence = res_json.get("evidence", [])
 
-                cand["qa_answer"] = ans
-                cand["answer"] = ans
-                cand["qa_status"] = status
-                cand["qa_evidence"] = evidence
-                
-                # Confidence giả lập dựa trên status
-                cand["qa_confidence"] = 1.0 if status == "answer" else 0.0
+                    cand["qa_answer"] = ans
+                    cand["answer"] = ans
+                    cand["qa_status"] = status
+                    cand["qa_evidence"] = evidence
+                    cand["qa_confidence"] = 1.0 if status == "answer" else 0.0
 
-                if status == "answer" and ans.lower() not in ["không xác định", "không có", "unknown", "n/a"]:
-                    best_answer = ans
-                    best_cand_idx = idx
-                    break # Ngừng duyệt ngay khi có frame đủ bằng chứng (Tiết kiệm Token)
-
-            except Exception as e:
-                cand["qa_answer"] = "Lỗi API"
-                cand["qa_status"] = "error"
-                cand["qa_confidence"] = 0.0
+                    if status == "answer" and ans.lower() not in ["không xác định", "không có", "unknown", "n/a"]:
+                        best_answer = ans
+                        best_cand_idx = idx
+                        break
+                    break # Thành công nhận JSON thì sang candidate tiếp theo
+                except Exception as e:
+                    err_str = str(e).lower()
+                    if "429" in err_str or "quota" in err_str:
+                        continue
+                    else:
+                        break
 
         # Nếu tìm thấy khung hình có câu trả lời tự tin, hoán đổi khung hình đó lên Rank #1
         reranked = candidates.copy()

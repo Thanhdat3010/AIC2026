@@ -494,7 +494,7 @@ class TaskSpecializedEngine:
         best_answer, reranked = self.qa_agent.answer_and_rerank(
             qa_question=query_text,
             candidates=candidates[:top_k],
-            max_inspect_frames=15, # Top-15 video limit
+            max_inspect_frames=5, # Top-5 candidate frames for fast & high-accuracy VLM verification
             use_multi_crop=use_multi_crop,
             gate_info=gate_info,
             qa_modality=qa_modality
