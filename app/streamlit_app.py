@@ -463,56 +463,81 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
             st.subheader(f"🎬 Studio Soi Video MP4 & Keyframe Filmstrip: `{insp_vid}` (Đang chọn từ Rank #{insp_rank})")
             st.caption("Xem video thực tế với đầy đủ âm thanh/chuyển động, tua dòng thời gian và gán ngay frame ưng ý nhất vào file nộp bài.")
 
-            col_vid_player, col_kf_strip = st.columns([1.2, 1.0])
+            col_vid_player, col_kf_strip = st.columns([1.3, 0.9])
 
             with col_vid_player:
                 st.markdown(f"#### 🎥 Trình Phát Video Trực Tiếp: `{insp_vid}.mp4`")
                 v_path = video_manager.get_video_path(insp_vid)
                 pts_time_cur = keyframe_loader.get_pts_time(insp_vid, insp_fidx)
+                cur_min_sec = f"{int(pts_time_cur//60):02d}:{int(pts_time_cur%60):02d}"
 
                 if v_path and v_path.exists():
-                    st.video(str(v_path), start_time=int(max(0, pts_time_cur - 2.0)))
-                    st.caption(f"⏱️ Mốc thời gian tự động tua tới: `{int(pts_time_cur//60):02d}:{int(pts_time_cur%60):02d}` ({pts_time_cur:.1f}s)")
+                    st.video(str(v_path), start_time=int(max(0, pts_time_cur - 1.5)))
+                    st.caption(f"⏱️ Mốc thời gian bắt đầu phát: `{cur_min_sec}` ({pts_time_cur:.1f}s) -> Frame `{insp_fidx}`")
                 else:
                     st.warning(f"⚠️ Chưa tìm thấy file video MP4 gốc cho `{insp_vid}` trong `raw/batch_1/Videos/`. Đang hiển thị ảnh Keyframe thay thế.")
                     kf_big = keyframe_loader.get_keyframe_image(insp_vid, insp_fidx)
                     if kf_big:
                         st.image(kf_big, use_container_width=True)
 
-                # Nút xác nhận frame cho Rank 1
-                col_cfm1, col_cfm2 = st.columns([1.5, 1.0])
-                with col_cfm1:
+                st.markdown("##### ⏱️ Bắt Khung Hình Chính Xác (Theo Phút:Giây hoặc Số Frame):")
+                col_ts1, col_ts2 = st.columns([1, 1])
+                with col_ts1:
+                    ts_text_input = st.text_input(
+                        "Nhập mốc thời gian (MM:SS hoặc Giây):",
+                        value=cur_min_sec,
+                        key=f"ts_input_{selected_q_name}_{insp_vid}",
+                        help="Ví dụ nhập 01:24 hoặc 84.5 để tự động quy đổi ra frame chính xác"
+                    )
+                
+                # Tính frame từ text input
+                calc_frame_from_ts = insp_fidx
+                try:
+                    if ":" in ts_text_input:
+                        m_str, s_str = ts_text_input.strip().split(":")
+                        total_sec = float(m_str) * 60.0 + float(s_str)
+                    else:
+                        total_sec = float(ts_text_input.strip())
+                    calc_frame_from_ts = int(total_sec * 25.0) # Chuẩn 25 FPS
+                except Exception:
+                    calc_frame_from_ts = insp_fidx
+
+                with col_ts2:
                     custom_f_input = st.number_input(
-                        f"Nhập Frame chính xác cho Rank #1 (`{insp_vid}`):",
+                        "Hoặc nhập trực tiếp số Frame:",
                         min_value=0,
                         max_value=300000,
-                        value=insp_fidx,
+                        value=calc_frame_from_ts,
                         step=5,
-                        key=f"custom_fidx_{selected_q_name}"
+                        key=f"custom_fidx_{selected_q_name}_{insp_vid}"
                     )
-                with col_cfm2:
-                    st.markdown("<div style='margin-top:28px;'></div>", unsafe_allow_html=True)
-                    if st.button("📌 Chốt Frame Này Làm Rank #1", type="primary", use_container_width=True):
-                        # Cập nhật dòng Rank 1
-                        if rows[0][0] == insp_vid:
-                            rows[0][1] = str(custom_f_input)
-                        else:
-                            # Swap video này lên Rank 1
-                            target_row = [insp_vid, str(custom_f_input)]
-                            if len(rows[0]) > 2:
-                                target_row.append(rows[0][2])
-                            rows.insert(0, target_row)
 
-                        with open(target_csv_path, "w", encoding="utf-8") as f:
-                            for row_item in rows:
-                                f.write(",".join(row_item) + "\n")
-                        sync_submission_zip(output_dir, zip_output_path)
-                        st.success(f"🎉 Đã chốt Rank #1: `{insp_vid}` - Frame `{custom_f_input}` & tự động cập nhật submission.zip!")
-                        st.rerun()
+                # Nút Chốt làm Rank 1
+                if st.button(f"📌 Chốt Đúng Mốc Này (Frame {custom_f_input}) Làm Rank #1", type="primary", use_container_width=True):
+                    if rows[0][0] == insp_vid:
+                        rows[0][1] = str(custom_f_input)
+                    else:
+                        target_row = [insp_vid, str(custom_f_input)]
+                        if len(rows[0]) > 2:
+                            target_row.append(rows[0][2])
+                        rows.insert(0, target_row)
+
+                    with open(target_csv_path, "w", encoding="utf-8") as f:
+                        for row_item in rows:
+                            f.write(",".join(row_item) + "\n")
+                    sync_submission_zip(output_dir, zip_output_path)
+                    st.success(f"🎉 Đã chốt Rank #1: `{insp_vid}` - Frame `{custom_f_input}` ({int((custom_f_input/25)//60):02d}:{int((custom_f_input/25)%60):02d}) & tự động cập nhật submission.zip!")
+                    st.rerun()
 
             with col_kf_strip:
-                st.markdown("#### 🎞️ Dải Phim Ngữ Cảnh (Surrounding Keyframes)")
-                surr_kfs = keyframe_loader.get_surrounding_keyframes(insp_vid, insp_fidx, count=8)
+                st.markdown("#### 🎞️ Dải Phim Ngữ Cảnh & Xem Trước Frame")
+                # Hiển thị ảnh trích xuất trực tiếp tại frame đang chọn
+                live_preview_img = keyframe_loader.get_dense_video_frame(insp_vid, custom_f_input) or keyframe_loader.get_keyframe_image(insp_vid, custom_f_input)
+                if live_preview_img:
+                    st.image(live_preview_img, caption=f"📸 Khung hình thực tế tại Frame {custom_f_input} ({int((custom_f_input/25)//60):02d}:{int((custom_f_input/25)%60):02d})", use_container_width=True)
+
+                st.markdown("**Dải Keyframe lân cận (Click để gán tức thì):**")
+                surr_kfs = keyframe_loader.get_surrounding_keyframes(insp_vid, custom_f_input, count=8)
                 if surr_kfs:
                     k_cols = st.columns(4)
                     for k_idx, sk in enumerate(surr_kfs):
@@ -528,8 +553,6 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                                 st.session_state["inspect_target"]["frame_idx"] = f_val
                                 st.rerun()
                             st.markdown("</div>", unsafe_allow_html=True)
-                else:
-                    st.info("Chưa có dải phim keyframe.")
 
             # =================================================================
             # STUDIO TRAKE CHUYÊN DỤNG (REBUILT FOR MULTI-EVENT SEQUENCE)
