@@ -496,32 +496,45 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
 
                 st.markdown("##### ⏱️ Bắt Khung Hình Khi Xem Video (Nhập Phút:Giây hoặc Số Frame):")
                 
-                current_target_frame = active_f_cur
-
-                col_ts1, col_ts2 = st.columns([1.2, 1.0])
+                col_ts1, col_btn_calc, col_ts2 = st.columns([1.2, 0.8, 1.0])
                 with col_ts1:
                     user_time_str = st.text_input(
-                        "⏱️ Nhập mốc thời gian đang xem (MM:SS hoặc Giây):",
+                        "⏱️ Nhập mốc thời gian xem được (MM:SS hoặc Giây):",
                         value="",
                         key=f"ts_raw_input_{selected_q_name}_{insp_vid}",
-                        placeholder=f"Hiện tại: {cur_min_sec} (Gõ 01:40 hoặc 100s...)",
-                        help="Gõ mốc thời gian xem trong video (ví dụ: 01:40 hoặc 100) rồi nhấn Enter để tra cứu frame tức thì"
+                        placeholder=f"Ví dụ: 01:40 hoặc 100...",
+                        help="Nhập thời gian đang thấy trong video rồi bấm nút 'Tính Frame' bên cạnh"
                     )
 
-                # Nếu người dùng có nhập chuỗi thời gian mới -> tính ngay frame tương ứng
-                if user_time_str.strip():
+                with col_btn_calc:
+                    st.markdown("<div style='margin-top:28px;'></div>", unsafe_allow_html=True)
+                    btn_calc_time = st.button("⚡ Tính Frame", use_container_width=True, help="Quy đổi thời gian thành Frame chính xác")
+
+                if (btn_calc_time or user_time_str.strip()) and user_time_str.strip():
                     try:
-                        if ":" in user_time_str:
-                            m_s, s_s = user_time_str.strip().split(":")
+                        clean_ts = user_time_str.strip()
+                        if ":" in clean_ts:
+                            m_s, s_s = clean_ts.split(":")
                             t_sec = float(m_s) * 60.0 + float(s_s)
                         else:
-                            t_sec = float(user_time_str.strip())
-                        new_f = keyframe_loader.get_nearest_frame_from_time(insp_vid, t_sec)
-                        current_target_frame = new_f
+                            t_sec = float(clean_ts)
+
+                        # Tra cứu frame an toàn từ frames.parquet
+                        new_f = None
+                        if hasattr(keyframe_loader, "df_frames") and keyframe_loader.df_frames is not None:
+                            df_v = keyframe_loader.df_frames[keyframe_loader.df_frames["video_id"] == insp_vid]
+                            if not df_v.empty and "pts_time" in df_v.columns:
+                                diffs = (df_v["pts_time"] - t_sec).abs()
+                                new_f = int(df_v.loc[diffs.idxmin()]["frame_idx"])
+                        if new_f is None:
+                            new_f = int(t_sec * 25.0)
+
                         st.session_state[fidx_widget_key] = new_f
                         st.session_state["inspect_target"]["frame_idx"] = new_f
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        st.error(f"Lỗi định dạng thời gian: {e}")
+
+                current_target_frame = st.session_state.get(fidx_widget_key, insp_fidx)
 
                 with col_ts2:
                     custom_f_input = st.number_input(
@@ -532,17 +545,19 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                         step=1,
                         key=f"fnum_input_{selected_q_name}_{insp_vid}_{current_target_frame}"
                     )
-                    current_target_frame = custom_f_input
-                    st.session_state[fidx_widget_key] = current_target_frame
+                    if custom_f_input != current_target_frame:
+                        st.session_state[fidx_widget_key] = custom_f_input
+                        st.session_state["inspect_target"]["frame_idx"] = custom_f_input
+                        current_target_frame = custom_f_input
 
-                active_chosen_frame = current_target_frame
+                active_chosen_frame = st.session_state.get(fidx_widget_key, current_target_frame)
                 exact_pts_chosen = keyframe_loader.get_pts_time(insp_vid, active_chosen_frame)
                 exact_pts_str = f"{int(exact_pts_chosen//60):02d}:{int(exact_pts_chosen%60):02d}"
 
                 # Hàng nút thao tác: Chốt Rank 1 & Quay lại mốc ban đầu
-                col_act_r1, col_act_reset = st.columns([1.4, 1.0])
+                col_act_r1, col_act_reset = st.columns([1.5, 1.0])
                 with col_act_r1:
-                    if st.button(f"📌 Chốt Mốc Này ({exact_pts_str} -> Frame {active_chosen_frame}) Làm Rank #1", type="primary", use_container_width=True):
+                    if st.button(f"📌 Chốt Mốc Này ({exact_pts_str} ➔ Frame {active_chosen_frame}) Làm Rank #1", type="primary", use_container_width=True):
                         if rows[0][0] == insp_vid:
                             rows[0][1] = str(active_chosen_frame)
                         else:
