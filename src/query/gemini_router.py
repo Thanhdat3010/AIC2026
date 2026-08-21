@@ -108,19 +108,22 @@ You are an expert Multimodal Video Retrieval AI System for AI Challenge 2026.
 Analyze this Vietnamese query:
 "{raw_query}"
 
-Rules for Semantic Generalization, Entity Expansion & Modality Gating:
-1. has_ocr_signal: set to TRUE ONLY if the query explicitly mentions reading written text, signs, banners, titles, text in quotes, awards, numbers, license plates, or specific proper nouns / acronyms (e.g. "COVID-19", "Lausanne", "FANA"). If the query is purely about visual actions/people/objects, set to FALSE.
-   - If has_ocr_signal is true: provide `ocr_keywords` containing the normalized Vietnamese text entity AND likely OCR typo / diacritics variants (e.g. ["COVID-19", "covid 19", "covid19"], ["Lausanne", "Đại học Lausanne", "EPFL"], ["FANA", "CLB FANA", "FA NA"]).
-2. has_asr_signal: set to TRUE if the query mentions spoken dialogue, interview speech, poems, songs, voice announcements, OR mentions specific proper nouns, acronyms, club/organization/brand/event names (e.g. "FANA", "CLB FANA", "Lausanne", "Nguyễn Trung Trực") because news reportage voiceover narrations frequently speak these entity names aloud.
-   - If has_asr_signal is true: provide `asr_keywords` containing normalized spoken phrases, proper noun keywords, AND phonetic variants (e.g. ["fana", "clb fana", "câu lạc bộ fana"], ["Lô-xan", "Lô san", "lausanne"], ["Hỏa hồng Nhự Tảo oanh thiên địa"]).
-3. is_qa: set to TRUE if the query is a Question asking for specific entity/action/color/count/time/name.
-4. is_trake: set to TRUE if the query describes a chronological sequence of multiple distinct consecutive actions (First... then... then...).
-5. If is_trake is true: break down the chronological actions into granular atomic sub-steps in `trake_events` (in concise natural English).
-   - CRITICAL: Ensure EVERY SINGLE atomic action is separated, even if they appear in the same sentence (e.g. "thêm đậu Hà Lan rồi cà rốt" MUST be split into two separate events: "add peas" and "add carrots"). Do NOT group actions!
+Rules for Semantic Generalization, Entity Expansion, Knowledge Disambiguation & Modality Gating:
+1. Knowledge & Entity Disambiguation (SOTA VBS 2025 Standard):
+   - If the query references real-world world knowledge, historical events, famous people, movies, books, organizations, or scientific concepts (e.g. "phim của đạo diễn Steven Spielberg năm 1975" -> Disambiguate to: "Hàm cá mập", "Jaws", "cá mập trắng", "Great White Shark"; "nghiên cứu tại Đại học ở Lausanne về bọ bay chế tạo robot" -> Disambiguate to: "EPFL", "Lausanne", "robotics", "beetle wing flight"):
+   - Disambiguate and include the underlying inferred entities directly into `asr_keywords`, `ocr_keywords`, and `visual_prompts`!
+2. has_ocr_signal: set to TRUE if the query explicitly mentions reading written text, signs, banners, titles, text in quotes, awards, numbers, license plates, OR specific proper nouns / acronyms (e.g. "COVID-19", "Lausanne", "FANA", "Steven Spielberg", "1975").
+   - If has_ocr_signal is true: provide `ocr_keywords` containing the normalized Vietnamese text entity AND likely OCR typo / diacritics variants (e.g. ["Steven Spielberg", "Jaws", "1975"], ["COVID-19", "covid 19", "covid19"], ["Lausanne", "EPFL"]).
+3. has_asr_signal: set to TRUE if the query mentions spoken dialogue, interview speech, poems, songs, voice announcements, OR mentions specific proper nouns, years, director/scientist names, acronyms, club/brand/event names (e.g. "Steven Spielberg", "1975", "FANA", "Lausanne", "Hồ Chí Minh") because news reportage voiceover narrations frequently speak these entity names aloud.
+   - If has_asr_signal is true: provide `asr_keywords` containing normalized spoken phrases, proper noun keywords, AND phonetic variants (e.g. ["steven spielberg", "hàm cá mập", "1975", "cá mập trắng"], ["lausanne", "lô san", "bọ bay", "robot"]).
+4. is_qa: set to TRUE if the query is a Question asking for specific entity/action/color/count/time/name.
+5. is_trake: set to TRUE if the query describes a chronological sequence of multiple distinct consecutive actions (First... then... then...).
+6. If is_trake is true: break down the chronological actions into granular atomic sub-steps in `trake_events` (in concise natural English).
+   - CRITICAL: Ensure EVERY SINGLE atomic action is separated, even if they appear in the same sentence. Do NOT group actions!
 
 CRITICAL RULE FOR VISUAL PROMPTS:
 - Do NOT include prefixes like "Sentence 1:", "Scene 1:", or "-". Just output the raw text.
-- visual_prompts[0] MUST BE a "Comprehensive Visual Prompt": A highly detailed and rich English description of the scene. Include the main subjects, actions, specific colors, clothing, background props, and spatial context (e.g. "on the left", "in the background"). Contrastive models like SigLIP thrive on long, dense captions. Do NOT use conversational fillers like "The image shows...".
+- visual_prompts[0] MUST BE a "Comprehensive Visual Prompt": A highly detailed and rich English description of the scene incorporating both literal cues and disambiguated knowledge (e.g. "A coastal town beach with tourists gathering, large great white shark from 1975 movie reference, sunny beachside").
 - visual_prompts[1] MUST BE "Action Focus": A short description isolating only the dynamic actions occurring.
 - visual_prompts[2] MUST BE "Entity Focus": A short list of the key objects/people present.
 
@@ -153,18 +156,24 @@ Respond with ONLY a JSON object with this EXACT structure:
 
                 if "weights" not in parsed:
                     parsed["weights"] = {"visual": 1.0, "ocr": 0.0, "asr": 0.0}
-                # Áp dụng Adaptive Modality Gating an toàn tuyệt đối
-                if not parsed.get("has_ocr_signal", False):
+                
+                # Adaptive Modality Gating & Entity-Specificity Boosting
+                has_ocr = parsed.get("has_ocr_signal", False)
+                has_asr = parsed.get("has_asr_signal", False)
+
+                if not has_ocr:
                     parsed["ocr_keywords"] = []
                     parsed["weights"]["ocr"] = 0.0
                 else:
-                    parsed["weights"]["ocr"] = 1.5
+                    # Tăng trọng số OCR lên 3.0 nếu chứa thực thể tên riêng/số năm
+                    parsed["weights"]["ocr"] = 3.0 if any(len(k.split()) >= 2 or any(c.isupper() for c in k) for k in parsed.get("ocr_keywords", [])) else 1.8
 
-                if not parsed.get("has_asr_signal", False):
+                if not has_asr:
                     parsed["asr_keywords"] = []
                     parsed["weights"]["asr"] = 0.0
                 else:
-                    parsed["weights"]["asr"] = 1.2
+                    # Tăng trọng số ASR lên 3.0 nếu chứa thực thể tên riêng/tri thức
+                    parsed["weights"]["asr"] = 3.0 if any(len(k.split()) >= 2 or any(c.isupper() for c in k) or any(char.isdigit() for char in k) for k in parsed.get("asr_keywords", [])) else 1.8
 
                 return parsed
             except Exception as e:

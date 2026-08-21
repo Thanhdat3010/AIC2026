@@ -92,15 +92,24 @@ class ModalityGate:
                 has_asr = True
                 break
 
-        if has_asr:
+        # Tự động kích hoạt ASR nếu câu hỏi chứa Tên riêng hoặc Năm lịch sử hoặc Danh nhân/Tác phẩm
+        years = re.findall(r'\b(19\d{2}|20\d{2})\b', query_text)
+        if years or filtered_entities or re.search(r'\b(đạo diễn|bộ phim|nhà khoa học|giáo sư|thành phố|thị trấn|ca sĩ|nhạc sĩ|tổng thống|giải thưởng|cuộc thi)\b', q_lower):
+            has_asr = True
+            if filtered_entities:
+                asr_keywords.extend(filtered_entities)
+            if years:
+                asr_keywords.extend(years)
+
+        if has_asr and not asr_keywords:
             clean_q = re.sub(r'[^\w\s]', ' ', query_text)
             words = [w for w in clean_q.split() if len(w) > 1 and w.lower() not in ["trong", "khi", "người", "đang", "của", "và", "là", "cho", "vào", "đoạn", "video", "clip"]]
             asr_keywords = words[:8]
 
-        # Trọng số WRRF chuẩn hóa
+        # Trọng số WRRF chuẩn hóa với Entity Boosting
         w_visual = 1.0
-        w_ocr = 1.5 if has_ocr else 0.0
-        w_asr = 1.2 if has_asr else 0.0
+        w_ocr = 3.0 if (has_ocr and filtered_entities) else (1.8 if has_ocr else 0.0)
+        w_asr = 3.0 if (has_asr and (filtered_entities or years)) else (1.8 if has_asr else 0.0)
 
         return {
             "has_ocr": has_ocr,

@@ -318,11 +318,17 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
         </div>
         """, unsafe_allow_html=True)
 
-        # Hàng nút điều khiển chính & Bộ chọn Top-K
-        col_btn_gpu, col_topk, col_filter = st.columns([1.5, 1.2, 1.3])
+        # Hàng nút điều khiển chính: SOTA Cân Bằng, Boost ASR, Boost OCR
+        st.markdown("##### ⚡ Điều Khiển Chạy Lại & Tăng Cường Đa Phương Thức (Modality Boost Controls):")
+        col_btn_gpu, col_btn_asr, col_btn_ocr = st.columns([1.4, 1.3, 1.3])
         with col_btn_gpu:
-            run_gpu_btn = st.button("⚡ Chạy Lại Riêng Câu Này Trên GPU (SOTA Engine)", type="primary", use_container_width=True)
+            run_gpu_btn = st.button("⚡ SOTA Engine (Tự Động)", type="primary", use_container_width=True, help="Tự động nhận diện thực thể và cân bằng đa phương thức")
+        with col_btn_asr:
+            run_asr_btn = st.button("🎙️ Boost ASR (3.5x - Lời Thoại)", use_container_width=True, help="Ưu tiên cực cao cho lời thuyết minh, phỏng vấn, tên riêng, năm sản xuất, đạo diễn...")
+        with col_btn_ocr:
+            run_ocr_btn = st.button("🔤 Boost OCR (3.5x - Chữ Viết)", use_container_width=True, help="Ưu tiên cực cao cho chữ viết trên màn hình, biển báo, số áo, logo...")
 
+        col_topk, col_filter, col_adv = st.columns([1.1, 1.2, 1.7])
         with col_topk:
             display_top_k = st.selectbox(
                 "👀 Số lượng ứng viên hiển thị:",
@@ -334,14 +340,31 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
         with col_filter:
             filter_kw = st.text_input("🔍 Lọc nhanh theo Video ID:", placeholder="ví dụ: L26, L30...", key="filter_vid_kw")
 
-        if run_gpu_btn:
-            with st.spinner("Đang chạy mô hình AI trên GPU..."):
+        with col_adv:
+            with st.expander("⚙️ Tùy Chỉnh Trọng Số Chi Tiết (Custom Weights)", expanded=False):
+                custom_w_asr = st.slider("🎙️ Trọng số ASR (Lời thoại):", 0.0, 5.0, 1.8, 0.2, key="slider_w_asr")
+                custom_w_ocr = st.slider("🔤 Trọng số OCR (Chữ in):", 0.0, 5.0, 1.8, 0.2, key="slider_w_ocr")
+
+        if run_gpu_btn or run_asr_btn or run_ocr_btn:
+            override_asr = 3.5 if run_asr_btn else (custom_w_asr if run_gpu_btn else 0.0)
+            override_ocr = 3.5 if run_ocr_btn else (custom_w_ocr if run_gpu_btn else 0.0)
+
+            status_label = "🎙️ Đang chạy với ASR Boost 3.5x..." if run_asr_btn else ("🔤 Đang chạy với OCR Boost 3.5x..." if run_ocr_btn else "⚡ Đang chạy SOTA Engine...")
+            with st.spinner(status_label):
                 if task_tag == "QA":
                     preds, info, lat = engine.search_qa(q_content, top_k=100, use_intra_reranker=True, use_cue=True, use_multimodal=True, use_rrf=True)
                 elif task_tag == "TRAKE":
                     preds, info, lat = engine.search_trake(q_content, top_k=100, use_multi_query=True, use_event_coverage=True, use_row_norm_dp=True, use_segmental_dp=True)
                 else:
-                    preds, info, lat = engine.search_kis(q_content, top_k=100, use_intra_reranker=True, use_dense_video_refiner=False)
+                    preds, info, lat = engine.search_kis(
+                        q_content,
+                        top_k=100,
+                        use_intra_reranker=True,
+                        use_multimodal=True,
+                        use_rrf=True,
+                        w_asr_override=override_asr,
+                        w_ocr_override=override_ocr
+                    )
 
                 with open(target_csv_path, "w", encoding="utf-8") as f:
                     for p in preds:
