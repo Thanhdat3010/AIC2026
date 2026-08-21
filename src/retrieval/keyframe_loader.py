@@ -142,6 +142,15 @@ class KeyframeZipLoader:
         # Fallback 25 fps
         return float(frame_idx) / 25.0
 
+    def get_nearest_frame_from_time(self, video_id: str, time_sec: float) -> int:
+        """Tra cứu chính xác frame_idx từ mốc thời gian giây dựa trên frames.parquet (chuẩn 100% BTC)."""
+        df_v = self.df_frames[self.df_frames["video_id"] == video_id]
+        if df_v.empty:
+            return int(time_sec * 25.0)
+        diffs = (df_v["pts_time"] - time_sec).abs()
+        nearest_row = df_v.loc[diffs.idxmin()]
+        return int(nearest_row["frame_idx"])
+
     def get_dense_video_frame(self, video_id: str, frame_idx: int) -> Image.Image:
         """
         Trích xuất frame video chính xác từng frame từ file MP4 gốc qua OpenCV.

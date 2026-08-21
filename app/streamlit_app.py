@@ -487,18 +487,20 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                         "Nhập mốc thời gian (MM:SS hoặc Giây):",
                         value=cur_min_sec,
                         key=f"ts_input_{selected_q_name}_{insp_vid}",
-                        help="Ví dụ nhập 01:24 hoặc 84.5 để tự động quy đổi ra frame chính xác"
+                        help="Ví dụ nhập 02:59 hoặc 179.2 để tự động tra cứu frame chuẩn xác trong frames.parquet"
                     )
                 
-                # Tính frame từ text input
+                # Tính frame từ text input dựa trên frames.parquet
                 calc_frame_from_ts = insp_fidx
                 try:
-                    if ":" in ts_text_input:
-                        m_str, s_str = ts_text_input.strip().split(":")
-                        total_sec = float(m_str) * 60.0 + float(s_str)
-                    else:
-                        total_sec = float(ts_text_input.strip())
-                    calc_frame_from_ts = int(total_sec * 25.0) # Chuẩn 25 FPS
+                    if ts_text_input.strip():
+                        if ":" in ts_text_input:
+                            m_str, s_str = ts_text_input.strip().split(":")
+                            total_sec = float(m_str) * 60.0 + float(s_str)
+                        else:
+                            total_sec = float(ts_text_input.strip())
+                        # Tra cứu frame gần nhất trong frames.parquet
+                        calc_frame_from_ts = keyframe_loader.get_nearest_frame_from_time(insp_vid, total_sec)
                 except Exception:
                     calc_frame_from_ts = insp_fidx
 
@@ -508,12 +510,16 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                         min_value=0,
                         max_value=300000,
                         value=calc_frame_from_ts,
-                        step=5,
+                        step=1,
                         key=f"custom_fidx_{selected_q_name}_{insp_vid}"
                     )
 
+                # Mốc thời gian chính xác của frame đang chọn
+                exact_pts_chosen = keyframe_loader.get_pts_time(insp_vid, custom_f_input)
+                exact_pts_str = f"{int(exact_pts_chosen//60):02d}:{int(exact_pts_chosen%60):02d}"
+
                 # Nút Chốt làm Rank 1
-                if st.button(f"📌 Chốt Đúng Mốc Này (Frame {custom_f_input}) Làm Rank #1", type="primary", use_container_width=True):
+                if st.button(f"📌 Chốt Đúng Mốc Này: `{insp_vid}` - Frame {custom_f_input} ({exact_pts_str}) Làm Rank #1", type="primary", use_container_width=True):
                     if rows[0][0] == insp_vid:
                         rows[0][1] = str(custom_f_input)
                     else:
@@ -526,15 +532,15 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                         for row_item in rows:
                             f.write(",".join(row_item) + "\n")
                     sync_submission_zip(output_dir, zip_output_path)
-                    st.success(f"🎉 Đã chốt Rank #1: `{insp_vid}` - Frame `{custom_f_input}` ({int((custom_f_input/25)//60):02d}:{int((custom_f_input/25)%60):02d}) & tự động cập nhật submission.zip!")
+                    st.success(f"🎉 Đã chốt Rank #1: `{insp_vid}` - Frame `{custom_f_input}` ({exact_pts_str}) & tự động cập nhật submission.zip!")
                     st.rerun()
 
             with col_kf_strip:
                 st.markdown("#### 🎞️ Dải Phim Ngữ Cảnh & Xem Trước Frame")
-                # Hiển thị ảnh trích xuất trực tiếp tại frame đang chọn
-                live_preview_img = keyframe_loader.get_dense_video_frame(insp_vid, custom_f_input) or keyframe_loader.get_keyframe_image(insp_vid, custom_f_input)
+                # Hiển thị ảnh chuẩn 100% từ tập Keyframe gốc trước, fallback OpenCV
+                live_preview_img = keyframe_loader.get_keyframe_image(insp_vid, custom_f_input) or keyframe_loader.get_dense_video_frame(insp_vid, custom_f_input)
                 if live_preview_img:
-                    st.image(live_preview_img, caption=f"📸 Khung hình thực tế tại Frame {custom_f_input} ({int((custom_f_input/25)//60):02d}:{int((custom_f_input/25)%60):02d})", use_container_width=True)
+                    st.image(live_preview_img, caption=f"📸 Khung hình chuẩn xác tại Frame {custom_f_input} ({exact_pts_str})", use_container_width=True)
 
                 st.markdown("**Dải Keyframe lân cận (Click để gán tức thì):**")
                 surr_kfs = keyframe_loader.get_surrounding_keyframes(insp_vid, custom_f_input, count=8)
