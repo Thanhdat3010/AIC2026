@@ -365,8 +365,82 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                         parts = line.split(",")
                         rows.append(parts)
 
+        # Khu vực Thêm Thủ Công Clip & Frame Đúng
+        with st.expander("➕ **THÊM / CHÈN THỦ CÔNG CLIP & FRAME ĐÚNG (MANUAL OVERRIDE)**", expanded=False):
+            st.markdown("Nhập chính xác mã Video và Frame Index (hoặc Đáp án QA / Chuỗi TRAKE) để ghim thẳng lên đầu bảng kết quả:")
+            if task_tag == "QA":
+                c_in1, c_in2, c_in3 = st.columns([1.2, 1.2, 2.0])
+            elif task_tag == "TRAKE":
+                c_in1, c_in2, c_in3 = st.columns([1.2, 1.2, 2.0])
+            else:
+                c_in1, c_in2 = st.columns([1.5, 1.5])
+                c_in3 = None
+
+            with c_in1:
+                man_vid = st.text_input("🎬 Mã Video (Video ID):", placeholder="VD: L22_V022", key=f"man_vid_{selected_q_name}").strip()
+            with c_in2:
+                man_frame = st.number_input("🖼️ Frame Index:", min_value=0, max_value=500000, value=0, step=1, key=f"man_frame_{selected_q_name}")
+            
+            man_qa_ans = ""
+            man_trake_events = ""
+            if task_tag == "QA" and c_in3:
+                with c_in3:
+                    man_qa_ans = st.text_input("💬 Đáp án QA (Answer text):", placeholder="VD: Đèo Ngang", key=f"man_qa_{selected_q_name}").strip()
+            elif task_tag == "TRAKE" and c_in3:
+                with c_in3:
+                    man_trake_events = st.text_input("⏱️ Chuỗi frames (phân cách bằng dấu phẩy):", placeholder="VD: 6080,6536,10184", key=f"man_trake_{selected_q_name}").strip()
+
+            c_act1, c_act2, c_spacer = st.columns([1.5, 1.3, 2.0])
+            with c_act1:
+                btn_set_r1 = st.button("👑 Đặt Làm Rank #1 Ngay Lập Tức", key=f"btn_man_r1_{selected_q_name}", use_container_width=True)
+            with c_act2:
+                btn_append = st.button("➕ Thêm Vào Cuối Danh Sách", key=f"btn_man_app_{selected_q_name}", use_container_width=True)
+
+            if btn_set_r1 or btn_append:
+                if not man_vid:
+                    st.error("⚠️ Vui lòng nhập Mã Video (Video ID)!")
+                else:
+                    # Chuẩn hóa tên video
+                    clean_vid = man_vid.replace(".mp4", "").replace(".MP4", "").strip()
+                    if task_tag == "QA":
+                        clean_ans = man_qa_ans.replace('"', '""')
+                        new_row = [clean_vid, str(int(man_frame)), f'"{clean_ans}"']
+                    elif task_tag == "TRAKE":
+                        if man_trake_events:
+                            ev_list = [str(int(x.strip())) for x in man_trake_events.split(",") if x.strip().isdigit()]
+                            new_row = [clean_vid] + (ev_list if ev_list else [str(int(man_frame))])
+                        else:
+                            new_row = [clean_vid, str(int(man_frame))]
+                    else:
+                        new_row = [clean_vid, str(int(man_frame))]
+
+                    # Xóa phần tử cũ nếu trùng (video_id, frame_idx)
+                    rows = [r for r in rows if not (r[0] == clean_vid and len(r) > 1 and r[1] == str(int(man_frame)))]
+
+                    if btn_set_r1:
+                        rows.insert(0, new_row)
+                    else:
+                        rows.append(new_row)
+
+                    # Giữ tối đa 100 dòng
+                    rows = rows[:100]
+
+                    with open(target_csv_path, "w", encoding="utf-8") as f:
+                        for row_item in rows:
+                            f.write(",".join(row_item) + "\n")
+
+                    sync_submission_zip(output_dir, zip_output_path)
+                    st.session_state["inspect_target"] = {
+                        "query": selected_q_name,
+                        "video_id": clean_vid,
+                        "frame_idx": int(man_frame),
+                        "rank": 1 if btn_set_r1 else len(rows)
+                    }
+                    st.success(f"✅ Đã thêm `{clean_vid}` (Frame `{man_frame}`) vào vị trí {'Rank #1' if btn_set_r1 else 'cuối'} và đồng bộ file nộp bài!")
+                    st.rerun()
+
         if not rows:
-            st.info("Chưa có kết quả dự đoán nào cho câu hỏi này. Hãy bấm 'Chạy Lại Riêng Câu Này Trên GPU' ở trên.")
+            st.info("Chưa có kết quả dự đoán nào cho câu hỏi này. Hãy bấm 'Chạy Lại Riêng Câu Này Trên GPU' ở trên hoặc thêm thủ công ở khung phía trên.")
         else:
             # Lọc theo từ khóa nếu có
             filtered_rows_with_idx = []
