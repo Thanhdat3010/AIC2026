@@ -6,7 +6,10 @@ from tqdm import tqdm
 from src.config import settings
 
 def process_videos(raw_dir: Path, out_dir: Path):
-    media_zip_path = raw_dir / "media-info-aic25-b1.zip"
+    media_zips = list(raw_dir.glob("media-info*.zip"))
+    if not media_zips:
+        raise FileNotFoundError(f"Không tìm thấy media-info*.zip trong {raw_dir}")
+    media_zip_path = media_zips[0]
     
     videos_data = []
     

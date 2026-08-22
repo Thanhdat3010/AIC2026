@@ -1,3 +1,4 @@
+import json
 import zipfile
 import io
 import pandas as pd
@@ -5,10 +6,14 @@ from pathlib import Path
 from tqdm import tqdm
 
 def process_frames(raw_dir: Path, out_dir: Path, videos_df: pd.DataFrame):
-    map_zip_path = raw_dir / "map-keyframes-aic25-b1.zip"
+    map_zips = list(raw_dir.glob("map-keyframes*.zip"))
+    if not map_zips:
+        raise FileNotFoundError(f"Không tìm thấy map-keyframes*.zip trong {raw_dir}")
+    map_zip_path = map_zips[0]
     
     frames_data = []
     video_ranges = []
+    video_zip_map = {}
     
     global_id_counter = 0
     
@@ -20,6 +25,9 @@ def process_frames(raw_dir: Path, out_dir: Path, videos_df: pd.DataFrame):
         
         for f in tqdm(csv_files, desc="Processing Keyframe Mappings"):
             video_id = Path(f).stem
+            prefix = video_id.split('_')[0]
+            video_zip_map[video_id] = f"Keyframes/Keyframes_{prefix}.zip"
+
             length = video_lengths.get(video_id, 1.0)
             if length == 0:
                 length = 1.0 # prevent division by zero
@@ -64,9 +72,12 @@ def process_frames(raw_dir: Path, out_dir: Path, videos_df: pd.DataFrame):
     # Save Parquet
     frames_path = out_dir / "frames.parquet"
     ranges_path = out_dir / "video_ranges.parquet"
+    zip_map_path = out_dir / "video_zip_map.json"
     
     frames_df.to_parquet(frames_path, index=False)
     ranges_df.to_parquet(ranges_path, index=False)
+    with open(zip_map_path, "w", encoding="utf-8") as f:
+        json.dump(video_zip_map, f, ensure_ascii=False, indent=2)
     
     # Merge video ranges into videos_df and overwrite
     final_videos_df = pd.merge(videos_df, ranges_df, on="video_id", how="left")
@@ -75,6 +86,8 @@ def process_frames(raw_dir: Path, out_dir: Path, videos_df: pd.DataFrame):
     
     print(f"Saved {len(frames_df)} frames to {frames_path}")
     print(f"Saved {len(ranges_df)} video ranges to {ranges_path}")
+    print(f"Saved {len(video_zip_map)} zip mappings to {zip_map_path}")
     print(f"Updated videos.parquet with ranges")
     
     return frames_df
+

@@ -7,21 +7,12 @@ from collections import defaultdict
 import gc
 
 def process_objects(raw_dir: Path, out_dir: Path, frames_df: pd.DataFrame):
-    obj_zip_path = raw_dir / "objects-aic25-b1.zip"
+    obj_zips = list(raw_dir.glob("objects*.zip"))
+    if not obj_zips:
+        raise FileNotFoundError(f"Không tìm thấy objects*.zip trong {raw_dir}")
+    obj_zip_path = obj_zips[0]
     obj_out_dir = out_dir / "objects"
     obj_out_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Create lookup for fast global_id resolution
-    # Mapping: (video_id, keyframe_index) -> global_id
-    # Wait, the object files are named like `L21_V001/0001.json` but wait, BTC structure says:
-    # "không nên hard-code số lượng chữ số của tên keyframe... match bằng filename stem"
-    # Actually, the file stem (e.g. '0024' or '24') is usually the 'n' in the mapping, but we should parse it as integer if possible.
-    # Alternatively, we can use the order of files if they are sorted, but using the stem as integer keyframe_index is safer.
-    
-    # Let's map video_id -> list of global_ids in order
-    # Wait, we know global_id is contiguous. Let's build a dict: video_id -> {keyframe_index: global_id}
-    # Wait, keyframe name in objects is like `0024.json`. 
-    # Usually `0024` means `n=24`. Let's map `int(stem)` to `n`.
     
     vid_to_n_to_global = defaultdict(dict)
     for _, row in frames_df.iterrows():
@@ -29,12 +20,11 @@ def process_objects(raw_dir: Path, out_dir: Path, frames_df: pd.DataFrame):
         
     summary_data = []
     
-    # We will process batch by batch (L21, L22...) to avoid memory overflow
+    # We will process batch by batch (L21, K01...) to avoid memory overflow
     current_batch_prefix = None
     batch_data = []
     
     with zipfile.ZipFile(obj_zip_path, 'r') as z:
-        # Filter and sort files (e.g., objects/L21_V001/001.json)
         json_files = sorted([f for f in z.namelist() if f.endswith('.json')])
         
         for f in tqdm(json_files, desc="Processing Object JSONs"):
@@ -42,17 +32,15 @@ def process_objects(raw_dir: Path, out_dir: Path, frames_df: pd.DataFrame):
             if len(parts) < 2:
                 continue
                 
-            # Usually path is something like `objects/L21_V001/024.json`
+            # Usually path is something like `objects/L21_V001/024.json` or `objects/K01_V001/024.json`
             video_id = parts[-2]
-            if not video_id.startswith('L'):
-                # fallback if structure is L21_V001/024.json directly
+            if '_' not in video_id:
                 video_id = parts[0]
                 
             stem = Path(f).stem
             try:
                 keyframe_index = int(stem)
             except ValueError:
-                # If stem is not int, we skip or handle differently, but usually it's a number
                 continue
                 
             global_id = vid_to_n_to_global.get(video_id, {}).get(keyframe_index)
