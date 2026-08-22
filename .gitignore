@@ -11,6 +11,7 @@ __pycache__/
 *.mp4
 *.tar
 *.gz
+*.exe
 
 # Ignore data folder contents but preserve structure via .gitkeep
 raw/**

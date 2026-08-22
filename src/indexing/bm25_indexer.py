@@ -4,6 +4,7 @@ import re
 import pickle
 import time
 from pathlib import Path
+import numpy as np
 import pandas as pd
 from rank_bm25 import BM25Okapi
 
@@ -223,16 +224,21 @@ class BM25MultiIndexer:
         tokens = tokenize_text(query_text)
         if not tokens:
             return []
-        scores = self.ocr_index.get_scores(tokens)
-        top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:top_k]
+        scores = np.asarray(self.ocr_index.get_scores(tokens), dtype=np.float32)
+        if len(scores) == 0 or np.max(scores) <= 0:
+            return []
+        k = min(top_k, len(scores))
+        top_indices = np.argpartition(-scores, k)[:k]
+        top_indices = top_indices[np.argsort(-scores[top_indices])]
         
         results = []
         for rank, idx in enumerate(top_indices, 1):
-            if scores[idx] <= 0:
+            sc = float(scores[idx])
+            if sc <= 0:
                 break
             doc = self.ocr_docs[idx].copy()
             doc["rank"] = rank
-            doc["score"] = float(scores[idx])
+            doc["score"] = sc
             results.append(doc)
         return results
 
@@ -242,16 +248,21 @@ class BM25MultiIndexer:
         tokens = tokenize_text(query_text)
         if not tokens:
             return []
-        scores = self.asr_index.get_scores(tokens)
-        top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:top_k]
+        scores = np.asarray(self.asr_index.get_scores(tokens), dtype=np.float32)
+        if len(scores) == 0 or np.max(scores) <= 0:
+            return []
+        k = min(top_k, len(scores))
+        top_indices = np.argpartition(-scores, k)[:k]
+        top_indices = top_indices[np.argsort(-scores[top_indices])]
         
         results = []
         for rank, idx in enumerate(top_indices, 1):
-            if scores[idx] <= 0:
+            sc = float(scores[idx])
+            if sc <= 0:
                 break
             doc = self.asr_docs[idx].copy()
             doc["rank"] = rank
-            doc["score"] = float(scores[idx])
+            doc["score"] = sc
             # Chọn frame đại diện ở giữa đoạn thoại
             mid_frame = (doc["start_frame"] + doc["end_frame"]) // 2
             doc["frame_idx"] = mid_frame

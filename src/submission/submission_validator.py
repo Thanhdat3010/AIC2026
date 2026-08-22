@@ -77,6 +77,8 @@ class SubmissionValidator:
                     return {"valid": False, "error": f"Dòng {r_idx} có frame_idx không phải số nguyên ({row[1]})"}
 
                 answer = ",".join(row[2:]).strip()
+                if not answer:
+                    return {"valid": False, "error": f"Dòng {r_idx} trong {file_path.name} câu trả lời QA bị rỗng (Answer cannot be empty)!"}
                 if len(answer) > 100:
                     return {"valid": False, "error": f"Dòng {r_idx} câu trả lời QA vượt quá 100 ký tự ({len(answer)} ký tự)"}
 

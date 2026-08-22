@@ -90,7 +90,7 @@ class LLMSemanticJudge:
         if cache_key in self.cache:
             return self.cache[cache_key]
 
-        # 3. Gọi Gemini 3.5 Flash Lite Judge
+        # 3. Gọi Gemini 3.5 Flash Lite Judge với cơ chế xoay tua Key Pool
         try:
             from src.query.gemini_router import GeminiKeyPool
             from google import genai
@@ -99,15 +99,16 @@ class LLMSemanticJudge:
             if self._key_pool is None:
                 self._key_pool = GeminiKeyPool()
 
-            api_key = self._key_pool.get_next_key()
-            if not api_key:
-                # Fallback rule-based nếu không có key
+            keys = list(self._key_pool.gemini_keys)
+            if not keys:
                 res = is_qa_match_fast(pred_answer, gt_answer)
                 self.cache[cache_key] = res
                 self._save_cache()
                 return res
 
-            client = genai.Client(api_key=api_key)
+            import random
+            random.shuffle(keys)
+
             prompt = f"""Bạn là Giám khảo AI chính thức của cuộc thi AI Challenge TP.HCM.
 Nhiệm vụ: Hãy so sánh Câu trả lời của thí sinh với Đáp án chuẩn (Ground Truth) trong ngữ cảnh câu hỏi và xác định xem câu trả lời của thí sinh có ĐÚNG NGỮ NGHĨA và CÙNG THÔNG TIN CỐT LÕI hay không.
 
@@ -122,22 +123,33 @@ Quy tắc chấm điểm:
 Chỉ trả về duy nhất định dạng JSON:
 {{"is_match": true}} hoặc {{"is_match": false}}
 """
-            resp = client.models.generate_content(
-                model="gemini-3.5-flash-lite",
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    temperature=0.0
-                )
-            )
-            res_json = json.loads(resp.text.strip())
-            is_match = bool(res_json.get("is_match", False))
-            self.cache[cache_key] = is_match
-            self._save_cache()
-            return is_match
+            for api_key in keys:
+                try:
+                    client = genai.Client(api_key=api_key)
+                    resp = client.models.generate_content(
+                        model="gemini-3.5-flash-lite",
+                        contents=prompt,
+                        config=types.GenerateContentConfig(
+                            response_mime_type="application/json",
+                            temperature=0.0
+                        )
+                    )
+                    if resp and resp.text:
+                        res_json = json.loads(resp.text.strip())
+                        is_match = bool(res_json.get("is_match", False))
+                        self.cache[cache_key] = is_match
+                        self._save_cache()
+                        return is_match
+                except Exception:
+                    continue
 
-        except Exception as e:
-            # Fallback
+            # Fallback nếu toàn bộ key bị lỗi
+            res = is_qa_match_fast(pred_answer, gt_answer)
+            self.cache[cache_key] = res
+            self._save_cache()
+            return res
+
+        except Exception:
             res = is_qa_match_fast(pred_answer, gt_answer)
             self.cache[cache_key] = res
             self._save_cache()

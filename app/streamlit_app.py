@@ -14,7 +14,9 @@ from PIL import Image
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.retrieval.task_specialized_engine import TaskSpecializedEngine
+from src.retrieval.unified_search_core import UnifiedSearchCore
+from src.query.llm_query_refiner import LLMQueryRefiner
+from src.tasks.clean_task_handlers import KISHandler, QAHandler, TRAKEHandler
 from src.retrieval.keyframe_loader import KeyframeZipLoader
 from src.retrieval.video_player_manager import VideoPlayerManager
 from src.submission.submission_validator import SubmissionValidator
@@ -85,8 +87,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 @st.cache_resource
-def get_engine():
-    return TaskSpecializedEngine(engine="siglip2", batch="batch_1")
+def get_search_core():
+    return UnifiedSearchCore(engine="siglip2", batch="batch_1")
+
+@st.cache_resource
+def get_llm_refiner():
+    return LLMQueryRefiner()
 
 @st.cache_resource
 def get_keyframe_loader():
@@ -100,7 +106,12 @@ def get_video_manager():
 def get_validator():
     return SubmissionValidator()
 
-engine = get_engine()
+search_core = get_search_core()
+llm_refiner = get_llm_refiner()
+kis_handler = KISHandler(search_core, llm_refiner)
+qa_handler = QAHandler(search_core, llm_refiner)
+trake_handler = TRAKEHandler(search_core, llm_refiner)
+
 keyframe_loader = get_keyframe_loader()
 video_manager = get_video_manager()
 validator = get_validator()
@@ -147,7 +158,7 @@ def parse_trake_subevents(query_text: str) -> list[str]:
 with st.sidebar:
     st.image("https://img.shields.io/badge/AIC_2026-CHAMPIONSHIP_CONSOLE-gold?style=for-the-badge&logo=google", use_container_width=True)
     st.header("⚙️ Trung tâm Điều khiển")
-    st.caption("Engine: **Google SigLIP-2 (1152d)** + **Gemini 2.5 Flash Lite** + **On-Demand Video Player**")
+    st.caption("Engine: **Google SigLIP-2 (1152d)** + **Gemini 3.5 Flash Lite** + **On-Demand Video Player**")
     
     st.divider()
     active_tab = st.radio(
@@ -167,34 +178,41 @@ if active_tab == "📊 Báo Cáo Thí Nghiệm & Ablation Leaderboard":
     st.caption("Bảng tổng sắp hiệu năng 47 test cases chuẩn BTC trên tập dữ liệu Video Retrieval")
 
     # Load dữ liệu benchmark mới nhất
-    latest_res_file = PROJECT_ROOT / "data" / "benchmark" / "latest_ablation_results.json"
-    if latest_res_file.exists():
-        with open(latest_res_file, "r", encoding="utf-8") as f:
-            bench_data = json.load(f)
+    ablation_summary_file = PROJECT_ROOT / "data" / "benchmark" / "ablation_study_summary.json"
+    if ablation_summary_file.exists():
+        with open(ablation_summary_file, "r", encoding="utf-8") as f:
+            all_summaries = json.load(f)
 
-        s = bench_data.get("summary", {})
-        m1, m2, m3, m4 = st.columns(4)
-        with m1:
-            st.metric("🏆 Macro BTC Score", f"{s.get('final_score', 0.0):.4f}", "Config 25 Quán Quân")
-        with m2:
-            st.metric("🎯 Video Recall@100", f"{s.get('video_recall_100', 0.0):.1f}%", "46/47 Video")
-        with m3:
-            st.metric("🥇 Video Recall@1", f"{s.get('video_recall_1', 0.0):.1f}%", "Rank 1 Tuyệt Đối")
-        with m4:
-            st.metric("⚡ Độ trễ TB", f"{s.get('latency_ms', 0.0):.0f} ms", "Real-time Ready")
+        if all_summaries:
+            best_s = max(all_summaries, key=lambda x: x.get("macro_score", 0.0))
+            m1, m2, m3, m4 = st.columns(4)
+            with m1:
+                st.metric("🏆 Top Macro BTC Score", f"{best_s.get('macro_score', 0.0):.4f}", f"Cấu hình {best_s.get('config_id')}")
+            with m2:
+                st.metric("🎯 Video Recall@100", f"{best_s.get('video_r100', 0.0):.1%}", "Toàn bộ tập test")
+            with m3:
+                st.metric("🥇 Video Recall@1", f"{best_s.get('video_r1', 0.0):.1%}", "Rank 1 Tuyệt Đối")
+            with m4:
+                st.metric("⚡ Độ trễ trung bình", f"{best_s.get('avg_latency_ms', 0.0):.0f} ms", "Real-time Ready")
 
-        st.divider()
+            st.divider()
 
-        # Bảng Leaderboard
-        st.subheader("🥇 Bảng Tổng Sắp Cấu Hình (Leaderboard)")
-        lb_records = [
-            {"Cấu hình": "Config 25 (WRRF SOTA)", "Macro": 0.5532, "KIS": 0.6500, "QA": 0.3714, "TRAKE": 0.5200, "Video-R@100": "97.9%", "Video-R@20": "87.2%", "Status": "🥇 Quán Quân"},
-            {"Cấu hình": "Config 22 (Baseline SOTA)", "Macro": 0.5415, "KIS": 0.6286, "QA": 0.3714, "TRAKE": 0.5300, "Video-R@100": "93.6%", "Video-R@20": "80.9%", "Status": "🥈 Top 2"},
-            {"Cấu hình": "Config 24 (Dual Indexing)", "Macro": 0.5064, "KIS": 0.6214, "QA": 0.2857, "TRAKE": 0.4800, "Video-R@100": "91.5%", "Video-R@20": "80.9%", "Status": "🥉 Top 3"},
-            {"Cấu hình": "Config 23 (Fast Linguistic Gate)", "Macro": 0.5021, "KIS": 0.5786, "QA": 0.3286, "TRAKE": 0.5600, "Video-R@100": "93.6%", "Video-R@20": "80.9%", "Status": "#4"},
-            {"Cấu hình": "Config 26 (Master Tri-Modal)", "Macro": 0.4989, "KIS": 0.6000, "QA": 0.3000, "TRAKE": 0.4900, "Video-R@100": "95.7%", "Video-R@20": "83.0%", "Status": "#5"}
-        ]
-        st.dataframe(pd.DataFrame(lb_records), use_container_width=True)
+            # Bảng Leaderboard Động
+            st.subheader("🥇 Bảng Tổng Sắp Đối Đầu Ablation Study (Ground Truth 47 Câu)")
+            df_lb = pd.DataFrame(all_summaries)
+            cols_map = {
+                "config_id": "Cấu Hình",
+                "macro_score": "Macro Score 🏆",
+                "kis_score": "KIS Score",
+                "qa_score": "QA Score",
+                "trake_score": "TRAKE Score",
+                "video_r20": "Video-R@20",
+                "video_r100": "Video-R@100",
+                "avg_latency_ms": "Độ Trễ (ms)"
+            }
+            display_cols = [c for c in cols_map.keys() if c in df_lb.columns]
+            df_display = df_lb[display_cols].rename(columns=cols_map).sort_values(by="Macro Score 🏆", ascending=False)
+            st.dataframe(df_display, use_container_width=True)
 
 # =============================================================================
 # TAB 2: DUYỆT & CHỈNH SỬA KẾT QUẢ NỘP BÀI (SUBMISSION CONSOLE - REALTIME)
@@ -638,7 +656,13 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                             t_sec = float(clean_ts)
 
                         # Tính chính xác frame theo FPS thực của video
-                        new_f = keyframe_loader.get_exact_frame_from_time(insp_vid, t_sec)
+                        if hasattr(keyframe_loader, "get_exact_frame_from_time"):
+                            new_f = keyframe_loader.get_exact_frame_from_time(insp_vid, t_sec)
+                        else:
+                            # Fallback tra cứu trực tiếp qua df_frames nếu instance cũ chưa cập nhật method
+                            df_v = keyframe_loader.df_frames[keyframe_loader.df_frames["video_id"] == insp_vid]
+                            fps = float(df_v.iloc[0]["fps"]) if not df_v.empty and "fps" in df_v.columns and float(df_v.iloc[0]["fps"]) > 0 else 25.0
+                            new_f = int(round(t_sec * fps))
 
                         st.session_state[fidx_widget_key] = new_f
                         st.session_state["inspect_target"]["frame_idx"] = new_f
@@ -879,48 +903,62 @@ else:
     st.title("🔍 AIC 2026: Live Multimodal Search Engine")
     st.caption("Truy vấn đa phương thức tiếng Việt với định tuyến thông minh theo Task (KIS / QA / TRAKE)")
 
-    col1, col2, col3 = st.columns([2, 1, 1])
+    col1, col2 = st.columns([3, 1])
     with col1:
         query_text = st.text_input("🔍 Nhập câu truy vấn tiếng Việt:", placeholder="ví dụ: Người thợ gốm nhào đất trên bàn xoay...")
     with col2:
-        task_choice = st.selectbox("Loại bài toán:", ["Auto (Gemini Router)", "KIS (Khoảnh khắc)", "QA (Hỏi - Đáp)", "TRAKE (Chuỗi hành động)"])
-    with col3:
-        use_layer3 = st.toggle("Kích hoạt GPU Layer 3 (Vi sai)", value=False)
+        task_choice = st.selectbox("Loại bài toán:", ["Auto (LLM Refiner)", "KIS (Khoảnh khắc)", "QA (Hỏi - Đáp)", "TRAKE (Chuỗi hành động)"])
 
     if st.button("🚀 Bắt đầu Tìm kiếm", type="primary", use_container_width=True):
         if not query_text.strip():
             st.warning("Vui lòng nhập nội dung truy vấn!")
         else:
-            with st.spinner("Đang truy xuất và rerank qua mạng nơ-ron trên GPU..."):
+            with st.spinner("Đang tiền xử lý qua LLM và truy xuất đa phương thức siêu tốc..."):
                 t0 = time.time()
-                if "KIS" in task_choice or task_choice == "Auto (Gemini Router)":
-                    preds, info, lat = engine.search_kis(query_text, top_k=50, use_intra_reranker=True, use_dense_video_refiner=use_layer3)
+                if "KIS" in task_choice or task_choice == "Auto (LLM Refiner)":
+                    preds, info, lat = kis_handler.search(query_text, top_k=50)
                 elif "QA" in task_choice:
-                    preds, info, lat = engine.search_qa(query_text, top_k=50, use_intra_reranker=True, use_cue=True, use_multimodal=True)
+                    preds, info, lat = qa_handler.search(query_text, top_k=50)
                 else:
-                    preds, info, lat = engine.search_trake(query_text, top_k=50)
+                    preds, info, lat = trake_handler.search(query_text, top_k=50)
 
                 total_ms = (time.time() - t0) * 1000
 
             st.success(f"✅ Hoàn tất trong {total_ms:.1f} ms | Tìm thấy {len(preds)} kết quả!")
             
-            if "generated_qa_answer" in info and info["generated_qa_answer"]:
-                st.info(f"💡 **Câu trả lời Visual Q&A:** `{info['generated_qa_answer']}`")
+            if "vlm_answer" in info and info["vlm_answer"]:
+                st.info(f"💡 **Câu trả lời Visual Q&A (VLM):** `{info['vlm_answer']}`")
+
+            if "refined" in info:
+                ref = info["refined"]
+                with st.expander("🧠 Chi tiết Tiền xử lý & Làm giàu truy vấn từ LLM Refiner"):
+                    st.json(ref)
 
             # Grid View Top 16
             cols = st.columns(4)
             for idx, cand in enumerate(preds[:16]):
                 with cols[idx % 4]:
                     vid = cand["video_id"]
-                    f_idx = cand["frame_idx"]
                     sc = cand.get("score", 0.0)
-                    img = keyframe_loader.get_keyframe_image(vid, f_idx)
                     
-                    st.markdown(f"<span class='rank-badge-normal'>Rank #{idx+1}</span> **{vid}** : `{f_idx}`", unsafe_allow_html=True)
-                    if img is not None:
-                        st.image(img, use_container_width=True)
+                    if "events" in cand and isinstance(cand["events"], list):
+                        # TRAKE multi-event sequence
+                        ev_str = " → ".join(str(e) for e in cand["events"])
+                        st.markdown(f"<span class='rank-badge-normal'>Rank #{idx+1}</span> **{vid}**", unsafe_allow_html=True)
+                        st.caption(f"Events: `{ev_str}`")
+                        first_f = int(cand["events"][0]) if cand["events"] else 0
+                        img = keyframe_loader.get_keyframe_image(vid, first_f)
+                        if img is not None:
+                            st.image(img, use_container_width=True, caption=f"E1: {first_f}")
                     else:
-                        st.info(f"Frame: {f_idx}")
-                    st.caption(f"Score: `{sc:.4f}`")
-                    if "answer" in cand and cand["answer"]:
-                        st.caption(f"Ans: `{cand['answer']}`")
+                        # KIS / QA single keyframe
+                        f_idx = int(cand.get("frame_idx", 0))
+                        img = keyframe_loader.get_keyframe_image(vid, f_idx)
+                        st.markdown(f"<span class='rank-badge-normal'>Rank #{idx+1}</span> **{vid}** : `{f_idx}`", unsafe_allow_html=True)
+                        if img is not None:
+                            st.image(img, use_container_width=True)
+                        else:
+                            st.info(f"Frame: {f_idx}")
+                        st.caption(f"Score: `{sc:.4f}`")
+                        if "answer" in cand and cand["answer"]:
+                            st.caption(f"Ans: `{cand['answer']}`")

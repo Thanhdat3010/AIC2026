@@ -113,47 +113,38 @@ class VisualQAAgent:
 
             contents = [img_full]
             
-            # Adaptive Evidence (P3): Không dùng Multi-crop cho đếm số hoặc ASR
-            if qa_modality in ["count", "asr", "visual"]:
-                use_local_crop = False
-            else:
-                use_local_crop = use_multi_crop
-
-            if use_local_crop:
-                crops = self._generate_multi_crops(img)
-                contents.extend(crops)
-                
-            # Tri-modal Context Injection
+            # Unified Multimodal Context Injection (Luôn nạp đầy đủ cả Ảnh + ASR [t±30s] + OCR)
             pts = self.frame_to_time.get((v_id, f_idx), 0.0)
             context_str = ""
             
             ocr_txt = self.video_frame_to_ocr.get((v_id, f_idx), "")
-            if ocr_txt and qa_modality in ["ocr", "visual"]:
-                context_str += f"\n[Hệ thống OCR nhận diện được (có thể chứa nhiễu)]: {ocr_txt}"
+            if ocr_txt:
+                context_str += f"\n[Chữ OCR hiển thị trên khung hình]: {ocr_txt}"
                 
             asr_texts = []
-            if qa_modality in ["asr", "visual"]:
-                for chunk in self.video_to_asr.get(v_id, []):
-                    # Mở rộng window cho ASR
-                    if chunk["start"] - 10.0 <= pts <= chunk["end"] + 10.0:
-                        asr_texts.append(chunk["text"])
+            for chunk in self.video_to_asr.get(v_id, []):
+                # Mở rộng cửa sổ thời gian lên 30s để bắt trọn lời thuyết minh/phỏng vấn
+                if chunk["start"] - 30.0 <= pts <= chunk["end"] + 30.0:
+                    asr_texts.append(chunk["text"])
             if asr_texts:
-                context_str += f"\n[Hệ thống ASR nghe được (có thể chứa nhiễu)]: {' | '.join(asr_texts)}"
+                context_str += f"\n[Lời thoại ASR thuyết minh quanh cảnh này]: {' | '.join(asr_texts)}"
                 
-            prompt = f"""Bạn là Giám khảo VLM (VLM Verifier) cho cuộc thi AI Challenge TP.HCM.
-Nhiệm vụ: Quan sát kỹ ảnh và các ngữ cảnh văn bản (nếu có) để trả lời câu hỏi (QA) bằng TIẾNG VIỆT ĐẦY ĐỦ Ý, CHÍNH XÁC VÀ ĐÚNG TRỌNG TÂM (đáp án dưới 100 ký tự).
-Đặc tính câu hỏi ({qa_modality}): Nếu là 'count', hãy đếm thật kỹ toàn cảnh. Nếu là 'ocr'/'asr', hãy đối chiếu văn bản cung cấp với hình ảnh.
+            prompt = f"""Bạn là Trợ lý VLM Thông minh (Multimodal Verifier) cho cuộc thi AI Challenge TP.HCM.
+Nhiệm vụ: Quan sát kỹ hình ảnh và kết hợp ngữ cảnh âm thanh/chữ viết để trả lời câu hỏi (QA) bằng TIẾNG VIỆT ĐẦY ĐỦ Ý, CHÍNH XÁC VÀ ĐÚNG TRỌNG TÂM (đáp án dưới 100 ký tự).
 
 Câu hỏi: {qa_question}{context_str}
 
-Trích xuất BẰNG CHỨNG (Evidence) rõ ràng từ hình ảnh để biện minh cho câu trả lời. Nếu hình ảnh không đủ thông tin để trả lời CHẮC CHẮN, hãy trả về status = "insufficient". Ngược lại, trả về status = "answer".
+Hướng dẫn phân tích đa phương thức:
+1. Nếu câu hỏi về số liệu thống kê/bản đồ/biểu đồ mờ khó nhìn bằng mắt, hãy chú ý đối chiếu với LỜI THOẠI ASR được thuyết minh quanh cảnh này.
+2. Nếu câu hỏi về màu sắc/vật thể/con số cụ thể trên hình, hãy quan sát kỹ bức ảnh và các chữ OCR.
+3. Nếu câu hỏi về thời gian/địa danh/tên người được nhắc đến trong đoạn hội thoại, hãy ưu tiên đọc phần Lời thoại ASR.
 
 Trả về ĐÚNG định dạng JSON thuần túy:
 {{
   "status": "answer" | "insufficient",
-  "answer": "câu trả lời của bạn",
+  "answer": "câu trả lời ngắn gọn, chính xác của bạn",
   "evidence": [
-    {{ "frame_id": {f_idx}, "observation": "Mô tả bằng chứng vật lý bạn nhìn thấy trong ảnh" }}
+    {{ "frame_id": {f_idx}, "observation": "Mô tả bằng chứng bạn nhìn thấy hoặc nghe thấy" }}
   ]
 }}"""
             contents.append(prompt)
