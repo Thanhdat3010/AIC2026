@@ -8,7 +8,6 @@ import shutil
 import zipfile
 import argparse
 from pathlib import Path
-from datetime import datetime
 
 # Force UTF-8 on Windows console
 if hasattr(sys.stdout, 'reconfigure'):
@@ -19,7 +18,8 @@ if hasattr(sys.stderr, 'reconfigure'):
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
-from src.retrieval.task_specialized_engine import TaskSpecializedEngine
+from src.tasks.clean_task_handlers import MasterPipelineRunner
+from src.submission.submission_validator import SubmissionValidator
 
 def clean_video_name(video_id: str) -> str:
     """Loại bỏ phần mở rộng .mp4 nếu có theo đúng quy chuẩn BTC."""
@@ -103,55 +103,9 @@ def parse_input_queries(input_path: Path) -> list[dict]:
 
     return queries
 
-def get_config_params(config_code: str = "22") -> dict:
-    """Trả về bộ cờ cấu hình tương thích 100% với evaluate_ablation.py."""
-    cfg = {
-        "config_code": config_code,
-        "config_name": f"Config {config_code}",
-        "engine": "siglip2",
-        "use_intra_reranker": True,
-        "use_neighbor": True,
-        "use_cue": True,
-        "use_multimodal": True,
-        "use_vlm_verification": True,
-        "use_dense_video_refiner": False,
-        "use_rrf": True,
-        "use_neighbor_expansion": True,
-        "use_multi_crop": True,
-        "use_multi_query": True,
-        "use_event_coverage": True,
-        "use_row_norm_dp": True,
-        "use_segmental_dp": True,
-    }
-    if config_code == "0":
-        cfg.update({"engine": "clip", "use_intra_reranker": False, "use_rrf": False, "use_multimodal": False, "use_segmental_dp": False})
-    elif config_code == "1":
-        cfg.update({"engine": "siglip2", "use_intra_reranker": False, "use_rrf": False, "use_multimodal": False, "use_segmental_dp": False})
-    elif config_code == "11":
-        cfg.update({"use_intra_reranker": False, "use_cue": False, "use_multimodal": False, "use_rrf": False, "use_segmental_dp": False})
-    elif config_code == "12":
-        cfg.update({"use_intra_reranker": True, "use_neighbor": True, "use_cue": False, "use_multimodal": False, "use_rrf": False, "use_segmental_dp": False})
-    elif config_code == "14":
-        cfg.update({"use_intra_reranker": True, "use_neighbor": True, "use_cue": True, "use_multimodal": True, "use_rrf": False, "use_segmental_dp": False})
-    elif config_code == "20":
-        cfg.update({"use_multi_query": True, "use_event_coverage": True, "use_row_norm_dp": False, "use_segmental_dp": False})
-    elif config_code == "21":
-        cfg.update({"use_multi_query": True, "use_event_coverage": True, "use_row_norm_dp": True, "use_segmental_dp": False})
-    elif config_code == "22":
-        cfg.update({"config_name": "Config 22 (Ablation 4 - Segmental DP)", "use_multi_query": True, "use_event_coverage": True, "use_row_norm_dp": True, "use_segmental_dp": True})
-    elif config_code == "23":
-        cfg.update({"config_name": "Config 23 (Ablation 5 - Fast Linguistic Gate)", "use_multi_query": True, "use_event_coverage": True, "use_row_norm_dp": True, "use_segmental_dp": True})
-    elif config_code == "24":
-        cfg.update({"config_name": "Config 24 (Ablation 6 - Entity Expansion & Cleaned Dual Index)", "use_multi_query": True, "use_event_coverage": True, "use_row_norm_dp": True, "use_segmental_dp": True})
-    elif config_code == "25":
-        cfg.update({"config_name": "Config 25 (Ablation 7 - WRRF)", "use_multi_query": True, "use_event_coverage": True, "use_row_norm_dp": True, "use_segmental_dp": True})
-    elif config_code == "26":
-        cfg.update({"config_name": "Config 26 (Master SOTA - Tiered Modality Routing Master)", "use_multi_query": True, "use_event_coverage": True, "use_row_norm_dp": True, "use_segmental_dp": True})
-    return cfg
-
-def generate_submission(input_path: Path, output_root: Path = None, top_k: int = 100, config_code: str = "22"):
+def generate_submission(input_path: Path, output_root: Path = None, top_k: int = 100, config_code: str = "A7"):
     if output_root is None:
-        output_root = BASE_DIR / "outputs"
+        output_root = BASE_DIR / "output" / "submission"
     output_root.mkdir(parents=True, exist_ok=True)
 
     submission_dir = output_root / "submission"
@@ -159,11 +113,9 @@ def generate_submission(input_path: Path, output_root: Path = None, top_k: int =
         shutil.rmtree(submission_dir)
     submission_dir.mkdir(parents=True, exist_ok=True)
 
-    cfg = get_config_params(config_code)
-
     print("=" * 85, flush=True)
-    print("🚀 BẮT ĐẦU CHẠY TASK-SPECIALIZED PIPELINE SINH SUBMISSION CHUẨN 100% BTC", flush=True)
-    print(f"⚙️ Cấu hình thực thi: CẤU HÌNH {config_code} ({cfg['config_name']})", flush=True)
+    print("🚀 BẮT ĐẦU CHẠY UNIFIED SOTA PIPELINE SINH SUBMISSION CHUẨN 100% BTC", flush=True)
+    print(f"⚙️ Cấu hình thực thi: CẤU HÌNH [{config_code}]", flush=True)
     print(f"📂 Đề bài đầu vào: {input_path}", flush=True)
     print(f"📁 Thư mục xuất CSV: {submission_dir}", flush=True)
     print("=" * 85, flush=True)
@@ -173,8 +125,8 @@ def generate_submission(input_path: Path, output_root: Path = None, top_k: int =
         print(f"❌ LỖI: Không tìm thấy truy vấn nào từ {input_path}", flush=True)
         return
 
-    # Khởi tạo TaskSpecializedEngine
-    engine = TaskSpecializedEngine(engine=cfg["engine"])
+    # Khởi tạo MasterPipelineRunner (Single Source of Truth)
+    runner = MasterPipelineRunner(engine="siglip2", batch="batch_1")
 
     total_queries = len(queries)
     summary_report = []
@@ -190,57 +142,33 @@ def generate_submission(input_path: Path, output_root: Path = None, top_k: int =
         print(f"\n[{idx}/{total_queries}] ⚡ Đang xử lý: [{ttype.upper()}] {qid}...")
         print(f"    Nội dung: {qtext[:75]}...", flush=True)
 
-        lines = []
+        preds, info, lat = runner.run_query(
+            query_text=qtext,
+            task_type=ttype,
+            config_name=config_code,
+            top_k=top_k
+        )
 
+        lines = []
         if ttype == "kis":
-            preds, info, lat = engine.search_kis(
-                query_text=qtext,
-                top_k=top_k,
-                use_intra_reranker=cfg["use_intra_reranker"],
-                use_neighbor=cfg["use_neighbor"],
-                use_cue=cfg["use_cue"],
-                use_multimodal=cfg["use_multimodal"],
-                use_vlm_verification=cfg["use_vlm_verification"],
-                use_dense_video_refiner=cfg["use_dense_video_refiner"],
-                use_rrf=cfg["use_rrf"],
-                use_neighbor_expansion=cfg["use_neighbor_expansion"]
-            )
             for p in preds[:top_k]:
                 v_clean = clean_video_name(p["video_id"])
                 f_idx = int(p["frame_idx"])
                 lines.append(f"{v_clean},{f_idx}")
 
         elif ttype == "qa":
-            preds, info, lat = engine.search_qa(
-                query_text=qtext,
-                top_k=top_k,
-                use_intra_reranker=cfg["use_intra_reranker"],
-                use_neighbor=cfg["use_neighbor"],
-                use_cue=cfg["use_cue"],
-                use_multimodal=cfg["use_multimodal"],
-                use_rrf=cfg["use_rrf"],
-                use_multi_crop=cfg["use_multi_crop"]
-            )
-            default_ans = info.get("generated_qa_answer", "Không xác định")
+            default_ans = info.get("vlm_answer", preds[0].get("answer", "Không xác định") if preds else "Không xác định")
             for p in preds[:top_k]:
                 v_clean = clean_video_name(p["video_id"])
                 f_idx = int(p["frame_idx"])
-                cand_ans = p.get("qa_answer", default_ans)
+                cand_ans = p.get("qa_answer", p.get("answer", default_ans))
                 ans_formatted = format_qa_answer_csv(cand_ans)
                 lines.append(f"{v_clean},{f_idx},{ans_formatted}")
 
         elif ttype == "trake":
-            preds, info, lat = engine.search_trake(
-                query_text=qtext,
-                top_k=top_k,
-                use_multi_query=cfg["use_multi_query"],
-                use_event_coverage=cfg["use_event_coverage"],
-                use_row_norm_dp=cfg["use_row_norm_dp"],
-                use_segmental_dp=cfg["use_segmental_dp"]
-            )
             for p in preds[:top_k]:
                 v_clean = clean_video_name(p["video_id"])
-                event_frames = p.get("event_frames", [p["frame_idx"]])
+                event_frames = p.get("event_frames", p.get("events", [p.get("frame_idx", 0)]))
                 frames_str = ",".join(str(int(f)) for f in event_frames)
                 lines.append(f"{v_clean},{frames_str}")
 
@@ -248,7 +176,7 @@ def generate_submission(input_path: Path, output_root: Path = None, top_k: int =
         with open(csv_path, "w", encoding="utf-8", newline="\n") as f:
             f.write("\n".join(lines) + "\n")
 
-        print(f"    ✅ Đã ghi {len(lines)} dòng vào: {submission_dir.name}/{csv_filename}")
+        print(f"    ✅ Đã ghi {len(lines)} dòng vào: {submission_dir.name}/{csv_filename} ({lat:.0f} ms)")
         summary_report.append({
             "query_id": qid,
             "task": ttype.upper(),
@@ -263,7 +191,7 @@ def generate_submission(input_path: Path, output_root: Path = None, top_k: int =
         zip_path.unlink()
 
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
-        for csv_file in submission_dir.glob("*.csv"):
+        for csv_file in sorted(list(submission_dir.glob("*.csv"))):
             arcname = f"submission/{csv_file.name}"
             z.write(csv_file, arcname=arcname)
 
@@ -280,11 +208,18 @@ def generate_submission(input_path: Path, output_root: Path = None, top_k: int =
         print(f"{s['query_id']:<20} | {s['task']:<7} | {s['lines_count']:<8} | {s['sample_line']}")
     print("-" * 85 + "\n")
 
+    validator = SubmissionValidator()
+    val_res = validator.validate_directory(submission_dir)
+    if val_res.get("all_valid", False):
+        print(f"🎉 VALIDATION PASSED: Toàn bộ {val_res['total_files']} file CSV đều HỢP LỆ 100% chuẩn quy chế BTC!\n")
+    else:
+        print(f"⚠️ CẢNH BÁO VALIDATION: {val_res.get('error')}\n")
+
 def main():
     parser = argparse.ArgumentParser(description="Tool sinh kết quả nộp bài chuẩn 100% BTC AIC 2026")
     parser.add_argument("--input", type=str, default="query/THUNGHIEM-bo-de-thi", help="Thư mục chứa file .txt hoặc đường dẫn file .json")
     parser.add_argument("--output_dir", type=str, default="output/thunghiem", help="Thư mục lưu submission và file zip (mặc định 'output/thunghiem')")
-    parser.add_argument("--config", type=str, default="A7", help="Mã cấu hình muốn chạy (mặc định A7 - Grand Master SOTA)")
+    parser.add_argument("--config", type=str, default="A7", help="Mã cấu hình muốn chạy (ví dụ: A6, A6_1, A6_2, A6_4, A7). Mặc định là A7.")
     parser.add_argument("--top_k", type=int, default=100, help="Số lượng kết quả dự đoán tối đa cho mỗi query (mặc định 100)")
     args = parser.parse_args()
 
@@ -300,3 +235,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

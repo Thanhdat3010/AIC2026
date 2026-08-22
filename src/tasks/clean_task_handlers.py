@@ -28,15 +28,17 @@ class KISHandler:
     def search(self, query_vi: str, top_k: int = 100, config_name: str = "A7") -> Tuple[List[Dict[str, Any]], Dict[str, Any], float]:
         t0 = time.time()
         
-        # 1. Phân tích & Tinh chỉnh câu truy vấn
+        # 1. Phân tích & Tinh chỉnh câu truy vấn (T1: DIEM / ROCLING 2025 Query Purification)
         refined = self.refiner.refine_query(query_vi, task_type="kis")
+        # Với câu KIS siêu dài (>35 từ), dùng visual_scene_vi để tránh tràn 64 tokens. Câu thông thường giữ nguyên query_vi để bảo toàn tính từ chi tiết.
+        search_query_vi = refined.get("visual_scene_vi", query_vi) if len(query_vi.split()) > 35 else query_vi
         query_en = refined.get("english_visual", query_vi)
         ocr_kws = refined.get("ocr_keywords", [])
         asr_kws = refined.get("asr_keywords", [])
 
         # 2. Tìm kiếm qua thuật toán TNCA & Bounded Multimodal
         final_hits, info, core_latency = self.search_core.search_tnca(
-            query_vi=query_vi,
+            query_vi=search_query_vi,
             query_en=query_en,
             ocr_keywords=ocr_kws,
             asr_keywords=asr_kws,
@@ -310,3 +312,41 @@ class TRAKEHandler:
             "latency_ms": latency_ms
         }
         return final_results[:top_k], info, latency_ms
+
+
+class MasterPipelineRunner:
+    """
+    SINGLE SOURCE OF TRUTH PIPELINE RUNNER
+    Gom chung toàn bộ logic thực thi KIS / QA / TRAKE vào một đầu mối duy nhất,
+    được dùng chung 100% bởi:
+      1. scripts/evaluation/benchmark_clean.py (Chấm điểm Eval/Leaderboard)
+      2. scripts/submission/run_submission.py (Sinh file nộp bài CSV/ZIP chuẩn BTC)
+      3. app/streamlit_app.py (Giao diện Live Search & Hiệu chỉnh)
+    """
+    def __init__(self, engine: str = "siglip2", batch: str = "batch_1"):
+        self.search_core = UnifiedSearchCore(engine=engine, batch=batch)
+        self.refiner = LLMQueryRefiner()
+        self.kis_handler = KISHandler(self.search_core, self.refiner)
+        self.qa_handler = QAHandler(self.search_core, self.refiner)
+        self.trake_handler = TRAKEHandler(self.search_core, self.refiner)
+
+    def run_query(
+        self,
+        query_text: str,
+        task_type: str,
+        config_name: str = "A7",
+        top_k: int = 100
+    ) -> Tuple[List[Dict[str, Any]], Dict[str, Any], float]:
+        """
+        Thực thi truy vấn chuẩn hóa cho mọi tác vụ với cấu hình SOTA A0..A7.
+        """
+        ttype = task_type.lower().strip()
+        if ttype == "kis":
+            return self.kis_handler.search(query_text, top_k=top_k, config_name=config_name)
+        elif ttype in ["qa", "q&a"]:
+            return self.qa_handler.search(query_text, top_k=top_k, config_name=config_name)
+        elif ttype == "trake":
+            return self.trake_handler.search(query_text, top_k=top_k, config_name=config_name)
+        else:
+            return self.kis_handler.search(query_text, top_k=top_k, config_name=config_name)
+
