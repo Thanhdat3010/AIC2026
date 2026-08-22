@@ -107,6 +107,17 @@ def run_configuration(config_id: str, search_core: UnifiedSearchCore, refiner: L
             else:
                 preds, _, _ = kis_handler.search(qtext, top_k=100, config_name="A6")
 
+        elif config_id in ["A6_1", "A6_2", "A6_3", "A6_4", "A7"]:
+            # A6_1..A6_4 & A7: Các nhánh thực nghiệm độc lập và Grand Master
+            if ttype == "kis":
+                preds, _, _ = kis_handler.search(qtext, top_k=100, config_name="A6" if config_id != "A7" else "A7")
+            elif ttype == "qa":
+                preds, _, _ = qa_handler.search(qtext, top_k=100, config_name=config_id)
+            elif ttype == "trake":
+                preds, _, _ = trake_handler.search(qtext, top_k=100, config_name=config_id)
+            else:
+                preds, _, _ = kis_handler.search(qtext, top_k=100, config_name=config_id)
+
         latency = (time.time() - t_start) * 1000
         latencies.append(latency)
 

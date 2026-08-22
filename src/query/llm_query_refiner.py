@@ -130,23 +130,24 @@ class LLMQueryRefiner:
 
         is_count_query = bool(re.search(r"(bao nhiêu|con số|mấy|số lượng|hiển thị|ghi trên)", lower_q))
 
-        prompt = f"""Bạn là Giám khảo AI và Chuyên gia Truy xuất Video Đa Phương Thức của cuộc thi AI Challenge 2026.
-Nhiệm vụ: Phân tích sâu ngữ nghĩa câu truy vấn tiếng Việt từ Ban tổ chức và xác định trọng số định tuyến đa phương thức thích hợp.
+        prompt = f"""Bạn là Chuyên gia Xử lý Ngôn ngữ & Truy xuất Video Đa Phương Thức (DIEM CVPR 2024 / ROCLING 2025 Framework).
+Nhiệm vụ: Phân tích cấu trúc ngữ nghĩa câu truy vấn tiếng Việt từ Ban tổ chức thành các thành phần thị giác, thoại, chữ viết và câu hỏi trực diện.
 
 Đề bài gốc: "{raw_clean}"
 Loại bài toán: {task_type.upper()}
 
-Hãy trả về duy nhất định dạng JSON sau:
+Hãy trả về duy nhất định dạng JSON sau (không thêm văn bản ngoài JSON):
 {{
-  "cleaned_vi": "Câu tiếng Việt đã chuẩn hóa lỗi chính tả và dấu câu",
-  "english_visual": "Mô tả tiếng Anh giàu chi tiết thị giác phục vụ đối sánh visual",
-  "visual_relevance": 0.85,
-  "ocr_relevance": 0.15,
-  "asr_relevance": 0.10,
-  "ocr_keywords": ["Từ khóa văn bản trên màn hình/biển hiệu (nếu có)"],
+  "cleaned_vi": "Câu tiếng Việt đã chuẩn hóa",
+  "visual_scene_vi": "Mô tả bối cảnh thị giác cốt lõi bằng tiếng Việt (loại bỏ từ nghi vấn như 'gì', 'ai', 'mấy giờ', 'như thế nào', chỉ giữ lại Actor, Action, Object, Scene)",
+  "visual_scene_en": "Detailed English visual scene description focusing on visual elements for SigLIP-2 retrieval",
+  "english_visual": "Detailed English visual scene description",
+  "qa_direct_question": "Câu hỏi trực diện ngắn gọn (Ví dụ: 'Người đi phía trước đội gì trên đầu?')",
+  "ocr_keywords": ["Từ khóa văn bản trên màn hình/biển hiệu/slide (nếu có)"],
   "asr_keywords": ["Từ khóa nội dung lời thoại/phỏng vấn/thuyết minh (nếu có)"],
+  "is_dialogue_query": true,
   "sub_events_vi": ["E1: Sự kiện 1", "E2: Sự kiện 2", "E3: Sự kiện 3"],
-  "sub_events_en": ["E1: Event 1", "E2: Event 2", "E3: Event 3"]
+  "sub_events_en": ["E1: Event 1 description", "E2: Event 2 description", "E3: Event 3 description"]
 }}"""
 
         resp = self._call_llm(prompt)
