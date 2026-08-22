@@ -1,0 +1,5 @@
+# Danh sách Link trực tiếp từ BTC cho Metadata Batch 2
+https://aic-data.ledo.io.vn/media-info-aic25-b2.zip
+https://aic-data.ledo.io.vn/map-keyframes-b2.zip
+https://aic-data.ledo.io.vn/clip-features-32-aic25-b2.zip
+https://aic-data.ledo.io.vn/objects-aic25-b2.zip

@@ -69,6 +69,7 @@ def download_file(url_or_id, target_path, pkg_idx, total_pkgs, max_retries=5):
                     unit='B',
                     unit_scale=True,
                     unit_divisor=1024,
+                    mininterval=10.0,
                     leave=False
                 ) as bar:
                     for data in response.iter_content(block_size):
@@ -138,7 +139,7 @@ def process_video_zip(zpath, batched_pipeline, beam_size, batch_size, video_fps_
     with zipfile.ZipFile(zpath, "r") as zf:
         mp4_names = [n for n in zf.namelist() if n.lower().endswith('.mp4')]
         
-        with tqdm(mp4_names, desc=f"🎙️ [ASR {pkg_idx}/{total_pkgs}] {zip_name}", unit="video", leave=False) as pbar:
+        with tqdm(mp4_names, desc=f"🎙️ [ASR {pkg_idx}/{total_pkgs}] {zip_name}", unit="video", mininterval=10.0, leave=False) as pbar:
             for mp4_name in pbar:
                 match_vid = re.search(r'(L\d+_V\d+)', mp4_name)
                 if match_vid:
@@ -339,7 +340,7 @@ def main():
     active_targets = all_targets[start_offset:]
     start_time = time.time()
 
-    with tqdm(enumerate(active_targets, start=start_offset + 1), total=total_pkgs, initial=start_offset, desc="📦 [TỔNG] Videos", unit="gói") as main_bar:
+    with tqdm(enumerate(active_targets, start=start_offset + 1), total=total_pkgs, initial=start_offset, desc="📦 [TỔNG] Videos", unit="gói", mininterval=10.0) as main_bar:
         for pkg_idx, target in main_bar:
             pkg_name = Path(target).name if "http" in target else str(target)
             main_bar.set_postfix({"gói_hiện_tại": pkg_name})

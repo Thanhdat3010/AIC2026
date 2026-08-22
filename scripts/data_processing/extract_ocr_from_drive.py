@@ -259,6 +259,7 @@ def download_file(url_or_id, target_path, pkg_idx, total_pkgs, max_retries=5):
                     unit='B',
                     unit_scale=True,
                     unit_divisor=1024,
+                    mininterval=10.0,
                     leave=False
                 ) as bar:
                     for data in response.iter_content(block_size):
@@ -335,7 +336,7 @@ def process_zip_archive(zpath, ocr_engine, frames_df, pkg_idx, total_pkgs, out_f
                 vid = match_vid.group(1)
                 video_groups.setdefault(vid, []).append(img_name)
 
-        with tqdm(img_names, desc=f"🚀 [OCR Siêu Tốc {pkg_idx}/{total_pkgs}] {zip_name}", unit="frame", leave=False) as pbar:
+        with tqdm(img_names, desc=f"🚀 [OCR Siêu Tốc {pkg_idx}/{total_pkgs}] {zip_name}", unit="frame", mininterval=10.0, leave=False) as pbar:
             for video_id, v_img_names in video_groups.items():
                 if processed_videos_set and video_id in processed_videos_set:
                     pbar.update(len(v_img_names))
@@ -464,7 +465,7 @@ def main():
     active_targets = all_targets[start_offset:]
     start_time = time.time()
 
-    with tqdm(enumerate(active_targets, start=start_offset + 1), total=total_pkgs, initial=start_offset, desc="📦 [TỔNG] Keyframes", unit="gói") as main_bar:
+    with tqdm(enumerate(active_targets, start=start_offset + 1), total=total_pkgs, initial=start_offset, desc="📦 [TỔNG] Keyframes", unit="gói", mininterval=10.0) as main_bar:
         for pkg_idx, target in main_bar:
             pkg_name = Path(target).name if "http" in target else str(target)
             main_bar.set_postfix({"gói_hiện_tại": pkg_name})
