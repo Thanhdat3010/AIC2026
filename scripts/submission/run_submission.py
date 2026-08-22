@@ -284,7 +284,7 @@ def main():
     parser = argparse.ArgumentParser(description="Tool sinh kết quả nộp bài chuẩn 100% BTC AIC 2026")
     parser.add_argument("--input", type=str, default="query/THUNGHIEM-bo-de-thi", help="Thư mục chứa file .txt hoặc đường dẫn file .json")
     parser.add_argument("--output_dir", type=str, default="output/thunghiem", help="Thư mục lưu submission và file zip (mặc định 'output/thunghiem')")
-    parser.add_argument("--config", type=str, default="25", help="Mã cấu hình muốn chạy (ví dụ: 22, 23, 24, 25, 26). Mặc định là 25.")
+    parser.add_argument("--config", type=str, default="A7", help="Mã cấu hình muốn chạy (mặc định A7 - Grand Master SOTA)")
     parser.add_argument("--top_k", type=int, default=100, help="Số lượng kết quả dự đoán tối đa cho mỗi query (mặc định 100)")
     args = parser.parse_args()
 

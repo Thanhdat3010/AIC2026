@@ -25,7 +25,7 @@ class KISHandler:
         self.search_core = search_core
         self.refiner = refiner
 
-    def search(self, query_vi: str, top_k: int = 100, config_name: str = "A6") -> Tuple[List[Dict[str, Any]], Dict[str, Any], float]:
+    def search(self, query_vi: str, top_k: int = 100, config_name: str = "A7") -> Tuple[List[Dict[str, Any]], Dict[str, Any], float]:
         t0 = time.time()
         
         # 1. Phân tích & Tinh chỉnh câu truy vấn
@@ -64,7 +64,7 @@ class QAHandler:
         self.key_pool = search_core.key_pool
         self.qa_agent = VisualQAAgent(key_pool=self.key_pool)
 
-    def search(self, query_vi: str, top_k: int = 100, config_name: str = "A6") -> Tuple[List[Dict[str, Any]], Dict[str, Any], float]:
+    def search(self, query_vi: str, top_k: int = 100, config_name: str = "A7") -> Tuple[List[Dict[str, Any]], Dict[str, Any], float]:
         t0 = time.time()
 
         # 1. Phân tích truy vấn (T1: DIEM / ROCLING 2025 Query Decomposition)
@@ -233,7 +233,7 @@ class TRAKEHandler:
             text_encoder=search_core.text_encoder
         )
 
-    def search(self, query_vi: str, top_k: int = 100, config_name: str = "A6") -> Tuple[List[Dict[str, Any]], Dict[str, Any], float]:
+    def search(self, query_vi: str, top_k: int = 100, config_name: str = "A7") -> Tuple[List[Dict[str, Any]], Dict[str, Any], float]:
         t0 = time.time()
 
         # 1. Phân tích & Bóc tách Sub-Events (T1 & T4 DIEM / D3TW Framework)
