@@ -256,13 +256,19 @@ def main():
         target_videos_set = {v.strip() for v in args.target_videos.split(",") if v.strip()}
         print(f"🎯 [CHẾ ĐỘ MỤC TIÊU] Chỉ xử lý đúng {len(target_videos_set)} video được chỉ định: {sorted(list(target_videos_set))[:5]}...")
 
+    out_file = Path(args.output_path)
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+
     # Nạp mapping FPS thực tế
-    frames_path = settings.directories.processed / "frames.parquet"
+    frames_path = out_file.parent / "frames.parquet"
+    if not frames_path.exists():
+        frames_path = settings.directories.processed / "frames.parquet"
+        
     video_fps_map = {}
     if frames_path.exists():
         frames_df = pd.read_parquet(frames_path, columns=["video_id", "fps"]).drop_duplicates(subset=["video_id"])
         video_fps_map = dict(zip(frames_df["video_id"], frames_df["fps"]))
-        print(f"✅ Đã nạp mapping FPS thực tế của {len(video_fps_map)} video từ frames.parquet.")
+        print(f"✅ Đã nạp mapping FPS thực tế của {len(video_fps_map)} video từ {frames_path}.")
 
     actual_model_id = get_actual_model_id(args.model_size)
 

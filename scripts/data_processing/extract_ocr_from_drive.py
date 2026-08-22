@@ -407,14 +407,17 @@ def main():
         batch_size=args.crop_batch_size
     )
 
-    frames_path = settings.directories.processed / "frames.parquet"
+    out_file = Path(args.output_path)
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+
+    frames_path = out_file.parent / "frames.parquet"
+    if not frames_path.exists():
+        frames_path = settings.directories.processed / "frames.parquet"
+        
     frames_df = None
     if frames_path.exists():
         frames_df = pd.read_parquet(frames_path).set_index(["video_id", "keyframe_index"])
-        print(f"✅ Đã nạp {len(frames_df)} bản ghi mapping từ frames.parquet.")
-
-    out_file = Path(args.output_path)
-    out_file.parent.mkdir(parents=True, exist_ok=True)
+        print(f"✅ Đã nạp {len(frames_df)} bản ghi mapping từ {frames_path}.")
     
     processed_videos_set = set()
     total_existing_records = 0
