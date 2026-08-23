@@ -328,13 +328,16 @@ def process_zip_archive(zpath, ocr_engine, frames_df, pkg_idx, total_pkgs, out_f
     with zipfile.ZipFile(zpath, "r") as zf:
         img_names = [n for n in zf.namelist() if n.lower().endswith(('.jpg', '.png', '.jpeg'))]
         
-        # Gom nhóm ảnh theo từng video
         video_groups = {}
         for img_name in img_names:
-            match_vid = re.search(r'(L\d+_V\d+)', img_name)
+            match_vid = re.search(r'([A-Za-z0-9]+_V\d+)', img_name)
             if match_vid:
                 vid = match_vid.group(1)
                 video_groups.setdefault(vid, []).append(img_name)
+            else:
+                parent = Path(img_name).parent.name
+                if parent:
+                    video_groups.setdefault(parent, []).append(img_name)
 
         with tqdm(img_names, desc=f"🚀 [OCR Siêu Tốc {pkg_idx}/{total_pkgs}] {zip_name}", unit="frame", mininterval=10.0, leave=False) as pbar:
             for video_id, v_img_names in video_groups.items():
