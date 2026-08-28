@@ -80,12 +80,13 @@ class TRAKEAlignmentAgent:
         self,
         sim_matrix: np.ndarray,
         pts_times: np.ndarray,
-        max_gap_sec: float = 240.0
+        max_gap_sec: float = 90.0
     ) -> list[int]:
         """
-        Row-Normalized Monotonic Dynamic Programming Solver:
+        Row-Normalized Monotonic Dynamic Programming Solver (CVPR 2021 D3TW):
         - Sử dụng Local Support 3-point [0.2, 0.6, 0.2] để chống spike mồ côi.
         - Ràng buộc thứ tự nghiêm ngặt: t(E_1) < t(E_2) < ... < t(E_N).
+        - Siết chặt khoảng cách tối đa max_gap_sec = 90s.
         """
         N, M = sim_matrix.shape
         if M < N:
@@ -131,9 +132,9 @@ class TRAKEAlignmentAgent:
                 valid_k = prev_indices[valid_mask]
                 valid_scores = dp[i-1, valid_k]
                 
-                # Phạt nhẹ nếu khoảng cách giữa 2 sự kiện vượt quá max_gap_sec
+                # Phạt nghiêm ngặt nếu khoảng cách giữa 2 sự kiện vượt quá max_gap_sec
                 excess_dt = np.maximum(0.0, dt[valid_mask] - max_gap_sec)
-                penalties = 0.001 * excess_dt
+                penalties = 0.005 * excess_dt + 0.0005 * dt[valid_mask]
                 
                 total_candidates = valid_scores - penalties
                 best_idx = int(np.argmax(total_candidates))
@@ -170,16 +171,15 @@ class TRAKEAlignmentAgent:
         self,
         sim_matrix: np.ndarray,
         pts_times: np.ndarray,
-        max_gap_sec: float = 240.0,
+        max_gap_sec: float = 90.0,
         max_seg_len_frames: int = 5,
         lambda_d: float = 0.02,
-        lambda_g: float = 0.001
+        lambda_g: float = 0.005
     ) -> list[int]:
         """
-        Segmental Dynamic Programming Solver cho TRAKE:
-        - Gán sự kiện vào một phân đoạn [s, e] thay vì 1 frame duy nhất.
-        - Giới hạn chiều dài phân đoạn: max_seg_len_frames.
-        - Trừ điểm penalty nếu kéo giãn quá dài (lambda_d) hoặc gap quá xa (lambda_g).
+        Segmental Dynamic Programming Solver cho TRAKE (NeurIPS 2021 Moment-DETR & D3TW):
+        - Gán sự kiện vào một phân đoạn [s, e] và chọn Exact Peak Frame trong phân đoạn.
+        - Ràng buộc chặt chẽ max_gap_sec = 90s.
         """
         N, M = sim_matrix.shape
         if M < N:
@@ -230,7 +230,7 @@ class TRAKEAlignmentAgent:
                 
                 dt = pts_times[s] - pts_times[valid_prev_e]
                 excess_dt = np.maximum(0.0, dt - max_gap_sec)
-                penalties = lambda_g * excess_dt
+                penalties = lambda_g * excess_dt + 0.0005 * dt
                 
                 total_candidates = valid_scores - penalties
                 best_idx = int(np.argmax(total_candidates))
@@ -260,9 +260,9 @@ class TRAKEAlignmentAgent:
             for i in range(N - 1, -1, -1):
                 s = seg_start[i, curr_e]
                 if s == -1: s = curr_e
-                # Chọn mid-point của phân đoạn để trả về
-                mid_point = (s + curr_e) // 2
-                chosen_j[i] = mid_point
+                # SOTA Pinpoint: Chọn đỉnh nhọn có S_norm cao nhất trong phân đoạn [s, curr_e]
+                peak_offset = int(np.argmax(S_norm[i, s:curr_e+1]))
+                chosen_j[i] = s + peak_offset
                 curr_e = parent_e[i, curr_e]
                 if curr_e == -1 and i > 0:
                     curr_e = max(0, s - 1)

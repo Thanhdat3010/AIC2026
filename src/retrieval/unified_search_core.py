@@ -213,9 +213,10 @@ class UnifiedSearchCore:
         t0 = time.time()
         
         # 1. Cấu hình cờ kỹ thuật theo config_name
-        use_dual_embedding = config_name in ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A6_1", "A6_2", "A6_3", "A6_4", "M5"]
-        use_tnca = config_name in ["A2", "A3", "A4", "A5", "A6", "A7", "A6_1", "A6_2", "A6_3", "A6_4", "M5"]
-        use_multimodal_boost = config_name in ["A3", "A4", "A5", "A6", "A7", "A6_1", "A6_2", "A6_3", "A6_4", "M5"]
+        sota_configs = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "A10_FINAL", "A6_1", "A6_2", "A6_3", "A6_4", "M5"]
+        use_dual_embedding = config_name in sota_configs
+        use_tnca = config_name in sota_configs and config_name != "A1"
+        use_multimodal_boost = config_name in sota_configs and config_name not in ["A1", "A2"]
         actual_cand_k = candidate_k if use_tnca or use_multimodal_boost else top_k
 
         # 2. Tầng 1: Dense Visual Search

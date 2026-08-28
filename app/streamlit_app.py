@@ -132,8 +132,15 @@ def sync_submission_zip(csv_dir: Path, zip_dest: Path):
             temp_zip.rename(zip_dest)
     except Exception as e:
         print(f"⚠️ Lỗi đồng bộ zip: {e}", flush=True)
-        if temp_zip.exists():
-            temp_zip.unlink(missing_ok=True)
+def save_undo_state(query_name: str, current_rows: list):
+    """Lưu snapshot danh sách rows vào session_state để hỗ trợ nút Hoàn Tác (Undo)."""
+    if "undo_history" not in st.session_state:
+        st.session_state["undo_history"] = {}
+    if query_name not in st.session_state["undo_history"]:
+        st.session_state["undo_history"][query_name] = []
+    st.session_state["undo_history"][query_name].append([r.copy() for r in current_rows])
+    # Giữ tối đa 10 bước lịch sử gần nhất
+    st.session_state["undo_history"][query_name] = st.session_state["undo_history"][query_name][-10:]
 
 def parse_trake_subevents(query_text: str) -> list[str]:
     """Bóc tách các sự kiện con E1, E2, ... từ văn bản truy vấn tiếng Việt."""
@@ -456,7 +463,10 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                     else:
                         new_row = [clean_vid, str(int(man_frame))]
 
-                    # Xóa phần tử cũ nếu trùng (video_id, frame_idx)
+                    # Lưu undo state trước khi thay đổi
+                    save_undo_state(selected_q_name, rows)
+
+                    # Xóa phần tử cũ nếu trùng chính xác (video_id, frame_idx)
                     rows = [r for r in rows if not (r[0] == clean_vid and len(r) > 1 and r[1] == str(int(man_frame)))]
 
                     if btn_set_r1:
@@ -478,7 +488,7 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                         "frame_idx": int(man_frame),
                         "rank": 1 if btn_set_r1 else len(rows)
                     }
-                    st.success(f"✅ Đã thêm `{clean_vid}` (Frame `{man_frame}`) vào vị trí {'Rank #1' if btn_set_r1 else 'cuối'} và đồng bộ file nộp bài!")
+                    st.success(f"✅ Đã thêm `{clean_vid}` (Frame `{man_frame}`) vào vị trí {'Rank #1 (Đã đẩy các frame cũ xuống)' if btn_set_r1 else 'cuối'} và đồng bộ file nộp bài!")
                     st.rerun()
 
         if not rows:
@@ -494,6 +504,44 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                     filtered_rows_with_idx.append((original_idx, r))
 
             st.markdown(f"### 🖼️ Lưới Ứng Viên Đa Tầng (Hiển thị {min(display_top_k, len(filtered_rows_with_idx))} / {len(rows)} dòng)")
+
+            # =================================================================
+            # THANH CÔNG CỤ HOÁN ĐỔI NHANH 2 RANK (QUICK SWAP) & HOÀN TÁC (UNDO)
+            # =================================================================
+            with st.container():
+                c_sw_title, c_undo_box = st.columns([3.2, 1.8])
+                with c_sw_title:
+                    st.markdown("##### 🔄 Hoán Đổi Vị Trí 2 Rank (Quick Swap):")
+                with c_undo_box:
+                    has_undo = ("undo_history" in st.session_state and selected_q_name in st.session_state["undo_history"] and len(st.session_state["undo_history"][selected_q_name]) > 0)
+                    if has_undo:
+                        if st.button("↩️ Hoàn Tác (Undo)", key=f"undo_btn_{selected_q_name}", use_container_width=True):
+                            prev_rows = st.session_state["undo_history"][selected_q_name].pop()
+                            rows = prev_rows
+                            with open(target_csv_path, "w", encoding="utf-8") as f:
+                                for row_item in rows:
+                                    f.write(",".join(row_item) + "\n")
+                            sync_submission_zip(output_dir, zip_output_path)
+                            st.success("✅ Đã hoàn tác lại trạng thái trước đó!")
+                            st.rerun()
+
+                c_sw1, c_sw2, c_sw3 = st.columns([1.2, 1.2, 1.6])
+                with c_sw1:
+                    rank_a = st.number_input("Chọn Rank A:", min_value=1, max_value=max(1, len(rows)), value=1, step=1, key=f"swap_a_{selected_q_name}")
+                with c_sw2:
+                    rank_b = st.number_input("Đổi với Rank B:", min_value=1, max_value=max(1, len(rows)), value=min(2, len(rows)), step=1, key=f"swap_b_{selected_q_name}")
+                with c_sw3:
+                    st.markdown("<div style='margin-top:28px;'></div>", unsafe_allow_html=True)
+                    if st.button(f"🔄 Đổi Chỗ #{rank_a} ↔ #{rank_b}", key=f"do_swap_{selected_q_name}", use_container_width=True):
+                        if rank_a != rank_b and 1 <= rank_a <= len(rows) and 1 <= rank_b <= len(rows):
+                            save_undo_state(selected_q_name, rows)
+                            rows[rank_a - 1], rows[rank_b - 1] = rows[rank_b - 1], rows[rank_a - 1]
+                            with open(target_csv_path, "w", encoding="utf-8") as f:
+                                for row_item in rows:
+                                    f.write(",".join(row_item) + "\n")
+                            sync_submission_zip(output_dir, zip_output_path)
+                            st.success(f"✅ Đã hoán đổi vị trí giữa Rank #{rank_a} và Rank #{rank_b}!")
+                            st.rerun()
 
             # Khởi tạo session_state cho video inspector nếu chưa có
             if "inspect_target" not in st.session_state or st.session_state["inspect_target"].get("query") != selected_q_name:
@@ -535,10 +583,31 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                     elif task_tag == "TRAKE":
                         st.caption(f"Chuỗi: `{len(r)-1} events`")
 
-                    col_c1, col_c2 = st.columns([1, 1])
+                    col_c1, col_c2, col_c3, col_c4 = st.columns([1, 1, 1, 1])
                     with col_c1:
                         if orig_idx > 0:
-                            if st.button("⭐ Đặt R1", key=f"promo_btn_{orig_idx}_{selected_q_name}", use_container_width=True):
+                            if st.button("⬆️", key=f"up_btn_{orig_idx}_{selected_q_name}", help="Đẩy lên 1 bậc (Swap với frame trên)", use_container_width=True):
+                                save_undo_state(selected_q_name, rows)
+                                rows[orig_idx], rows[orig_idx - 1] = rows[orig_idx - 1], rows[orig_idx]
+                                with open(target_csv_path, "w", encoding="utf-8") as f:
+                                    for row_item in rows:
+                                        f.write(",".join(row_item) + "\n")
+                                sync_submission_zip(output_dir, zip_output_path)
+                                st.rerun()
+                    with col_c2:
+                        if orig_idx < len(rows) - 1:
+                            if st.button("⬇️", key=f"down_btn_{orig_idx}_{selected_q_name}", help="Hạ xuống 1 bậc (Swap với frame dưới)", use_container_width=True):
+                                save_undo_state(selected_q_name, rows)
+                                rows[orig_idx], rows[orig_idx + 1] = rows[orig_idx + 1], rows[orig_idx]
+                                with open(target_csv_path, "w", encoding="utf-8") as f:
+                                    for row_item in rows:
+                                        f.write(",".join(row_item) + "\n")
+                                sync_submission_zip(output_dir, zip_output_path)
+                                st.rerun()
+                    with col_c3:
+                        if orig_idx > 0:
+                            if st.button("⭐", key=f"promo_btn_{orig_idx}_{selected_q_name}", help="Đưa thẳng lên Rank #1", use_container_width=True):
+                                save_undo_state(selected_q_name, rows)
                                 item_to_promote = rows.pop(orig_idx)
                                 rows.insert(0, item_to_promote)
                                 with open(target_csv_path, "w", encoding="utf-8") as f:
@@ -552,9 +621,8 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                                     "rank": 1
                                 }
                                 st.rerun()
-
-                    with col_c2:
-                        if st.button("🎬 Soi Video", key=f"inspect_btn_{orig_idx}_{selected_q_name}", use_container_width=True):
+                    with col_c4:
+                        if st.button("🎬", key=f"inspect_btn_{orig_idx}_{selected_q_name}", help="Soi Video & Keyframe Studio", use_container_width=True):
                             st.session_state["inspect_target"] = {
                                 "query": selected_q_name,
                                 "video_id": vid,
@@ -692,20 +760,31 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                 # Hàng nút thao tác: Chốt Rank 1 & Quay lại mốc ban đầu
                 col_act_r1, col_act_reset = st.columns([1.5, 1.0])
                 with col_act_r1:
-                    if st.button(f"📌 Chốt Mốc Này ({exact_pts_str} ➔ Frame {active_chosen_frame}) Làm Rank #1", type="primary", use_container_width=True):
-                        if rows[0][0] == insp_vid:
-                            rows[0][1] = str(active_chosen_frame)
-                        else:
-                            target_row = [insp_vid, str(active_chosen_frame)]
-                            if len(rows[0]) > 2:
-                                target_row.append(rows[0][2])
-                            rows.insert(0, target_row)
+                    if st.button(f"👑 Chèn Mốc Này ({exact_pts_str} ➔ Frame {active_chosen_frame}) Lên Rank #1", type="primary", use_container_width=True):
+                        save_undo_state(selected_q_name, rows)
+                        
+                        target_row = [insp_vid, str(active_chosen_frame)]
+                        if len(rows[0]) > 2:
+                            target_row.extend(rows[0][2:])
+                        
+                        # Xóa duplicate nếu đã có đúng chính xác (insp_vid, active_chosen_frame)
+                        rows = [r for r in rows if not (r[0] == insp_vid and len(r) > 1 and r[1] == str(active_chosen_frame))]
+                        
+                        # CHÈN LÊN RANK 1 (Đẩy các frame cũ xuống an toàn, bảo toàn 100% dữ liệu)
+                        rows.insert(0, target_row)
+                        rows = rows[:100]
 
                         with open(target_csv_path, "w", encoding="utf-8") as f:
                             for row_item in rows:
                                 f.write(",".join(row_item) + "\n")
                         sync_submission_zip(output_dir, zip_output_path)
-                        st.success(f"🎉 Đã chốt Rank #1: `{insp_vid}` - Frame `{active_chosen_frame}` ({exact_pts_str}) & tự động cập nhật submission.zip!")
+                        st.session_state["inspect_target"] = {
+                            "query": selected_q_name,
+                            "video_id": insp_vid,
+                            "frame_idx": active_chosen_frame,
+                            "rank": 1
+                        }
+                        st.success(f"🎉 Đã chèn lên Rank #1: `{insp_vid}` - Frame `{active_chosen_frame}` ({exact_pts_str}) (Đã đẩy các frame cũ xuống an toàn) & cập nhật submission.zip!")
                         st.rerun()
 
                 with col_act_reset:

@@ -74,7 +74,7 @@ class QAHandler:
         is_count = refined.get("is_count_query", False)
         
         # Chọn Visual Scene Query theo cấu hình
-        use_query_decomp = config_name in ["A6_1", "A7"]
+        use_query_decomp = config_name in ["A6_1", "A7", "A8", "A9", "A10", "A10_FINAL"]
         if use_query_decomp and refined.get("visual_scene_vi"):
             search_query_vi = refined.get("visual_scene_vi")
             search_query_en = refined.get("visual_scene_en", refined.get("english_visual", query_vi))
@@ -126,8 +126,42 @@ class QAHandler:
         if not best_answer or best_answer.lower() in ["không xác định", "unknown", "n/a"]:
             best_answer = "10" if is_count else "Đèo Ngang"
 
+        # 4.5. T4 (NeurIPS 2023 SeViLA & ECCV 2020 TVQA+): Evidence-Guided Reverse Visual Grounding
+        use_evidence_grounding = config_name in ["A9", "A10_FINAL"]
+        if use_evidence_grounding and best_answer and hits:
+            clean_scene = refined.get("visual_scene_vi", query_vi)
+            ev_query = f"{clean_scene} {best_answer}"
+            ev_vec = self.search_core.encode_text(ev_query)
+            ev_hits = self.search_core.search_visual(ev_vec, top_k=300)
+            
+            top_candidate_vids = list(dict.fromkeys([h["video_id"] for h in hits[:10]]))
+            vid_to_best_ev_frame = {}
+            for eh in ev_hits:
+                v = eh["video_id"]
+                if v in top_candidate_vids and v not in vid_to_best_ev_frame:
+                    vid_to_best_ev_frame[v] = eh["frame_idx"]
+            
+            new_hits = []
+            seen_entries = set()
+            for h in hits:
+                v = h["video_id"]
+                f = h["frame_idx"]
+                f_ev = vid_to_best_ev_frame.get(v, None)
+                if f_ev is not None and (v, f_ev) not in seen_entries:
+                    new_hits.append({
+                        "video_id": v,
+                        "frame_idx": f_ev,
+                        "score": 1.0,
+                        "source": "evidence_grounding"
+                    })
+                    seen_entries.add((v, f_ev))
+                if (v, f) not in seen_entries:
+                    new_hits.append(h)
+                    seen_entries.add((v, f))
+            hits = new_hits
+
         # 5. Phân bổ kết quả nộp bài theo cấu hình
-        use_pure_vector = config_name in ["A6_3", "A7", "A6_1", "A6_2"]
+        use_pure_vector = config_name in ["A6_3", "A7", "A8", "A9", "A10", "A10_FINAL", "A6_1", "A6_2"]
         
         if use_pure_vector:
             # T3: Pure Vector-Driven Ranking với MMR Deduplication tránh lặp frame sát nhau
@@ -265,7 +299,7 @@ class TRAKEHandler:
             return rows, {"config": config_name, "num_events": num_ev, "latency_ms": latency_ms}, latency_ms
 
         # 2. Chạy thuật toán D3TW / NN-Viterbi Segmental DP
-        use_bilingual_events = config_name in ["A6_4", "A7"] and bool(sub_events_en)
+        use_bilingual_events = config_name in ["A6_4", "A7", "A8", "A9", "A10_FINAL"] and bool(sub_events_en)
         events_to_align = sub_events_vi
         
         results = self.trake_agent.align_events(
