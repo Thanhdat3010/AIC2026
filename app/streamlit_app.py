@@ -39,42 +39,83 @@ st.markdown("""
         margin-bottom: 10px;
         color: white;
     }
-    .candidate-card {
+    .card-r1 {
+        background: #1e293b;
+        border: 2px solid #eab308 !important;
+        box-shadow: 0 0 16px rgba(234, 179, 8, 0.45) !important;
+        border-radius: 10px;
+        padding: 8px;
+        margin-bottom: 12px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card-active {
+        background: #1e293b;
+        border: 2px solid #a855f7 !important;
+        box-shadow: 0 0 16px rgba(168, 85, 247, 0.5) !important;
+        border-radius: 10px;
+        padding: 8px;
+        margin-bottom: 12px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card-top5 {
+        background: #1e293b;
+        border: 1px solid #3b82f6 !important;
+        border-radius: 8px;
+        padding: 8px;
+        margin-bottom: 12px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card-normal {
         background: #1e293b;
         border: 1px solid #334155;
         border-radius: 8px;
-        padding: 10px;
+        padding: 8px;
         margin-bottom: 12px;
         transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
     }
-    .candidate-card:hover {
-        transform: translateY(-3px);
-        border-color: #3b82f6;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    .card-r1:hover, .card-active:hover, .card-top5:hover, .card-normal:hover {
+        transform: translateY(-2px);
     }
-    .rank-badge-1 {
-        background: linear-gradient(135deg, #eab308, #ca8a04);
+    .glass-badge-r1 {
+        background: linear-gradient(135deg, rgba(234, 179, 8, 0.95), rgba(202, 138, 4, 0.95));
         color: #0f172a;
-        padding: 3px 8px;
-        border-radius: 5px;
+        padding: 2px 7px;
+        border-radius: 4px;
         font-weight: 800;
-        font-size: 0.85rem;
+        font-size: 0.78rem;
     }
-    .rank-badge-top5 {
-        background: #3b82f6;
+    .glass-badge-top5 {
+        background: rgba(59, 130, 246, 0.9);
         color: white;
-        padding: 3px 7px;
-        border-radius: 5px;
+        padding: 2px 6px;
+        border-radius: 4px;
         font-weight: bold;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
-    .rank-badge-normal {
-        background: #475569;
+    .glass-badge-normal {
+        background: rgba(71, 85, 105, 0.85);
         color: #f1f5f9;
-        padding: 3px 6px;
-        border-radius: 5px;
+        padding: 2px 5px;
+        border-radius: 4px;
         font-weight: bold;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
+    }
+    .glass-time {
+        background: rgba(15, 23, 42, 0.85);
+        color: #38bdf8;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-family: monospace;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .studio-panel {
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 16px;
+        position: sticky;
+        top: 1rem;
     }
     .event-card {
         background: #0f172a;
@@ -524,15 +565,17 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                             sync_submission_zip(output_dir, zip_output_path)
                             st.success("✅ Đã hoàn tác lại trạng thái trước đó!")
                             st.rerun()
+                            st.success("✅ Đã hoàn tác lại!")
+                            st.rerun()
 
-                c_sw1, c_sw2, c_sw3 = st.columns([1.2, 1.2, 1.6])
+                c_sw1, c_sw2, c_sw3 = st.columns([1.1, 1.1, 1.4])
                 with c_sw1:
-                    rank_a = st.number_input("Chọn Rank A:", min_value=1, max_value=max(1, len(rows)), value=1, step=1, key=f"swap_a_{selected_q_name}")
+                    rank_a = st.number_input("Rank A:", min_value=1, max_value=max(1, len(rows)), value=1, step=1, key=f"swap_a_{selected_q_name}")
                 with c_sw2:
-                    rank_b = st.number_input("Đổi với Rank B:", min_value=1, max_value=max(1, len(rows)), value=min(2, len(rows)), step=1, key=f"swap_b_{selected_q_name}")
+                    rank_b = st.number_input("Rank B:", min_value=1, max_value=max(1, len(rows)), value=min(2, len(rows)), step=1, key=f"swap_b_{selected_q_name}")
                 with c_sw3:
                     st.markdown("<div style='margin-top:28px;'></div>", unsafe_allow_html=True)
-                    if st.button(f"🔄 Đổi Chỗ #{rank_a} ↔ #{rank_b}", key=f"do_swap_{selected_q_name}", use_container_width=True):
+                    if st.button(f"🔄 Đổi #{rank_a}↔#{rank_b}", key=f"do_swap_{selected_q_name}", use_container_width=True):
                         if rank_a != rank_b and 1 <= rank_a <= len(rows) and 1 <= rank_b <= len(rows):
                             save_undo_state(selected_q_name, rows)
                             rows[rank_a - 1], rows[rank_b - 1] = rows[rank_b - 1], rows[rank_a - 1]
@@ -540,138 +583,137 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                                 for row_item in rows:
                                     f.write(",".join(row_item) + "\n")
                             sync_submission_zip(output_dir, zip_output_path)
-                            st.success(f"✅ Đã hoán đổi vị trí giữa Rank #{rank_a} và Rank #{rank_b}!")
+                            st.success(f"✅ Đã đổi vị trí #{rank_a} ↔ #{rank_b}!")
                             st.rerun()
 
-            # Khởi tạo session_state cho video inspector nếu chưa có
-            if "inspect_target" not in st.session_state or st.session_state["inspect_target"].get("query") != selected_q_name:
-                st.session_state["inspect_target"] = {
-                    "query": selected_q_name,
-                    "video_id": rows[0][0],
-                    "frame_idx": int(rows[0][1]) if len(rows[0]) > 1 and rows[0][1].isdigit() else 0,
-                    "rank": 1
-                }
+                # Lưới 3 Cột trong cột trái
+                cols_3 = st.columns(3)
+                cur_inspect_vid = st.session_state["inspect_target"].get("video_id", rows[0][0])
+                for render_count, (orig_idx, r) in enumerate(filtered_rows_with_idx[:display_top_k]):
+                    col = cols_3[render_count % 3]
+                    with col:
+                        vid = r[0]
+                        f_idx = int(r[1]) if len(r) > 1 and r[1].isdigit() else 0
+                        img = keyframe_loader.get_keyframe_image(vid, f_idx)
+                        pts_sec = keyframe_loader.get_pts_time(vid, f_idx)
+                        min_sec_str = f"{int(pts_sec // 60):02d}:{int(pts_sec % 60):02d}"
 
-            # Hiển thị Lưới 5 Cột
-            cols_5 = st.columns(5)
-            for render_count, (orig_idx, r) in enumerate(filtered_rows_with_idx[:display_top_k]):
-                col = cols_5[render_count % 5]
-                with col:
-                    vid = r[0]
-                    f_idx = int(r[1]) if len(r) > 1 and r[1].isdigit() else 0
-                    img = keyframe_loader.get_keyframe_image(vid, f_idx)
-                    pts_sec = keyframe_loader.get_pts_time(vid, f_idx)
-                    min_sec_str = f"{int(pts_sec // 60):02d}:{int(pts_sec % 60):02d}"
+                        # Phân biệt viền thẻ theo trạng thái
+                        is_r1 = (orig_idx == 0)
+                        is_active_inspect = (vid == cur_inspect_vid)
+                        card_class = "card-r1" if is_r1 else ("card-active" if is_active_inspect else ("card-top5" if orig_idx < 5 else "card-normal"))
 
-                    # Header thẻ ứng viên
-                    if orig_idx == 0:
-                        st.markdown(f"<span class='rank-badge-1'>👑 RANK #1</span> **{vid}**", unsafe_allow_html=True)
-                    elif orig_idx < 5:
-                        st.markdown(f"<span class='rank-badge-top5'>RANK #{orig_idx+1}</span> **{vid}**", unsafe_allow_html=True)
-                    else:
-                        st.markdown(f"<span class='rank-badge-normal'>#{orig_idx+1}</span> **{vid}**", unsafe_allow_html=True)
+                        st.markdown(f"<div class='{card_class}'>", unsafe_allow_html=True)
 
-                    if img is not None:
-                        st.image(img, use_container_width=True)
-                    else:
-                        st.info(f"Frame {f_idx}")
+                        # Glassmorphism Badges đè trên ảnh
+                        c_bd1, c_bd2 = st.columns([1.2, 1.0])
+                        with c_bd1:
+                            if is_r1:
+                                st.markdown(f"<span class='glass-badge-r1'>👑 #1 {vid}</span>", unsafe_allow_html=True)
+                            elif orig_idx < 5:
+                                st.markdown(f"<span class='glass-badge-top5'>#{orig_idx+1} {vid}</span>", unsafe_allow_html=True)
+                            else:
+                                st.markdown(f"<span class='glass-badge-normal'>#{orig_idx+1} {vid}</span>", unsafe_allow_html=True)
+                        with c_bd2:
+                            st.markdown(f"<span class='glass-time'>⏱️ {min_sec_str}</span>", unsafe_allow_html=True)
 
-                    st.caption(f"Frame: `{f_idx}` ({min_sec_str})")
-                    if task_tag == "QA" and len(r) > 2:
-                        ans_display = ",".join(r[2:]).strip('"')
-                        st.caption(f"Ans: `{ans_display[:20]}`")
-                    elif task_tag == "TRAKE":
-                        st.caption(f"Chuỗi: `{len(r)-1} events`")
+                        if img is not None:
+                            st.image(img, use_container_width=True)
+                        else:
+                            st.info(f"Frame {f_idx}")
 
-                    col_c1, col_c2, col_c3, col_c4 = st.columns([1, 1, 1, 1])
-                    with col_c1:
-                        if orig_idx > 0:
-                            if st.button("⬆️", key=f"up_btn_{orig_idx}_{selected_q_name}", help="Đẩy lên 1 bậc (Swap với frame trên)", use_container_width=True):
-                                save_undo_state(selected_q_name, rows)
-                                rows[orig_idx], rows[orig_idx - 1] = rows[orig_idx - 1], rows[orig_idx]
-                                with open(target_csv_path, "w", encoding="utf-8") as f:
-                                    for row_item in rows:
-                                        f.write(",".join(row_item) + "\n")
-                                sync_submission_zip(output_dir, zip_output_path)
-                                st.rerun()
-                    with col_c2:
-                        if orig_idx < len(rows) - 1:
-                            if st.button("⬇️", key=f"down_btn_{orig_idx}_{selected_q_name}", help="Hạ xuống 1 bậc (Swap với frame dưới)", use_container_width=True):
-                                save_undo_state(selected_q_name, rows)
-                                rows[orig_idx], rows[orig_idx + 1] = rows[orig_idx + 1], rows[orig_idx]
-                                with open(target_csv_path, "w", encoding="utf-8") as f:
-                                    for row_item in rows:
-                                        f.write(",".join(row_item) + "\n")
-                                sync_submission_zip(output_dir, zip_output_path)
-                                st.rerun()
-                    with col_c3:
-                        if orig_idx > 0:
-                            if st.button("⭐", key=f"promo_btn_{orig_idx}_{selected_q_name}", help="Đưa thẳng lên Rank #1", use_container_width=True):
-                                save_undo_state(selected_q_name, rows)
-                                item_to_promote = rows.pop(orig_idx)
-                                rows.insert(0, item_to_promote)
-                                with open(target_csv_path, "w", encoding="utf-8") as f:
-                                    for row_item in rows:
-                                        f.write(",".join(row_item) + "\n")
-                                sync_submission_zip(output_dir, zip_output_path)
+                        if task_tag == "QA" and len(r) > 2:
+                            ans_display = ",".join(r[2:]).strip('"')
+                            st.caption(f"💬 `{ans_display[:18]}`")
+                        elif task_tag == "TRAKE":
+                            st.caption(f"⏱️ `{len(r)-1} sự kiện`")
+
+                        # 4 nút mini điều hướng
+                        c_b1, c_b2, c_b3, c_b4 = st.columns([1, 1, 1, 1])
+                        with c_b1:
+                            if orig_idx > 0:
+                                if st.button("⬆️", key=f"up_btn_{orig_idx}_{selected_q_name}", help="Đẩy lên 1 bậc", use_container_width=True):
+                                    save_undo_state(selected_q_name, rows)
+                                    rows[orig_idx], rows[orig_idx - 1] = rows[orig_idx - 1], rows[orig_idx]
+                                    with open(target_csv_path, "w", encoding="utf-8") as f:
+                                        for row_item in rows:
+                                            f.write(",".join(row_item) + "\n")
+                                    sync_submission_zip(output_dir, zip_output_path)
+                                    st.rerun()
+                        with c_b2:
+                            if orig_idx < len(rows) - 1:
+                                if st.button("⬇️", key=f"down_btn_{orig_idx}_{selected_q_name}", help="Hạ xuống 1 bậc", use_container_width=True):
+                                    save_undo_state(selected_q_name, rows)
+                                    rows[orig_idx], rows[orig_idx + 1] = rows[orig_idx + 1], rows[orig_idx]
+                                    with open(target_csv_path, "w", encoding="utf-8") as f:
+                                        for row_item in rows:
+                                            f.write(",".join(row_item) + "\n")
+                                    sync_submission_zip(output_dir, zip_output_path)
+                                    st.rerun()
+                        with c_b3:
+                            if orig_idx > 0:
+                                if st.button("⭐", key=f"promo_btn_{orig_idx}_{selected_q_name}", help="Chuyển lên Rank #1", use_container_width=True):
+                                    save_undo_state(selected_q_name, rows)
+                                    item_to_promote = rows.pop(orig_idx)
+                                    rows.insert(0, item_to_promote)
+                                    with open(target_csv_path, "w", encoding="utf-8") as f:
+                                        for row_item in rows:
+                                            f.write(",".join(row_item) + "\n")
+                                    sync_submission_zip(output_dir, zip_output_path)
+                                    st.session_state["inspect_target"] = {
+                                        "query": selected_q_name,
+                                        "video_id": item_to_promote[0],
+                                        "frame_idx": int(item_to_promote[1]) if len(item_to_promote) > 1 and item_to_promote[1].isdigit() else 0,
+                                        "rank": 1
+                                    }
+                                    st.rerun()
+                        with c_b4:
+                            if st.button("🎬", key=f"inspect_btn_{orig_idx}_{selected_q_name}", help="Mở soi video ngay bên phải", use_container_width=True):
                                 st.session_state["inspect_target"] = {
                                     "query": selected_q_name,
-                                    "video_id": item_to_promote[0],
-                                    "frame_idx": int(item_to_promote[1]) if len(item_to_promote) > 1 and item_to_promote[1].isdigit() else 0,
-                                    "rank": 1
+                                    "video_id": vid,
+                                    "frame_idx": f_idx,
+                                    "rank": orig_idx + 1
                                 }
                                 st.rerun()
-                    with col_c4:
-                        if st.button("🎬", key=f"inspect_btn_{orig_idx}_{selected_q_name}", help="Soi Video & Keyframe Studio", use_container_width=True):
-                            st.session_state["inspect_target"] = {
-                                "query": selected_q_name,
-                                "video_id": vid,
-                                "frame_idx": f_idx,
-                                "rank": orig_idx + 1
-                            }
-                            st.rerun()
 
-            # =================================================================
-            # TRÌNH PHÁT VIDEO MP4 ON-DEMAND & KÍNH HIỂN VI KEYFRAME
-            # =================================================================
-            st.divider()
-            cur_insp = st.session_state.get("inspect_target", {"video_id": rows[0][0], "frame_idx": int(rows[0][1]), "rank": 1})
-            insp_vid = cur_insp.get("video_id", rows[0][0])
-            insp_fidx = cur_insp.get("frame_idx", int(rows[0][1]))
-            insp_rank = cur_insp.get("rank", 1)
+                        st.markdown("</div>", unsafe_allow_html=True)
 
-            st.subheader(f"🎬 Studio Soi Video MP4 & Keyframe Filmstrip: `{insp_vid}` (Đang chọn từ Rank #{insp_rank})")
-            st.caption("Xem video thực tế với đầy đủ âm thanh/chuyển động, tua dòng thời gian và gán ngay frame ưng ý nhất vào file nộp bài.")
+            # -----------------------------------------------------------------
+            # CỘT PHẢI: STUDIO SOI VIDEO MP4 & KEYFRAME FILMSTRIP (TRỰC QUAN 100%)
+            # -----------------------------------------------------------------
+            with col_right_studio:
+                cur_insp = st.session_state.get("inspect_target", {"video_id": rows[0][0], "frame_idx": int(rows[0][1]), "rank": 1})
+                insp_vid = cur_insp.get("video_id", rows[0][0])
+                insp_fidx = cur_insp.get("frame_idx", int(rows[0][1]))
+                insp_rank = cur_insp.get("rank", 1)
 
-            col_vid_player, col_kf_strip = st.columns([1.3, 0.9])
+                st.markdown(f"#### 🎬 Studio Soi Video: `{insp_vid}` (Rank #{insp_rank})")
 
-            # Lưu lại mốc frame ban đầu khi mở video để hỗ trợ nút quay lại
-            if "initial_inspect_frame" not in st.session_state or st.session_state.get("initial_inspect_vid") != insp_vid:
-                st.session_state["initial_inspect_vid"] = insp_vid
-                st.session_state["initial_inspect_frame"] = insp_fidx
+                # Lưu lại mốc frame ban đầu khi mở video để hỗ trợ nút quay lại
+                if "initial_inspect_frame" not in st.session_state or st.session_state.get("initial_inspect_vid") != insp_vid:
+                    st.session_state["initial_inspect_vid"] = insp_vid
+                    st.session_state["initial_inspect_frame"] = insp_fidx
 
-            init_fidx = st.session_state.get("initial_inspect_frame", insp_fidx)
-            init_pts = keyframe_loader.get_pts_time(insp_vid, init_fidx)
-            init_min_sec = f"{int(init_pts//60):02d}:{int(init_pts%60):02d}"
+                init_fidx = st.session_state.get("initial_inspect_frame", insp_fidx)
+                init_pts = keyframe_loader.get_pts_time(insp_vid, init_fidx)
+                init_min_sec = f"{int(init_pts//60):02d}:{int(init_pts%60):02d}"
 
-            ts_widget_key = f"ts_input_{selected_q_name}_{insp_vid}"
-            fidx_widget_key = f"custom_fidx_{selected_q_name}_{insp_vid}"
+                ts_widget_key = f"ts_input_{selected_q_name}_{insp_vid}"
+                fidx_widget_key = f"custom_fidx_{selected_q_name}_{insp_vid}"
 
-            active_f_cur = st.session_state.get(fidx_widget_key, insp_fidx)
-            pts_time_cur = keyframe_loader.get_pts_time(insp_vid, active_f_cur)
-            cur_min_sec = f"{int(pts_time_cur//60):02d}:{int(pts_time_cur%60):02d}"
+                active_f_cur = st.session_state.get(fidx_widget_key, insp_fidx)
+                pts_time_cur = keyframe_loader.get_pts_time(insp_vid, active_f_cur)
+                cur_min_sec = f"{int(pts_time_cur//60):02d}:{int(pts_time_cur%60):02d}"
 
-            with col_vid_player:
-                st.markdown(f"#### 🎥 Trình Phát Video Trực Tiếp: `{insp_vid}.mp4`")
-                
                 play_mode = st.radio(
-                    "Chế độ phát:",
-                    ["⚡ Đoạn Ngắn Tối Ưu (60s - Siêu Mượt, 0.01s Load)", "🌐 Toàn Bộ Video Gốc"],
+                    "Chế độ phát video:",
+                    ["⚡ Đoạn Ngắn (60s - Siêu Mượt)", "🌐 Toàn Bộ Video Gốc"],
                     horizontal=True,
                     key=f"play_mode_{selected_q_name}_{insp_vid}"
                 )
 
-                with st.spinner("⏳ Đang chuẩn bị luồng video tối ưu..."):
+                with st.spinner("⏳ Đang chuẩn bị video..."):
                     is_short_clip = "Đoạn Ngắn" in play_mode and hasattr(video_manager, "get_optimized_clip")
                     if is_short_clip:
                         clip_path, clip_start, clip_dur = video_manager.get_optimized_clip(insp_vid, pts_time_cur, clip_window=60.0)
@@ -680,39 +722,34 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                             st.video(str(clip_path), start_time=int(offset_in_clip))
                             c_start_m = f"{int(clip_start//60):02d}:{int(clip_start%60):02d}"
                             c_end_m = f"{int((clip_start+clip_dur)//60):02d}:{int((clip_start+clip_dur)%60):02d}"
-                            st.caption(f"⚡ Đang phát đoạn ngắn tối ưu từ `{c_start_m}` đến `{c_end_m}` | Mốc chọn: `{cur_min_sec}` ({pts_time_cur:.1f}s) -> Frame `{active_f_cur}`")
+                            st.caption(f"⚡ Clip `{c_start_m}` đến `{c_end_m}` | Mốc chọn: `{cur_min_sec}` -> Frame `{active_f_cur}`")
                         else:
-                            st.warning(f"⚠️ Đang hiển thị ảnh Keyframe thay thế cho `{insp_vid}`.")
                             kf_big = keyframe_loader.get_keyframe_image(insp_vid, active_f_cur)
                             if kf_big:
                                 st.image(kf_big, use_container_width=True)
                     else:
                         v_path = video_manager.get_video_path(insp_vid)
                         if v_path and v_path.exists():
-                            size_mb = v_path.stat().st_size / (1024 * 1024)
                             st.video(str(v_path), start_time=int(max(0, pts_time_cur - 1.5)))
-                            st.caption(f"📁 Video gốc ({size_mb:.1f} MB) | Mốc thời gian tua tới: `{cur_min_sec}` ({pts_time_cur:.1f}s) -> Frame `{active_f_cur}`")
+                            st.caption(f"📁 Video gốc | Mốc tua: `{cur_min_sec}` -> Frame `{active_f_cur}`")
                         else:
-                            st.warning(f"⚠️ Chưa tìm thấy file video MP4 gốc cho `{insp_vid}`.")
                             kf_big = keyframe_loader.get_keyframe_image(insp_vid, active_f_cur)
                             if kf_big:
                                 st.image(kf_big, use_container_width=True)
 
-                st.markdown("##### ⏱️ Bắt Khung Hình Khi Xem Video (Nhập Phút:Giây hoặc Số Frame):")
-                
+                st.markdown("##### ⏱️ Bắt Khung Hình Khi Xem Video:")
                 col_ts1, col_btn_calc, col_ts2 = st.columns([1.2, 0.8, 1.0])
                 with col_ts1:
                     user_time_str = st.text_input(
-                        "⏱️ Nhập mốc thời gian xem được (MM:SS hoặc Giây):",
+                        "Thời gian (MM:SS):",
                         value="",
                         key=f"ts_raw_input_{selected_q_name}_{insp_vid}",
-                        placeholder=f"Ví dụ: 01:40 hoặc 100...",
-                        help="Nhập thời gian đang thấy trong video rồi bấm nút 'Tính Frame' bên cạnh"
+                        placeholder="VD: 01:40..."
                     )
 
                 with col_btn_calc:
                     st.markdown("<div style='margin-top:28px;'></div>", unsafe_allow_html=True)
-                    btn_calc_time = st.button("⚡ Tính Frame", use_container_width=True, help="Quy đổi thời gian thành Frame chính xác")
+                    btn_calc_time = st.button("⚡ Tính", use_container_width=True, help="Quy đổi thời gian thành Frame")
 
                 if (btn_calc_time or user_time_str.strip()) and user_time_str.strip():
                     try:
@@ -723,11 +760,9 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                         else:
                             t_sec = float(clean_ts)
 
-                        # Tính chính xác frame theo FPS thực của video
                         if hasattr(keyframe_loader, "get_exact_frame_from_time"):
                             new_f = keyframe_loader.get_exact_frame_from_time(insp_vid, t_sec)
                         else:
-                            # Fallback tra cứu trực tiếp qua df_frames nếu instance cũ chưa cập nhật method
                             df_v = keyframe_loader.df_frames[keyframe_loader.df_frames["video_id"] == insp_vid]
                             fps = float(df_v.iloc[0]["fps"]) if not df_v.empty and "fps" in df_v.columns and float(df_v.iloc[0]["fps"]) > 0 else 25.0
                             new_f = int(round(t_sec * fps))
@@ -735,13 +770,13 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                         st.session_state[fidx_widget_key] = new_f
                         st.session_state["inspect_target"]["frame_idx"] = new_f
                     except Exception as e:
-                        st.error(f"Lỗi định dạng thời gian: {e}")
+                        st.error(f"Lỗi: {e}")
 
                 current_target_frame = st.session_state.get(fidx_widget_key, insp_fidx)
 
                 with col_ts2:
                     custom_f_input = st.number_input(
-                        "🎞️ Hoặc chỉnh số Frame:",
+                        "Số Frame:",
                         min_value=0,
                         max_value=300000,
                         value=current_target_frame,
@@ -757,20 +792,15 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                 exact_pts_chosen = keyframe_loader.get_pts_time(insp_vid, active_chosen_frame)
                 exact_pts_str = f"{int(exact_pts_chosen//60):02d}:{int(exact_pts_chosen%60):02d}"
 
-                # Hàng nút thao tác: Chốt Rank 1 & Quay lại mốc ban đầu
-                col_act_r1, col_act_reset = st.columns([1.5, 1.0])
+                col_act_r1, col_act_reset = st.columns([1.6, 1.0])
                 with col_act_r1:
-                    if st.button(f"👑 Chèn Mốc Này ({exact_pts_str} ➔ Frame {active_chosen_frame}) Lên Rank #1", type="primary", use_container_width=True):
+                    if st.button(f"👑 Chèn Lên Rank #1 (Frame {active_chosen_frame})", type="primary", use_container_width=True):
                         save_undo_state(selected_q_name, rows)
-                        
                         target_row = [insp_vid, str(active_chosen_frame)]
                         if len(rows[0]) > 2:
                             target_row.extend(rows[0][2:])
                         
-                        # Xóa duplicate nếu đã có đúng chính xác (insp_vid, active_chosen_frame)
                         rows = [r for r in rows if not (r[0] == insp_vid and len(r) > 1 and r[1] == str(active_chosen_frame))]
-                        
-                        # CHÈN LÊN RANK 1 (Đẩy các frame cũ xuống an toàn, bảo toàn 100% dữ liệu)
                         rows.insert(0, target_row)
                         rows = rows[:100]
 
@@ -784,23 +814,17 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                             "frame_idx": active_chosen_frame,
                             "rank": 1
                         }
-                        st.success(f"🎉 Đã chèn lên Rank #1: `{insp_vid}` - Frame `{active_chosen_frame}` ({exact_pts_str}) (Đã đẩy các frame cũ xuống an toàn) & cập nhật submission.zip!")
+                        st.success(f"🎉 Đã chèn `{insp_vid}` - Frame `{active_chosen_frame}` lên Rank #1 (Đã đẩy các frame cũ xuống an toàn)!")
                         st.rerun()
 
                 with col_act_reset:
-                    if st.button(f"🔄 Về mốc ban đầu ({init_min_sec})", use_container_width=True):
+                    if st.button(f"🔄 Mốc gốc ({init_min_sec})", use_container_width=True):
                         st.session_state[fidx_widget_key] = init_fidx
                         st.session_state["inspect_target"]["frame_idx"] = init_fidx
                         st.rerun()
 
-            with col_kf_strip:
-                st.markdown("#### 🎞️ Dải Phim Ngữ Cảnh & Xem Trước Frame")
-                # Hiển thị ảnh chuẩn 100% từ tập Keyframe gốc trước, fallback OpenCV
-                live_preview_img = keyframe_loader.get_keyframe_image(insp_vid, active_chosen_frame) or keyframe_loader.get_dense_video_frame(insp_vid, active_chosen_frame)
-                if live_preview_img:
-                    st.image(live_preview_img, caption=f"📸 Khung hình chuẩn xác tại Frame {active_chosen_frame} ({exact_pts_str})", use_container_width=True)
-
-                st.markdown("**Dải Keyframe lân cận (Click để gán tức thì):**")
+                # Dải Keyframe Filmstrip
+                st.markdown("##### 🎞️ Dải Keyframe lân cận (Click để gán):")
                 surr_kfs = keyframe_loader.get_surrounding_keyframes(insp_vid, active_chosen_frame, count=8)
                 if surr_kfs:
                     k_cols = st.columns(4)
