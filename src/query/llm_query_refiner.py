@@ -189,7 +189,7 @@ Hãy trả về duy nhất định dạng JSON sau (không thêm văn bản ngo�
         lines = [l.strip() for l in raw_query.split("\n") if l.strip()]
         sub_events_vi = []
         for l in lines:
-            if re.match(r"^[eE]\d+[:\s\-\.]", l) or "khoảnh khắc" in l.lower():
+            if re.match(r"^(?:[eE]|sự kiện|event|bước|cảnh|scene|giai đoạn)\s*\d+[:\s\-\.]", l, re.IGNORECASE) or re.match(r"^\d+[\.\)]\s*", l) or "khoảnh khắc" in l.lower():
                 sub_events_vi.append(l)
 
         if not sub_events_vi and task_type == "trake":

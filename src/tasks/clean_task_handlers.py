@@ -278,8 +278,18 @@ class TRAKEHandler:
         sub_events_en = refined.get("sub_events_en", [])
         
         if not sub_events_vi or len(sub_events_vi) < 2:
-            parts = [p.strip() for p in re.split(r"E\d+:|E\d+\s+|;\s*|sau đó|tiếp theo|kế đến", query_vi) if len(p.strip()) > 10]
-            sub_events_vi = parts if len(parts) >= 2 else [query_vi, query_vi, query_vi]
+            lines = [l.strip() for l in query_vi.split("\n") if l.strip()]
+            extracted = []
+            for l in lines:
+                if re.search(r"^(?:[eE]|sự kiện|event|bước|cảnh|scene|giai đoạn)\s*\d+[\s:.-]*", l, re.IGNORECASE) or re.search(r"^\d+[\.\)]\s*", l):
+                    cl = re.sub(r"^(?:[eE]|sự kiện|event|bước|cảnh|scene|giai đoạn)\s*\d+[\s:.-]*\s*", "", l, flags=re.IGNORECASE)
+                    cl = re.sub(r"^\d+[\.\)]\s*", "", cl)
+                    if cl: extracted.append(cl)
+            if len(extracted) >= 2:
+                sub_events_vi = extracted
+            else:
+                parts = [p.strip() for p in re.split(r"(?:[eE]|cảnh|sự kiện)\s*\d+[:\s.-]+|;\s*|sau đó|tiếp theo|kế đến", query_vi, flags=re.IGNORECASE) if len(p.strip()) > 8]
+                sub_events_vi = parts if len(parts) >= 2 else [query_vi, query_vi, query_vi]
 
         # Nếu cấu hình là A0..A4 (chưa kích hoạt Joint TRAKE DP) -> fallback đơn giản
         if config_name in ["A0", "A1", "A2", "A3", "A4"]:

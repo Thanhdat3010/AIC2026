@@ -188,17 +188,17 @@ def parse_trake_subevents(query_text: str) -> list[str]:
     lines = [l.strip() for l in query_text.split("\n") if l.strip()]
     events = []
     
-    # 1. Tìm các dòng có tiền tố sự kiện: E1, E2, Sự kiện 1, Event 1, 1., 1)
+    # 1. Tìm các dòng có tiền tố sự kiện: E1, E2, Sự kiện 1, Cảnh 1, Event 1, 1., 1)
     for l in lines:
-        if re.search(r'^(?:sự kiện|event|bước|e)\s*\d+[\s:.-]*', l, re.IGNORECASE) or re.search(r'^\d+[\.\)]\s*', l):
-            cleaned = re.sub(r'^(?:sự kiện|event|bước|e)\s*\d+[\s:.-]*\s*', '', l, flags=re.IGNORECASE)
+        if re.search(r'^(?:sự kiện|event|bước|cảnh|scene|giai đoạn|e)\s*\d+[\s:.-]*', l, re.IGNORECASE) or re.search(r'^\d+[\.\)]\s*', l):
+            cleaned = re.sub(r'^(?:sự kiện|event|bước|cảnh|scene|giai đoạn|e)\s*\d+[\s:.-]*\s*', '', l, flags=re.IGNORECASE)
             cleaned = re.sub(r'^\d+[\.\)]\s*', '', cleaned)
             if cleaned:
                 events.append(cleaned)
 
     # 2. Nếu không có tiền tố ở đầu dòng, thử bóc tách bằng regex bên trong văn bản
     if not events:
-        inline_matches = re.findall(r'(?:[eE]\d+|sự kiện\s*\d+|event\s*\d+)[:\s.-]+([^;\n\.]+(?:[\.\?!](?![eE]\d+|sự kiện|event))*)', query_text, flags=re.IGNORECASE)
+        inline_matches = re.findall(r'(?:[eE]\d+|sự kiện\s*\d+|cảnh\s*\d+|event\s*\d+)[:\s.-]+([^;\n\.]+(?:[\.\?!](?![eE]\d+|sự kiện|cảnh|event))*)', query_text, flags=re.IGNORECASE)
         if inline_matches:
             events = [m.strip() for m in inline_matches if len(m.strip()) > 5]
 
