@@ -927,9 +927,11 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
 
                     with ev_cols[e_idx]:
                         st.markdown(f"""
-                        <div class="event-card">
-                            <span style="font-weight:bold; color:#f59e0b;">SỰ KIỆN E{e_idx+1}</span><br/>
-                            <small style="color:#cbd5e1; font-style:italic;">"{ev_desc[:40]}"</small>
+                        <div class="event-card" style="min-height: 105px; display: flex; flex-direction: column; justify-content: flex-start; background: #0f172a; border: 1px solid #f59e0b; border-radius: 8px; padding: 10px; margin-bottom: 8px;">
+                            <span style="font-weight: bold; color: #f59e0b; font-size: 0.9rem; margin-bottom: 4px;">SỰ KIỆN E{e_idx+1}</span>
+                            <div style="color: #cbd5e1; font-style: italic; font-size: 0.85rem; line-height: 1.45; word-wrap: break-word;">
+                                "{ev_desc}"
+                            </div>
                         </div>
                         """, unsafe_allow_html=True)
 
