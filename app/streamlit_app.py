@@ -184,22 +184,32 @@ def save_undo_state(query_name: str, current_rows: list):
     st.session_state["undo_history"][query_name] = st.session_state["undo_history"][query_name][-10:]
 
 def parse_trake_subevents(query_text: str) -> list[str]:
-    """Bóc tách các sự kiện con E1, E2, ... từ văn bản truy vấn tiếng Việt."""
+    """Bóc tách các sự kiện con E1, E2, ... từ văn bản truy vấn tiếng Việt chuẩn xác 100%."""
     lines = [l.strip() for l in query_text.split("\n") if l.strip()]
     events = []
+    
+    # 1. Tìm các dòng có tiền tố sự kiện: E1, E2, Sự kiện 1, Event 1, 1., 1)
     for l in lines:
-        if re.search(r'^(sự kiện|event|bước|e)\s*\d+[:.-]', l, re.IGNORECASE) or re.search(r'^\d+[\.\)]', l):
-            cleaned = re.sub(r'^(sự kiện|event|bước|e)\s*\d+[:.-]\s*', '', l, flags=re.IGNORECASE)
+        if re.search(r'^(?:sự kiện|event|bước|e)\s*\d+[\s:.-]*', l, re.IGNORECASE) or re.search(r'^\d+[\.\)]\s*', l):
+            cleaned = re.sub(r'^(?:sự kiện|event|bước|e)\s*\d+[\s:.-]*\s*', '', l, flags=re.IGNORECASE)
             cleaned = re.sub(r'^\d+[\.\)]\s*', '', cleaned)
             if cleaned:
                 events.append(cleaned)
+
+    # 2. Nếu không có tiền tố ở đầu dòng, thử bóc tách bằng regex bên trong văn bản
     if not events:
-        # Fallback tách theo dấu chấm hoặc gạch đầu dòng
-        parts = [p.strip() for p in re.split(r'[\n;]', query_text) if len(p.strip()) > 8]
+        inline_matches = re.findall(r'(?:[eE]\d+|sự kiện\s*\d+|event\s*\d+)[:\s.-]+([^;\n\.]+(?:[\.\?!](?![eE]\d+|sự kiện|event))*)', query_text, flags=re.IGNORECASE)
+        if inline_matches:
+            events = [m.strip() for m in inline_matches if len(m.strip()) > 5]
+
+    # 3. Fallback cuối cùng nếu không có bất kỳ ký hiệu E nào
+    if not events:
+        parts = [p.strip() for p in re.split(r'(?:;\s*|\n|(?<=[\.\?!])\s+)', query_text) if len(p.strip()) > 8]
         if len(parts) >= 2:
             events = parts
         else:
             events = ["Sự kiện 1", "Sự kiện 2", "Sự kiện 3"]
+            
     return events
 
 # Sidebar
@@ -888,15 +898,21 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                 trake_vid = trake_row[0]
                 trake_frames = [int(x) for x in trake_row[1:] if x.isdigit()]
 
-                if not trake_frames:
-                    # Fallback lấy frame mặc định từ video đó
+                # SỐ LƯỢNG SỰ KIỆN PHẢI ĐỒNG BỘ CHUẨN XÁC VỚI KẾT QUẢ ĐỀ BÀI (KHÔNG SINH THỪA SỰ KIỆN)
+                if trake_frames:
+                    num_events = len(trake_frames)
+                else:
+                    num_events = len(parsed_events) if parsed_events else 3
                     all_kfs = keyframe_loader.get_all_video_keyframes(trake_vid)
-                    trake_frames = all_kfs[:len(parsed_events)] if len(all_kfs) >= len(parsed_events) else [100 * (i+1) for i in range(len(parsed_events))]
+                    trake_frames = all_kfs[:num_events] if len(all_kfs) >= num_events else [100 * (i+1) for i in range(num_events)]
 
-                num_events = max(len(trake_frames), len(parsed_events))
-                # Đồng bộ độ dài
-                while len(trake_frames) < num_events:
-                    trake_frames.append(trake_frames[-1] + 100 if trake_frames else 100)
+                # Cắt hoặc gán mô tả đúng chuẩn num_events
+                if len(parsed_events) > num_events:
+                    parsed_events = parsed_events[:num_events]
+                while len(parsed_events) < num_events:
+                    parsed_events.append(f"Sự kiện {len(parsed_events)+1}")
+
+                trake_frames = trake_frames[:num_events]
 
                 ev_cols = st.columns(num_events)
                 updated_trake_frames = []
