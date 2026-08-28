@@ -544,15 +544,30 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                 else:
                     filtered_rows_with_idx.append((original_idx, r))
 
-            st.markdown(f"### 🖼️ Lưới Ứng Viên Đa Tầng (Hiển thị {min(display_top_k, len(filtered_rows_with_idx))} / {len(rows)} dòng)")
+            # Khởi tạo an toàn 100% session_state cho video inspector
+            if "inspect_target" not in st.session_state or not isinstance(st.session_state["inspect_target"], dict) or st.session_state["inspect_target"].get("query") != selected_q_name:
+                st.session_state["inspect_target"] = {
+                    "query": selected_q_name,
+                    "video_id": rows[0][0],
+                    "frame_idx": int(rows[0][1]) if len(rows[0]) > 1 and rows[0][1].isdigit() else 0,
+                    "rank": 1
+                }
 
             # =================================================================
-            # THANH CÔNG CỤ HOÁN ĐỔI NHANH 2 RANK (QUICK SWAP) & HOÀN TÁC (UNDO)
+            # MASTER-DETAIL SPLIT-SCREEN STUDIO LAYOUT (VBS SOTA DESIGN)
             # =================================================================
-            with st.container():
-                c_sw_title, c_undo_box = st.columns([3.2, 1.8])
+            col_left_grid, col_right_studio = st.columns([1.12, 0.88], gap="medium")
+
+            # -----------------------------------------------------------------
+            # CỘT TRÁI: LƯỚI ỨNG VIÊN & TOOLBAR HOÁN ĐỔI / HOÀN TÁC
+            # -----------------------------------------------------------------
+            with col_left_grid:
+                st.markdown(f"#### 🖼️ Lưới Ứng Viên ({min(display_top_k, len(filtered_rows_with_idx))} / {len(rows)} dòng)")
+                
+                # Thanh Quick Swap & Undo
+                c_sw_title, c_undo_box = st.columns([3.0, 2.0])
                 with c_sw_title:
-                    st.markdown("##### 🔄 Hoán Đổi Vị Trí 2 Rank (Quick Swap):")
+                    st.markdown("🔄 **Hoán đổi Rank:**")
                 with c_undo_box:
                     has_undo = ("undo_history" in st.session_state and selected_q_name in st.session_state["undo_history"] and len(st.session_state["undo_history"][selected_q_name]) > 0)
                     if has_undo:
@@ -563,8 +578,6 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                                 for row_item in rows:
                                     f.write(",".join(row_item) + "\n")
                             sync_submission_zip(output_dir, zip_output_path)
-                            st.success("✅ Đã hoàn tác lại trạng thái trước đó!")
-                            st.rerun()
                             st.success("✅ Đã hoàn tác lại!")
                             st.rerun()
 
@@ -588,7 +601,7 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
 
                 # Lưới 3 Cột trong cột trái
                 cols_3 = st.columns(3)
-                cur_inspect_vid = st.session_state["inspect_target"].get("video_id", rows[0][0])
+                cur_inspect_vid = st.session_state.get("inspect_target", {}).get("video_id", rows[0][0])
                 for render_count, (orig_idx, r) in enumerate(filtered_rows_with_idx[:display_top_k]):
                     col = cols_3[render_count % 3]
                     with col:
@@ -687,6 +700,19 @@ elif active_tab == "📂 Duyệt & Chỉnh Sửa Kết Quả Nộp Bài (Submiss
                 insp_vid = cur_insp.get("video_id", rows[0][0])
                 insp_fidx = cur_insp.get("frame_idx", int(rows[0][1]))
                 insp_rank = cur_insp.get("rank", 1)
+
+                # 📌 Khung hiển thị câu hỏi trực tiếp trên video studio
+                st.markdown(f"""
+                <div style="background: rgba(30, 41, 59, 0.9); border-left: 5px solid {tag_color}; padding: 12px 14px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #334155; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <span style="font-size: 0.85rem; font-weight: bold; color: {tag_color};">📋 ĐỀ BÀI [{task_tag}]: {selected_q_name}</span>
+                        <span style="font-size: 0.8rem; color: #94a3b8;">Đang soi: <b style="color: #f1f5f9;">{insp_vid}</b> (Rank #{insp_rank})</span>
+                    </div>
+                    <div style="font-size: 1.0rem; color: #f8fafc; line-height: 1.5; font-style: italic; background: rgba(0,0,0,0.25); padding: 8px 10px; border-radius: 6px;">
+                        "{q_content}"
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
                 st.markdown(f"#### 🎬 Studio Soi Video: `{insp_vid}` (Rank #{insp_rank})")
 
