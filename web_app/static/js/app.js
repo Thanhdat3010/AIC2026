@@ -264,9 +264,28 @@ class AppController {
         if (this.statsLatencyEl) this.statsLatencyEl.textContent = `${data.latency_ms} ms`;
         if (this.statsCountEl) this.statsCountEl.textContent = `${this.currentResults.length}`;
 
-        // TỰ ĐỘNG GÁN SẴN CHUỖI TRAKE TỪ KẾT QUẢ MỚI TÌM ĐƯỢC
-        if (this.currentQueryData?.task_type === "TRAKE" && this.currentResults.length > 0 && this.currentResults[0].event_frames) {
-          window.trakeStudio?.setInitialFrames(this.currentResults[0].event_frames, this.currentResults[0].video_id);
+        // Nhận diện bài toán KIS / QA / TRAKE
+        const isTrake = (this.currentQueryData?.task_type === "TRAKE") || (data.task_type === "trake");
+        const qaBox = document.getElementById("qa-answer-station");
+        const trakeBox = document.getElementById("trake-station");
+        const lockR1Btn = document.getElementById("btn-lock-current-frame");
+
+        if (isTrake) {
+          if (trakeBox) trakeBox.style.display = "flex";
+          if (qaBox) qaBox.style.display = "none";
+          if (lockR1Btn) lockR1Btn.style.display = "none";
+
+          // Khởi tạo trạm TRAKE theo câu truy vấn thực tế
+          window.trakeStudio?.setupQuery(query);
+
+          // TỰ ĐỘNG GÁN SẴN CHUỖI TRAKE TỪ RANK 1 VỪA TÌM ĐƯỢC
+          if (this.currentResults.length > 0 && this.currentResults[0].event_frames && this.currentResults[0].event_frames.length > 0) {
+            window.trakeStudio?.setInitialFrames(this.currentResults[0].event_frames, this.currentResults[0].video_id);
+          }
+        } else if (data.task_type === "qa") {
+          if (qaBox) qaBox.style.display = "flex";
+          if (trakeBox) trakeBox.style.display = "none";
+          if (lockR1Btn) lockR1Btn.style.display = "flex";
         }
 
         this.renderCards(this.currentResults);
@@ -346,7 +365,9 @@ class AppController {
     if (window.videoInspector) {
       window.videoInspector.loadVideo(videoId, frameIdx);
     }
-    if (this.currentQueryData?.task_type === "TRAKE" && eventFrames && eventFrames.length > 0) {
+    const trakeStation = document.getElementById("trake-station");
+    const isTrake = (this.currentQueryData?.task_type === "TRAKE") || (trakeStation && trakeStation.style.display !== "none");
+    if (isTrake && eventFrames && eventFrames.length > 0) {
       window.trakeStudio?.setInitialFrames(eventFrames, videoId);
     }
   }
