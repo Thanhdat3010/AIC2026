@@ -162,12 +162,20 @@ class AppController {
     this.queryListEl?.querySelectorAll('.question-card').forEach(el => el.classList.remove('active'));
     document.getElementById(`q-card-${q.id}`)?.classList.add('active');
 
-    // Omnibar
+    // Omnibar & Banner Full Text
     if (this.omnibarInput) this.omnibarInput.value = q.content;
-    if (this.activeQueryTextEl) this.activeQueryTextEl.textContent = `[${q.id}]: "${q.content}"`;
+    const queryIdEl = document.getElementById("active-query-id");
+    if (queryIdEl) queryIdEl.textContent = `📋 ĐỀ BÀI: ${q.id}`;
+    if (this.activeQueryTextEl) this.activeQueryTextEl.textContent = q.content;
     if (this.activeQueryTagEl) {
       this.activeQueryTagEl.textContent = `${q.task_type} TASK`;
       this.activeQueryTagEl.className = `q-tag ${q.task_type.toLowerCase()}`;
+    }
+
+    const bannerBox = document.getElementById("query-banner-box");
+    if (bannerBox) {
+      const borderColors = { 'qa': '#10b981', 'trake': '#f59e0b', 'kis': '#38bdf8' };
+      bannerBox.style.borderLeftColor = borderColors[q.task_type.toLowerCase()] || '#38bdf8';
     }
 
     // Ẩn hiện các trạm đặc thù (QA vs TRAKE)

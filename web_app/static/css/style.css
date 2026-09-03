@@ -383,16 +383,45 @@ body {
   box-shadow: 0 4px 16px rgba(59, 130, 246, 0.6);
 }
 
-.query-banner {
-  background: rgba(30, 41, 59, 0.6);
-  border-left: 4px solid #38bdf8;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 0.88rem;
+.query-full-banner {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 1px solid #334155;
+  border-left: 5px solid #38bdf8;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: border-color 0.2s ease;
+}
+
+.query-banner-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #e2e8f0;
+}
+
+.query-id-title {
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: #f8fafc;
+  letter-spacing: 0.3px;
+}
+
+.query-full-content {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #f1f5f9;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  word-break: break-word;
+  white-space: normal;
+  max-height: 140px;
+  overflow-y: auto;
+  user-select: text; /* Cho phép bôi đen copy nếu cần */
 }
 
 .stats-line {
