@@ -186,8 +186,11 @@ class AppController {
     // Ẩn hiện các trạm đặc thù (QA vs TRAKE)
     const qaBox = document.getElementById("qa-answer-station");
     const trakeBox = document.getElementById("trake-station");
+    const lockR1Btn = document.getElementById("btn-lock-current-frame");
+
     if (qaBox) qaBox.style.display = (q.task_type === "QA") ? "flex" : "none";
     if (trakeBox) trakeBox.style.display = (q.task_type === "TRAKE") ? "flex" : "none";
+    if (lockR1Btn) lockR1Btn.style.display = (q.task_type === "TRAKE") ? "none" : "flex";
 
     if (window.trakeStudio && q.task_type === "TRAKE") {
       window.trakeStudio.setupQuery(q.content);

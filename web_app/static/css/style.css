@@ -583,13 +583,17 @@ body {
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--border-subtle);
+  flex-shrink: 0 !important; /* BẢO ĐẢM KHÔNG BAO GIỜ BỊ ĐÈ NÉN CO RÚM */
+  width: 100%;
 }
 
 .main-video {
   width: 100%;
-  aspect-ratio: 16/9;
+  aspect-ratio: 16 / 9;
+  min-height: 220px; /* BẢO ĐẢM THẤY ĐỦ TOÀN BỘ KHUNG HÌNH VIDEO */
   display: block;
   background: #000;
+  object-fit: contain; /* KHÔNG BỊ CẮT XÉN GÓC */
 }
 
 .video-scrub-bar {
@@ -628,17 +632,17 @@ body {
 /* KHU VỰC VŨ KHÍ: NÚT CHỐT FRAME HIỆN TẠI (1-CLICK INSTANT LOCK) */
 .decision-hub {
   background: rgba(30, 41, 59, 0.7);
-  border: 2px solid var(--border-gold);
-  border-radius: 10px;
-  padding: 12px;
+  border: 1.5px solid var(--border-gold);
+  border-radius: 8px;
+  padding: 8px 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+  gap: 6px;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
 }
 
 .hub-header {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 800;
   color: #fde047;
   display: flex;
@@ -646,45 +650,45 @@ body {
   align-items: center;
 }
 
-/* NÚT CHỐT FRAME TO ĐÙNG, ẤN LÀ XONG */
+/* NÚT CHỐT FRAME GỌN GÀNG */
 .btn-lock-frame-now {
   background: linear-gradient(135deg, #f59e0b, #eab308);
   color: #0b0f19;
   border: none;
-  padding: 12px 16px;
-  border-radius: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
   font-family: var(--font-family);
-  font-weight: 900;
-  font-size: 1rem;
+  font-weight: 800;
+  font-size: 0.88rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
   transition: all 0.15s ease;
 }
 
 .btn-lock-frame-now:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
 }
 
 .btn-lock-frame-now.success {
   background: #10b981 !important;
   color: #fff !important;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.5) !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.5) !important;
 }
 
 /* KHUNG ĐÁP ÁN CHO QA */
 .qa-answer-input-box {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  padding: 10px;
-  border-radius: 8px;
+  gap: 4px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 8px;
+  border-radius: 6px;
 }
 
 .qa-input-text {
@@ -692,33 +696,33 @@ body {
   border: 1px solid #10b981;
   color: #fff;
   font-family: var(--font-family);
-  padding: 8px 10px;
-  border-radius: 6px;
+  padding: 6px 8px;
+  border-radius: 5px;
   outline: none;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
-/* KHUNG CHỐT CHO TRAKE (TÁCH BIỆT XEM VÀ GÁN) */
+/* KHUNG CHỐT CHO TRAKE (GỌN GÀNG, TÁCH BIỆT XEM VÀ GÁN) */
 .trake-hub-box {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .trake-events-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .trake-event-item {
   background: #111827;
   border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  padding: 8px 10px;
+  border-radius: 6px;
+  padding: 5px 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   transition: border-color 0.15s ease;
 }
 
@@ -729,21 +733,21 @@ body {
 .trake-item-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .trake-badge-e {
   background: #f59e0b;
   color: #0b0f19;
   font-weight: 900;
-  font-size: 0.72rem;
-  padding: 2px 6px;
-  border-radius: 4px;
+  font-size: 0.68rem;
+  padding: 1px 5px;
+  border-radius: 3px;
   flex-shrink: 0;
 }
 
 .trake-item-desc {
-  font-size: 0.8rem;
+  font-size: 0.74rem;
   font-weight: 600;
   color: #e2e8f0;
   white-space: nowrap;
@@ -755,7 +759,7 @@ body {
 .trake-item-frame {
   font-family: monospace;
   font-weight: 800;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: #38bdf8;
   flex-shrink: 0;
 }
@@ -763,23 +767,23 @@ body {
 .trake-item-btns {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  gap: 4px;
 }
 
 .btn-trake-view {
   background: rgba(6, 182, 212, 0.15);
-  border: 1px solid rgba(6, 182, 212, 0.45);
+  border: 1px solid rgba(6, 182, 212, 0.4);
   color: #38bdf8;
   font-family: var(--font-family);
   font-weight: 800;
-  font-size: 0.76rem;
-  padding: 6px 8px;
-  border-radius: 5px;
+  font-size: 0.72rem;
+  padding: 4px 6px;
+  border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
   transition: all 0.15s ease;
 }
 
@@ -789,19 +793,19 @@ body {
 }
 
 .btn-trake-assign {
-  background: rgba(245, 158, 11, 0.18);
-  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
   color: #fde047;
   font-family: var(--font-family);
   font-weight: 800;
-  font-size: 0.76rem;
-  padding: 6px 8px;
-  border-radius: 5px;
+  font-size: 0.72rem;
+  padding: 4px 6px;
+  border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
   transition: all 0.15s ease;
 }
 
