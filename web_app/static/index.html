@@ -154,31 +154,84 @@
           </button>
         </div>
 
-        <!-- NẾU LÀ CÂU TRAKE: CÓ 4 NÚT GÁN NHANH E1..E4 -->
+        <!-- NẾU LÀ CÂU TRAKE: TÁCH BIỆT RÕ RÀNG NÚT XEM (CON MẮT) VÀ NÚT GÁN (PIN) -->
         <div id="trake-station" class="trake-hub-box" style="display: none;">
-          <div style="font-size: 0.8rem; font-weight: 800; color: #fde047; display: flex; justify-content: space-between;">
-            <span>⏱️ GÁN SỰ KIỆN TRAKE:</span>
-            <span id="trake-val-status" style="font-size: 0.72rem;">Chờ gán...</span>
+          <div style="font-size: 0.85rem; font-weight: 800; color: #fde047; display: flex; justify-content: space-between; align-items: center;">
+            <span>⏱️ CÁC SỰ KIỆN TRAKE:</span>
+            <span id="trake-val-status" style="font-size: 0.76rem; font-weight: 700;">Chờ gán...</span>
           </div>
-          <div class="trake-quick-grid">
-            <button class="btn-trake-snap" onclick="window.trakeStudio.assignCurrentFromPlayer(0)">
-              <strong>📌 Gán vào E1 (Phím 1)</strong>
-              <span id="trake-val-0">---</span>
-            </button>
-            <button class="btn-trake-snap" onclick="window.trakeStudio.assignCurrentFromPlayer(1)">
-              <strong>📌 Gán vào E2 (Phím 2)</strong>
-              <span id="trake-val-1">---</span>
-            </button>
-            <button class="btn-trake-snap" onclick="window.trakeStudio.assignCurrentFromPlayer(2)">
-              <strong>📌 Gán vào E3 (Phím 3)</strong>
-              <span id="trake-val-2">---</span>
-            </button>
-            <button class="btn-trake-snap" onclick="window.trakeStudio.assignCurrentFromPlayer(3)">
-              <strong>📌 Gán vào E4 (Phím 4)</strong>
-              <span id="trake-val-3">---</span>
-            </button>
+
+          <div class="trake-events-list">
+            <!-- Event 1 -->
+            <div class="trake-event-item" id="trake-item-0">
+              <div class="trake-item-header">
+                <span class="trake-badge-e">E1</span>
+                <span class="trake-item-desc" id="trake-desc-0">Sự kiện 1</span>
+                <span class="trake-item-frame" id="trake-val-0">#---</span>
+              </div>
+              <div class="trake-item-btns">
+                <button class="btn-trake-view" onclick="window.trakeStudio.seekToSlot(0)" title="Xem video tại frame này">
+                  👁️ Xem E1
+                </button>
+                <button class="btn-trake-assign" onclick="window.trakeStudio.assignCurrentFromPlayer(0)" title="Gán frame đang phát vào E1 (hoặc ấn phím 1)">
+                  📌 Gán (Phím 1)
+                </button>
+              </div>
+            </div>
+
+            <!-- Event 2 -->
+            <div class="trake-event-item" id="trake-item-1">
+              <div class="trake-item-header">
+                <span class="trake-badge-e">E2</span>
+                <span class="trake-item-desc" id="trake-desc-1">Sự kiện 2</span>
+                <span class="trake-item-frame" id="trake-val-1">#---</span>
+              </div>
+              <div class="trake-item-btns">
+                <button class="btn-trake-view" onclick="window.trakeStudio.seekToSlot(1)" title="Xem video tại frame này">
+                  👁️ Xem E2
+                </button>
+                <button class="btn-trake-assign" onclick="window.trakeStudio.assignCurrentFromPlayer(1)" title="Gán frame đang phát vào E2 (hoặc ấn phím 2)">
+                  📌 Gán (Phím 2)
+                </button>
+              </div>
+            </div>
+
+            <!-- Event 3 -->
+            <div class="trake-event-item" id="trake-item-2">
+              <div class="trake-item-header">
+                <span class="trake-badge-e">E3</span>
+                <span class="trake-item-desc" id="trake-desc-2">Sự kiện 3</span>
+                <span class="trake-item-frame" id="trake-val-2">#---</span>
+              </div>
+              <div class="trake-item-btns">
+                <button class="btn-trake-view" onclick="window.trakeStudio.seekToSlot(2)" title="Xem video tại frame này">
+                  👁️ Xem E3
+                </button>
+                <button class="btn-trake-assign" onclick="window.trakeStudio.assignCurrentFromPlayer(2)" title="Gán frame đang phát vào E3 (hoặc ấn phím 3)">
+                  📌 Gán (Phím 3)
+                </button>
+              </div>
+            </div>
+
+            <!-- Event 4 -->
+            <div class="trake-event-item" id="trake-item-3">
+              <div class="trake-item-header">
+                <span class="trake-badge-e">E4</span>
+                <span class="trake-item-desc" id="trake-desc-3">Sự kiện 4</span>
+                <span class="trake-item-frame" id="trake-val-3">#---</span>
+              </div>
+              <div class="trake-item-btns">
+                <button class="btn-trake-view" onclick="window.trakeStudio.seekToSlot(3)" title="Xem video tại frame này">
+                  👁️ Xem E4
+                </button>
+                <button class="btn-trake-assign" onclick="window.trakeStudio.assignCurrentFromPlayer(3)" title="Gán frame đang phát vào E4 (hoặc ấn phím 4)">
+                  📌 Gán (Phím 4)
+                </button>
+              </div>
+            </div>
           </div>
-          <button id="btn-save-trake-now" class="btn-card pin-r1" style="padding: 8px; font-weight: 800; margin-top: 4px;">
+
+          <button id="btn-save-trake-now" class="btn-lock-frame-now" style="font-size: 0.92rem; padding: 10px; margin-top: 4px;">
             💾 Lưu Chuỗi TRAKE Này Vào Bài Nộp
           </button>
         </div>

@@ -58,14 +58,11 @@ class TrakeStudio {
     this.subeventTitles = this.parseSubeventTitles(queryText);
     this.assignedFrames = [null, null, null, null];
 
-    // Cập nhật nhãn nút bấm
     for (let i = 0; i < 4; i++) {
-      const btn = document.querySelector(`button[onclick="window.trakeStudio.assignCurrentFromPlayer(${i})"] strong`);
-      if (btn) {
-        btn.textContent = `📌 E${i + 1}: ${this.subeventTitles[i]}`;
-      }
+      const descEl = document.getElementById(`trake-desc-${i}`);
+      if (descEl) descEl.textContent = this.subeventTitles[i] || `Sự kiện ${i + 1}`;
       const valEl = document.getElementById(`trake-val-${i}`);
-      if (valEl) valEl.textContent = "---";
+      if (valEl) valEl.textContent = "#---";
     }
 
     this.validateMonotonic();
@@ -81,16 +78,17 @@ class TrakeStudio {
         this.assignedFrames[idx] = parseInt(f);
         const valEl = document.getElementById(`trake-val-${idx}`);
         if (valEl) {
-          valEl.textContent = `#${f} (Click để xem)`;
-          valEl.style.cursor = "pointer";
-          valEl.title = `Click để tua video đến Frame #${f}`;
-          valEl.onclick = (e) => {
-            e.stopPropagation();
-            this.seekToSlot(idx);
-          };
+          valEl.textContent = `#${f}`;
         }
       }
     });
+
+    for (let i = 0; i < 4; i++) {
+      const itemEl = document.getElementById(`trake-item-${i}`);
+      if (itemEl) {
+        itemEl.style.display = (i < framesList.length || i < 3) ? "flex" : "none";
+      }
+    }
 
     this.validateMonotonic();
   }
@@ -101,8 +99,10 @@ class TrakeStudio {
       const vid = this.currentVideoId || window.videoInspector.currentVideoId;
       if (vid) {
         window.videoInspector.loadVideo(vid, f);
-        window.app?.showToast(`Đang soi Sự kiện E${slotIdx + 1} tại Frame #${f}`);
+        window.app?.showToast(`👁️ Đang xem video E${slotIdx + 1} tại Frame #${f}`);
       }
+    } else {
+      window.app?.showToast(`Sự kiện E${slotIdx + 1} chưa có frame để xem!`);
     }
   }
 
@@ -114,16 +114,11 @@ class TrakeStudio {
 
     const valEl = document.getElementById(`trake-val-${slotIdx}`);
     if (valEl) {
-      valEl.textContent = `#${f} (Click để xem)`;
-      valEl.style.cursor = "pointer";
-      valEl.onclick = (e) => {
-        e.stopPropagation();
-        this.seekToSlot(slotIdx);
-      };
+      valEl.textContent = `#${f}`;
     }
 
     this.validateMonotonic();
-    window.app?.showToast(`Đã gán Frame #${f} vào E${slotIdx + 1} (${this.subeventTitles[slotIdx] || ''})`);
+    window.app?.showToast(`📌 Đã gán Frame #${f} vào E${slotIdx + 1}!`);
   }
 
   validateMonotonic() {
