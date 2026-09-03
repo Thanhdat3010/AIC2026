@@ -116,6 +116,11 @@ class AppController {
       const data = await res.json();
       const queries = data.queries || [];
 
+      // SẮP XẾP CHUẨN SỐ TỰ NHIÊN: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11... 30
+      queries.sort((a, b) => {
+        return a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' });
+      });
+
       const progressEl = document.getElementById("contest-progress");
       if (progressEl) progressEl.textContent = `${data.completed}/${data.total}`;
 
