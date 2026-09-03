@@ -127,6 +127,10 @@ def run_benchmark_gt2(config_id: str, search_core: UnifiedSearchCore, refiner: L
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Ablation Benchmark on Ground Truth 2")
+    parser.add_argument("--configs", nargs="+", default=["A0", "A7", "A8_1", "A8_2", "A8_3", "A8_4", "A8"], help="List of configs to evaluate")
+    args = parser.parse_args()
+
     gt2_file = BASE_DIR / "data" / "benchmark" / "ground_truth_2.json"
     with open(gt2_file, "r", encoding="utf-8") as f:
         gt_data = json.load(f)
@@ -136,16 +140,50 @@ def main():
     search_core = UnifiedSearchCore(engine="siglip2", batch="batch_1")
     refiner = LLMQueryRefiner()
 
-    # Run SOTA A7 and Baseline A0 for comparison
+    # Nạp sẵn cache cũ nếu có
+    out_file = BASE_DIR / "data" / "benchmark" / "ground_truth_2_results.json"
     results = {}
-    for cfg in ["A0", "A7"]:
+    if out_file.exists():
+        try:
+            with open(out_file, "r", encoding="utf-8") as f:
+                results = json.load(f)
+        except Exception:
+            results = {}
+
+    configs_to_run = args.configs
+
+    for cfg in configs_to_run:
         res = run_benchmark_gt2(cfg, search_core, refiner, test_cases)
         results[cfg] = res
 
-    out_file = BASE_DIR / "data" / "benchmark" / "ground_truth_2_results.json"
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
-    print(f"\n✅ Đã lưu kết quả chi tiết vào: {out_file}")
+
+    # In Bảng Tổng Sắp Ablation Study Đối Đầu
+    print("\n" + "=" * 115)
+    print("🏆 BẢNG TỔNG SẮP ABLATION STUDY ĐỐI ĐẦU TRÊN GROUND TRUTH 2 (32 CÂU):")
+    print("=" * 115)
+    print(f"{'Config':<10} | {'KIS (22)':<10} | {'QA (7)':<10} | {'TRAKE (3)':<10} | {'Macro Score':<12} | {'Δ vs A7':<10} | {'Video-R@1':<10} | {'Latency':<10}")
+    print("-" * 115)
+
+    base_a7_macro = results.get("A7", {}).get("macro_score", 0.6708)
+
+    for cfg in configs_to_run:
+        if cfg in results:
+            r = results[cfg]
+            k_sc = r.get("kis_score", 0.0)
+            q_sc = r.get("qa_score", 0.0)
+            t_sc = r.get("trake_score", 0.0)
+            m_sc = r.get("macro_score", 0.0)
+            vr1 = r.get("video_r1", 0.0)
+            lat = r.get("avg_latency_ms", 0.0)
+            delta = m_sc - base_a7_macro
+            delta_str = f"{delta:+.4f}" if cfg != "A7" else "0.0000"
+            print(f"{cfg:<10} | {k_sc:10.4f} | {q_sc:10.4f} | {t_sc:10.4f} | {m_sc:12.4f} | {delta_str:<10} | {vr1*100:9.1f}% | {lat:8.1f}ms")
+
+    print("=" * 115)
+    print(f"✅ Đã lưu kết quả chi tiết vào: {out_file}")
+
 
 if __name__ == "__main__":
     main()

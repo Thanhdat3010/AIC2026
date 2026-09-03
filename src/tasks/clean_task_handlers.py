@@ -42,13 +42,30 @@ class KISHandler:
             query_en=query_en,
             ocr_keywords=ocr_kws,
             asr_keywords=asr_kws,
-            config_name=config_name,
+            config_name="A7" if config_name in ["A8_1", "A8_2", "A8_3", "A8_4", "A8", "A8_SOTA"] else config_name,
             top_k=top_k * 2
         )
 
+        # 2.5. CoDE (ECCV 2024): Multi-Query Dual-Perspective Fusion (MQ-DPF)
+        use_kis_mq_dpf = config_name in ["A8_4", "A8", "A8_SOTA"]
+        if use_kis_mq_dpf and refined.get("core_action_vi") and final_hits:
+            core_action_vi = refined.get("core_action_vi")
+            core_action_en = refined.get("core_action_en", core_action_vi)
+            core_text = f"{core_action_vi} {core_action_en}" if core_action_en != core_action_vi else core_action_vi
+            core_vec = self.search_core.encode_text(core_text)
+            core_hits = self.search_core.search_visual(core_vec, top_k=top_k * 2)
+            
+            core_score_map = {(h["video_id"], h["frame_idx"]): h["score"] for h in core_hits}
+            for h in final_hits:
+                pair = (h["video_id"], h["frame_idx"])
+                s_core = core_score_map.get(pair, 0.0)
+                # Max-Cosine Soft Blend (0.65 global + 0.35 core)
+                h["score"] = 0.65 * h["score"] + 0.35 * s_core
+            final_hits.sort(key=lambda x: x["score"], reverse=True)
+
         # 3. Temporal Proximity Density Expansion (U-CESE Suggestion Window Inspired)
         # Khắc phục triệt để TEMPORAL_NEAR_MISS bằng cách mở rộng chùm keyframes lân cận cho Top Videos
-        if config_name in ["A7", "A8", "A9", "A10", "A10_FINAL"] and final_hits:
+        if config_name in ["A7", "A8_1", "A8_2", "A8_3", "A8_4", "A8", "A8_SOTA", "A9", "A10", "A10_FINAL"] and final_hits:
             expanded_rows = []
             seen_pairs = set()
             
@@ -119,7 +136,7 @@ class QAHandler:
         is_count = refined.get("is_count_query", False)
         
         # Chọn Visual Scene Query theo cấu hình
-        use_query_decomp = config_name in ["A6_1", "A7", "A8", "A9", "A10", "A10_FINAL"]
+        use_query_decomp = config_name in ["A6_1", "A7", "A8_1", "A8_2", "A8_3", "A8_4", "A8", "A8_SOTA", "A9", "A10", "A10_FINAL"]
         if use_query_decomp and refined.get("visual_scene_vi"):
             search_query_vi = refined.get("visual_scene_vi")
             search_query_en = refined.get("visual_scene_en", refined.get("english_visual", query_vi))
@@ -137,7 +154,7 @@ class QAHandler:
             query_en=search_query_en,
             ocr_keywords=ocr_kws,
             asr_keywords=asr_kws,
-            config_name="A6" if config_name in ["A6_1", "A6_2", "A6_3", "A6_4"] else config_name,
+            config_name="A6" if config_name in ["A6_1", "A6_2", "A6_3", "A6_4"] else ("A7" if config_name.startswith("A8") else config_name),
             top_k=top_k * 3
         )
 
@@ -170,6 +187,11 @@ class QAHandler:
 
         if not best_answer or best_answer.lower() in ["không xác định", "unknown", "n/a"]:
             best_answer = "10" if is_count else "Đèo Ngang"
+
+        # SeViLA (NeurIPS 2023): QA Candidate Swapping (A8_1..A8)
+        use_qa_swap = config_name in ["A8_1", "A8_2", "A8_3", "A8_4", "A8", "A8_SOTA"]
+        if use_qa_swap and reranked_candidates:
+            hits = reranked_candidates
 
         # 4.5. T4 (NeurIPS 2023 SeViLA & ECCV 2020 TVQA+): Evidence-Guided Reverse Visual Grounding
         use_evidence_grounding = config_name in ["A9", "A10_FINAL"]
@@ -206,7 +228,7 @@ class QAHandler:
             hits = new_hits
 
         # 5. Phân bổ kết quả nộp bài theo cấu hình
-        use_pure_vector = config_name in ["A6_3", "A7", "A8", "A9", "A10", "A10_FINAL", "A6_1", "A6_2"]
+        use_pure_vector = config_name in ["A6_3", "A7", "A8_1", "A8_2", "A8_3", "A8_4", "A8", "A8_SOTA", "A9", "A10", "A10_FINAL", "A6_1", "A6_2"]
         
         if use_pure_vector:
             # T3: Proximity-Enhanced Distribution: Cấp chùm keyframe lân cận cho Top Candidates để chống TEMPORAL_NEAR_MISS
@@ -333,13 +355,16 @@ class TRAKEHandler:
     def search(self, query_vi: str, top_k: int = 100, config_name: str = "A7") -> Tuple[List[Dict[str, Any]], Dict[str, Any], float]:
         t0 = time.time()
 
-        # 1. Phân tích & Bóc tách Sub-Events (T1 & T4 DIEM / D3TW Framework)
+        # 1. Phân tích & Bóc tách Sub-Events (T1 & T4 DIEM CVPR 2024 TESD / D3TW Framework)
         refined = self.refiner.refine_query(query_vi, task_type="trake")
         sub_events_vi = refined.get("sub_events_vi", [])
         sub_events_en = refined.get("sub_events_en", [])
         
+        use_llm_tesd = config_name in ["A8_2", "A8_3", "A8_4", "A8", "A8_SOTA"]
+        use_adaptive_gap = config_name in ["A8_3", "A8_4", "A8", "A8_SOTA"]
+
         if not sub_events_vi or len(sub_events_vi) < 2:
-            # Bóc tách tự nhiên từ câu văn tiếng Việt (ví dụ: 'phân cảnh A, phân cảnh B, và phân cảnh C')
+            # Bóc tách tự nhiên từ câu văn tiếng Việt (fallback khi offline)
             raw_splits = re.split(r"(?:,\s*(?:và\s*)?phân cảnh\s*|\bphân cảnh\s*|,\s*(?:và\s*)?bước\s*|\bbước\s*\d*[:\s.-]*|;\s*|\bvà phân cảnh\s*)", query_vi, flags=re.IGNORECASE)
             cleaned = []
             for p in raw_splits:
@@ -390,7 +415,8 @@ class TRAKEHandler:
             use_multi_query=True,
             use_event_coverage=True,
             use_row_norm_dp=True,
-            use_segmental_dp=False
+            use_segmental_dp=False,
+            use_adaptive_gap=use_adaptive_gap
         )
 
         # 3. Đảm bảo đủ 100 dòng chuẩn BTC và đúng số lượng N cột events

@@ -130,24 +130,30 @@ class LLMQueryRefiner:
 
         is_count_query = bool(re.search(r"(bao nhiêu|con số|mấy|số lượng|hiển thị|ghi trên)", lower_q))
 
-        prompt = f"""Bạn là Chuyên gia Xử lý Ngôn ngữ & Truy xuất Video Đa Phương Thức (DIEM CVPR 2024 / ROCLING 2025 Framework).
-Nhiệm vụ: Phân tích cấu trúc ngữ nghĩa câu truy vấn tiếng Việt từ Ban tổ chức thành các thành phần thị giác, thoại, chữ viết và câu hỏi trực diện.
+        prompt = f"""Bạn là Chuyên gia Xử lý Ngôn ngữ & Truy xuất Video Đa Phương Thức (DIEM CVPR 2024 / CoDE ECCV 2024 / ROCLING 2025 Framework).
+Nhiệm vụ: Phân tích cấu trúc ngữ nghĩa câu truy vấn tiếng Việt từ Ban tổ chức thành các thành phần thị giác, thoại, chữ viết, câu hỏi trực diện và chuỗi sự kiện nguyên tử tuần tự.
 
 Đề bài gốc: "{raw_clean}"
 Loại bài toán: {task_type.upper()}
 
+Yêu cầu phân rã đặc biệt:
+1. Nếu là bài toán TRAKE hoặc câu có chuỗi hành động: Bóc tách thành mảng các sự kiện con NGUYÊN TỬ (Atomic Events) theo đúng thứ tự thời gian. Mỗi sự kiện phải là một câu mô tả hành động độc lập, tự đứng vững, TUYỆT ĐỐI KHÔNG chứa bất kỳ tiền tố nào như 'E1:', 'E2:', 'Bước 1:', 'Đầu tiên', 'sau đó', 'tiếp theo', 'cuối cùng'.
+2. Nếu là bài toán KIS hoặc QA: Trích xuất thêm 'core_action_vi' và 'core_action_en' (chỉ giữ lại Chủ thể chính + Hành động cốt lõi, loại bỏ bối cảnh phụ).
+
 Hãy trả về duy nhất định dạng JSON sau (không thêm văn bản ngoài JSON):
 {{
   "cleaned_vi": "Câu tiếng Việt đã chuẩn hóa",
-  "visual_scene_vi": "Mô tả bối cảnh thị giác cốt lõi bằng tiếng Việt (loại bỏ từ nghi vấn như 'gì', 'ai', 'mấy giờ', 'như thế nào', chỉ giữ lại Actor, Action, Object, Scene)",
+  "visual_scene_vi": "Mô tả bối cảnh thị giác cốt lõi bằng tiếng Việt (loại bỏ từ nghi vấn, chỉ giữ lại Actor, Action, Object, Scene)",
   "visual_scene_en": "Detailed English visual scene description focusing on visual elements for SigLIP-2 retrieval",
+  "core_action_vi": "Chủ thể chính và hành động cốt lõi ngắn gọn (Ví dụ: 'người phụ nữ phết hỗn hợp lên lá trầu')",
+  "core_action_en": "Primary actor and core action in English (e.g. 'woman spreading pink paste on betel leaf')",
   "english_visual": "Detailed English visual scene description",
   "qa_direct_question": "Câu hỏi trực diện ngắn gọn (Ví dụ: 'Người đi phía trước đội gì trên đầu?')",
   "ocr_keywords": ["Từ khóa văn bản trên màn hình/biển hiệu/slide (nếu có)"],
   "asr_keywords": ["Từ khóa nội dung lời thoại/phỏng vấn/thuyết minh (nếu có)"],
   "is_dialogue_query": true,
-  "sub_events_vi": ["E1: Sự kiện 1", "E2: Sự kiện 2", "E3: Sự kiện 3"],
-  "sub_events_en": ["E1: Event 1 description", "E2: Event 2 description", "E3: Event 3 description"]
+  "sub_events_vi": ["đầu bếp đổ hành tây thái hạt lựu vào chảo", "đầu bếp cho thịt bò bằm vào chảo", "đầu bếp thêm đậu Hà Lan và cà rốt vào chảo", "đầu bếp cho mì Ý đã luộc vào cùng chảo"],
+  "sub_events_en": ["chef pouring diced onions into the pan", "chef adding minced beef into the pan", "chef adding peas and carrots into the pan", "chef adding boiled spaghetti into the pan"]
 }}"""
 
         resp = self._call_llm(prompt)
@@ -164,6 +170,28 @@ Hãy trả về duy nhất định dạng JSON sau (không thêm văn bản ngo�
 
         if not parsed:
             parsed = self._fallback_refine(raw_clean, task_type)
+
+        # Hậu xử lý làm sạch triệt để mọi tiền tố rác trong sub_events (DIEM CVPR 2024 TESD)
+        clean_prefix_regex = r"^(?:(?:[eE]|sự kiện|event|bước|cảnh|scene|giai đoạn)\s*\d+[\s:.-]*|\d+[\.\)]\s*|(?:đầu tiên|tiếp theo|sau đó|kế đến|kế tiếp|cuối cùng|lần lượt|rồi)\s*[:,\s.-]*)+"
+        if "sub_events_vi" in parsed and isinstance(parsed["sub_events_vi"], list):
+            cleaned_evs = []
+            for ev in parsed["sub_events_vi"]:
+                if isinstance(ev, str):
+                    c = re.sub(clean_prefix_regex, "", ev.strip(), flags=re.IGNORECASE).strip()
+                    if len(c) > 3:
+                        cleaned_evs.append(c)
+            if cleaned_evs:
+                parsed["sub_events_vi"] = cleaned_evs
+
+        if "sub_events_en" in parsed and isinstance(parsed["sub_events_en"], list):
+            cleaned_en_evs = []
+            for ev in parsed["sub_events_en"]:
+                if isinstance(ev, str):
+                    c = re.sub(r"^(?:(?:event|step|scene|phase|stage)\s*\d+[\s:.-]*|\d+[\.\)]\s*|(?:first|then|next|after that|finally)\s*[:,\s.-]*)+", "", ev.strip(), flags=re.IGNORECASE).strip()
+                    if len(c) > 3:
+                        cleaned_en_evs.append(c)
+            if cleaned_en_evs:
+                parsed["sub_events_en"] = cleaned_en_evs
 
         # Chuẩn hóa trọng số tổng = 1.0
         v_w = float(parsed.get("visual_relevance", 0.70))

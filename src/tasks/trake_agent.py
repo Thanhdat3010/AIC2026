@@ -80,17 +80,24 @@ class TRAKEAlignmentAgent:
         self,
         sim_matrix: np.ndarray,
         pts_times: np.ndarray,
-        max_gap_sec: float = 90.0
+        max_gap_sec: float = 90.0,
+        use_adaptive_gap: bool = False
     ) -> list[int]:
         """
-        Row-Normalized Monotonic Dynamic Programming Solver (CVPR 2021 D3TW):
+        Row-Normalized Monotonic Dynamic Programming Solver (CVPR 2021 D3TW / Moment-DETR NeurIPS 2021):
         - Sử dụng Local Support 3-point [0.2, 0.6, 0.2] để chống spike mồ côi.
         - Ràng buộc thứ tự nghiêm ngặt: t(E_1) < t(E_2) < ... < t(E_N).
-        - Siết chặt khoảng cách tối đa max_gap_sec = 90s.
+        - Khi use_adaptive_gap=True: Co giãn max_gap_sec = max(300.0, duration * 0.4) cho video dài.
         """
         N, M = sim_matrix.shape
         if M < N:
             return list(range(min(N, M))) + [M - 1] * max(0, N - M)
+
+        if use_adaptive_gap:
+            duration = float(pts_times[-1] - pts_times[0]) if len(pts_times) > 1 else 300.0
+            eff_max_gap = max(300.0, duration * 0.4)
+        else:
+            eff_max_gap = max_gap_sec
 
         # 1. Local Temporal Support 3-point
         S_smooth = np.zeros_like(sim_matrix)
@@ -132,8 +139,8 @@ class TRAKEAlignmentAgent:
                 valid_k = prev_indices[valid_mask]
                 valid_scores = dp[i-1, valid_k]
                 
-                # Phạt nghiêm ngặt nếu khoảng cách giữa 2 sự kiện vượt quá max_gap_sec
-                excess_dt = np.maximum(0.0, dt[valid_mask] - max_gap_sec)
+                # Phạt nếu khoảng cách giữa 2 sự kiện vượt quá eff_max_gap
+                excess_dt = np.maximum(0.0, dt[valid_mask] - eff_max_gap)
                 penalties = 0.005 * excess_dt + 0.0005 * dt[valid_mask]
                 
                 total_candidates = valid_scores - penalties
@@ -283,13 +290,25 @@ class TRAKEAlignmentAgent:
         use_multi_query: bool = True,
         use_event_coverage: bool = True,
         use_row_norm_dp: bool = True,
-        use_segmental_dp: bool = False
+        use_segmental_dp: bool = False,
+        use_adaptive_gap: bool = False
     ) -> list[dict]:
         """
         Tìm kiếm và căn chỉnh chuỗi sự kiện bằng Multi-Query Retrieval & Calibrated Event Coverage.
         """
         if not events:
             return []
+
+        import re
+        clean_prefix_regex = r"^(?:(?:[eE]|sự kiện|event|bước|cảnh|scene|giai đoạn)\s*\d+[\s:.-]*|\d+[\.\)]\s*|(?:đầu tiên|tiếp theo|sau đó|kế đến|kế tiếp|cuối cùng|lần lượt|rồi)\s*[:,\s.-]*)+"
+        cleaned_events = []
+        for ev in events:
+            if isinstance(ev, str):
+                c = re.sub(clean_prefix_regex, "", ev.strip(), flags=re.IGNORECASE).strip()
+                cleaned_events.append(c if len(c) > 3 else ev.strip())
+            else:
+                cleaned_events.append(str(ev))
+        events = cleaned_events
 
         n_events = len(events)
         
@@ -400,7 +419,7 @@ class TRAKEAlignmentAgent:
             if use_segmental_dp:
                 chosen_kf_indices = self._solve_segmental_dp(sim_matrix, pts_times)
             else:
-                chosen_kf_indices = self._solve_monotonic_dp(sim_matrix, pts_times)
+                chosen_kf_indices = self._solve_monotonic_dp(sim_matrix, pts_times, use_adaptive_gap=use_adaptive_gap)
             chosen_frames = [int(f_indices[j]) for j in chosen_kf_indices]
             
             # Điểm tương đồng thực tế của chuỗi được chọn
