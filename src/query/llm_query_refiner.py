@@ -132,7 +132,9 @@ class LLMQueryRefiner:
 
         # Bóc tách sự kiện cấu trúc chuẩn xác theo các mốc E1..En hoặc Cảnh 1..n
         explicit_subevents = []
-        video_intro = ""
+        clean_intro = ""
+        global_trake_scene = ""
+        cleaned_deterministic = []
         if task_type == "trake":
             lines = [l.strip() for l in raw_clean.splitlines() if l.strip()]
             intro_lines = []
@@ -148,7 +150,20 @@ class LLMQueryRefiner:
                 matches = list(re.finditer(r'(?:^|[\n;.]\s*)(?:[eE]|Cảnh|Sự kiện|Event|Bước)\s*(\d+)[:\s.-]+(.*?)(?=(?:[\n;.]\s*)(?:[eE]|Cảnh|Sự kiện|Event|Bước)\s*\d+[:\s.-]+|$)', raw_clean, re.DOTALL | re.IGNORECASE))
                 if len(matches) >= 2:
                     explicit_subevents = [m.group(2).strip() for m in matches]
-            video_intro = ' '.join(intro_lines).strip()
+                    
+            # Lọc bỏ meta-text vô nghĩa (như '4 cảnh này xảy ra liên tiếp nhau', 'tìm các sự kiện sau')
+            intro_raw = ' '.join(intro_lines).strip()
+            clean_intro = re.sub(r'^(?:\d+\s*(?:cảnh|sự kiện|khoảnh khắc)\s*(?:này|sau)?\s*(?:xảy ra|diễn ra)?\s*(?:liên tiếp|lần lượt|theo thứ tự)?(?:\s*nhau)?[\s.:-]*|hãy tìm(?:\s*và liệt kê)?[\s.:-]*|tìm các sự kiện sau[\s.:-]*|gồm các khoảnh khắc(?: sơ chế)?[\s.:-]*)+', '', intro_raw, flags=re.IGNORECASE).strip()
+
+            clean_prefix_regex = r"^(?:(?:[eE]|sự kiện|event|bước|cảnh|scene|giai đoạn)\s*\d+[\s:.-]*|\d+[\.\)]\s*|(?:đầu tiên|tiếp theo|sau đó|kế đến|kế tiếp|cuối cùng|lần lượt|rồi)\s*[:,\s.-]*)+"
+            cleaned_deterministic = [re.sub(clean_prefix_regex, "", ev.strip(), flags=re.IGNORECASE).strip() for ev in explicit_subevents]
+
+            # Ngữ cảnh toàn cục tối ưu: Kết hợp câu dẫn có nghĩa (nếu có) + toàn bộ các sự kiện con
+            scene_parts = []
+            if len(clean_intro) > 5:
+                scene_parts.append(clean_intro)
+            scene_parts.extend(cleaned_deterministic)
+            global_trake_scene = '. '.join(scene_parts)
 
         prompt = f"""Bạn là Chuyên gia Xử lý Ngôn ngữ & Truy xuất Video Đa Phương Thức (DIEM CVPR 2024 / CoDE ECCV 2024 / ROCLING 2025 Framework).
 Nhiệm vụ: Phân tích cấu trúc ngữ nghĩa câu truy vấn tiếng Việt từ Ban tổ chức thành các thành phần thị giác, thoại, chữ viết, câu hỏi trực diện và chuỗi sự kiện nguyên tử tuần tự.
@@ -197,13 +212,8 @@ Hãy trả về duy nhất định dạng JSON sau (không thêm văn bản ngo�
         # Hậu xử lý làm sạch triệt để mọi tiền tố rác trong sub_events (DIEM CVPR 2024 TESD)
         # Nếu đề bài có các mốc đánh số rõ ràng (E1..En hoặc Cảnh 1..n), bắt buộc tuân theo số lượng đó
         if task_type == "trake" and len(explicit_subevents) >= 2:
-            cleaned_deterministic = []
-            for ev in explicit_subevents:
-                c = re.sub(clean_prefix_regex, "", ev.strip(), flags=re.IGNORECASE).strip()
-                cleaned_deterministic.append(c if len(c) > 3 else ev.strip())
             parsed["sub_events_vi"] = cleaned_deterministic
-            if video_intro:
-                parsed["visual_scene_vi"] = video_intro
+            parsed["visual_scene_vi"] = global_trake_scene if global_trake_scene else raw_clean
 
         if "sub_events_en" in parsed and isinstance(parsed["sub_events_en"], list):
             cleaned_en_evs = []
