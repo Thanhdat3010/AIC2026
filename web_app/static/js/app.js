@@ -197,12 +197,15 @@ class AppController {
       const res = await fetch(`/api/contest/submission_data?output_package=${this.selectedOutputPkg}&query_id=${queryId}`);
       const data = await res.json();
       if (data.exists && data.rows && data.rows.length > 0) {
+        const isTrake = (this.currentQueryData?.task_type === "TRAKE");
         const formatted = data.rows.map((parts, idx) => {
+          const rawFrames = parts.slice(1).map(x => parseInt(x.trim())).filter(x => !isNaN(x));
           return {
             rank: idx + 1,
-            video_id: parts[0],
-            frame_idx: parseInt(parts[1]) || 0,
-            answer: parts[2] ? parts[2].replace(/"/g, '') : '',
+            video_id: parts[0].trim(),
+            frame_idx: rawFrames.length > 0 ? rawFrames[0] : 0,
+            event_frames: isTrake ? rawFrames : [],
+            answer: (!isTrake && parts[2]) ? parts[2].replace(/"/g, '') : '',
             score: 1.0 - (idx * 0.005)
           };
         });
@@ -211,6 +214,11 @@ class AppController {
         if (this.currentQueryData?.task_type === "QA" && formatted[0]?.answer) {
           const qaField = document.getElementById("qa-input-field");
           if (qaField) qaField.value = formatted[0].answer;
+        }
+
+        // TỰ ĐỘNG GÁN SẴN CHUỖI TRAKE TỪ KẾT QUẢ ĐÃ LƯU TRƯỚC ĐÓ
+        if (isTrake && formatted.length > 0 && formatted[0].event_frames.length > 0) {
+          window.trakeStudio?.setInitialFrames(formatted[0].event_frames, formatted[0].video_id);
         }
 
         this.renderCards(formatted);
@@ -248,6 +256,11 @@ class AppController {
         if (this.statsLatencyEl) this.statsLatencyEl.textContent = `${data.latency_ms} ms`;
         if (this.statsCountEl) this.statsCountEl.textContent = `${this.currentResults.length}`;
 
+        // TỰ ĐỘNG GÁN SẴN CHUỖI TRAKE TỪ KẾT QUẢ MỚI TÌM ĐƯỢC
+        if (this.currentQueryData?.task_type === "TRAKE" && this.currentResults.length > 0 && this.currentResults[0].event_frames) {
+          window.trakeStudio?.setInitialFrames(this.currentResults[0].event_frames, this.currentResults[0].video_id);
+        }
+
         this.renderCards(this.currentResults);
 
         if (this.currentQueryData) {
@@ -262,6 +275,8 @@ class AppController {
   renderCards(results) {
     if (!this.cardsGridEl) return;
     this.cardsGridEl.innerHTML = "";
+
+    const isTrake = (this.currentQueryData?.task_type === "TRAKE");
 
     results.forEach((c, idx) => {
       const rank = c.rank || (idx + 1);
@@ -279,13 +294,17 @@ class AppController {
       const s = Math.floor(timeSec % 60);
       const timeStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 
-      let qaHtml = "";
-      if (c.answer) {
-        qaHtml = `<div style="font-size: 0.76rem; font-weight: 700; color: #a7f3d0; background: rgba(16,185,129,0.15); padding: 3px 6px; border-radius: 4px;">💬 "${c.answer}"</div>`;
+      let subHtml = "";
+      if (isTrake && c.event_frames && c.event_frames.length > 0) {
+        subHtml = `<div style="font-size: 0.74rem; font-weight: 800; color: #fbbf24; background: rgba(245,158,11,0.15); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(245,158,11,0.3); font-family: monospace;">⏱️ Events: ${c.event_frames.map(f => '#' + f).join(' ➔ ')}</div>`;
+      } else if (!isTrake && c.answer) {
+        subHtml = `<div style="font-size: 0.76rem; font-weight: 700; color: #a7f3d0; background: rgba(16,185,129,0.15); padding: 3px 6px; border-radius: 4px;">💬 "${c.answer}"</div>`;
       }
 
+      const evParam = (c.event_frames && c.event_frames.length > 0) ? JSON.stringify(c.event_frames) : 'null';
+
       cardEl.innerHTML = `
-        <div class="card-img-box" onclick="window.app.previewVideo('${c.video_id}', ${c.frame_idx})">
+        <div class="card-img-box" onclick='window.app.previewVideo("${c.video_id}", ${c.frame_idx}, ${evParam})'>
           <img class="card-img" src="/api/media/keyframe/${c.video_id}/${c.frame_idx}" loading="lazy" alt="${c.video_id}" />
           <span class="card-badge-rank ${badgeClass}">${badgeText}</span>
           <span class="card-badge-time">${timeStr} (#${c.frame_idx})</span>
@@ -295,9 +314,9 @@ class AppController {
             <span style="color: #fff;">${c.video_id}</span>
             <span style="color: #94a3b8; font-family: monospace; font-size: 0.8rem;">#${c.frame_idx}</span>
           </div>
-          ${qaHtml}
+          ${subHtml}
           <div class="card-actions-row">
-            <button class="btn-card" onclick="window.app.previewVideo('${c.video_id}', ${c.frame_idx})">👁️ Xem Video</button>
+            <button class="btn-card" onclick='window.app.previewVideo("${c.video_id}", ${c.frame_idx}, ${evParam})'>👁️ Xem Video</button>
             <button class="btn-card pin-r1" onclick="window.app.quickPinRank1('${c.video_id}', ${c.frame_idx}, '${c.answer || ''}')">👑 Ghim R1</button>
           </div>
         </div>
@@ -307,13 +326,17 @@ class AppController {
     });
 
     if (results.length > 0 && window.videoInspector) {
-      window.videoInspector.loadVideo(results[0].video_id, results[0].frame_idx);
+      const topCand = results[0];
+      this.previewVideo(topCand.video_id, topCand.frame_idx, topCand.event_frames);
     }
   }
 
-  previewVideo(videoId, frameIdx) {
+  previewVideo(videoId, frameIdx, eventFrames = null) {
     if (window.videoInspector) {
       window.videoInspector.loadVideo(videoId, frameIdx);
+    }
+    if (this.currentQueryData?.task_type === "TRAKE" && eventFrames && eventFrames.length > 0) {
+      window.trakeStudio?.setInitialFrames(eventFrames, videoId);
     }
   }
 

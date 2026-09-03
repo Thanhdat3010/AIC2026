@@ -60,8 +60,12 @@ async def list_queries(query_package: str, output_package: str):
     out_dir = OUTPUT_DIR / output_package / "submission"
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    def natural_sort_key(s):
+        import re
+        return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', str(s))]
+
     existing_csvs = {p.stem: p for p in out_dir.glob("*.csv")}
-    query_files = sorted(list(q_dir.glob("*.txt"))) if q_dir.exists() else []
+    query_files = sorted(list(q_dir.glob("*.txt")), key=lambda p: natural_sort_key(p.stem)) if q_dir.exists() else []
 
     queries = []
     if query_files:
@@ -79,8 +83,10 @@ async def list_queries(query_package: str, output_package: str):
                 "csv_path": str(existing_csvs[stem]) if stem in existing_csvs else None
             })
     else:
-        # Fallback từ các file csv đã có sẵn
-        for stem, csv_p in existing_csvs.items():
+        # Fallback từ các file csv đã có sẵn (cũng sắp xếp theo số tự nhiên)
+        sorted_stems = sorted(existing_csvs.keys(), key=natural_sort_key)
+        for stem in sorted_stems:
+            csv_p = existing_csvs[stem]
             task_tag = "QA" if "qa" in stem.lower() else ("TRAKE" if "trake" in stem.lower() else "KIS")
             queries.append({
                 "id": stem,
