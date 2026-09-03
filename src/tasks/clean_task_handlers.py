@@ -177,11 +177,11 @@ class QAHandler:
             if speech_cands:
                 hits = speech_cands + hits
 
-        # 4. Unified Multimodal VLM Solver
-        best_answer, reranked_candidates = self.qa_agent.answer_and_rerank(
+        # 4. Unified Multimodal VLM Solver (U-CESE Section 4.1 & SeViLA NeurIPS 2023)
+        best_answer, reranked_candidates, vid_to_evidence = self.qa_agent.answer_and_rerank(
             qa_question=qa_direct if use_query_decomp else query_vi,
             candidates=hits[:30],
-            max_inspect_frames=4,
+            max_inspect_frames=8,
             use_multi_crop=True
         )
 
@@ -247,7 +247,9 @@ class QAHandler:
             # Cấp chùm frame cho 8 video hàng đầu: Top 1 (6 frames), Top 2-3 (4 frames), Top 4-8 (2 frames)
             for v_rank, v in enumerate(top_vids[:8]):
                 best_h = vid_best_hit[v]
-                f_top = best_h["frame_idx"]
+                # 🎯 THUẬT TOÁN DỜI TÂM PHÂN BỔ (EVIDENCE-GUIDED ANCHOR RELOCATION - U-CESE & SeViLA NeurIPS 2023)
+                # Nếu VLM tìm thấy bằng chứng tại một frame cụ thể trong video này, dời tâm phân bổ về frame đó!
+                f_top = vid_to_evidence.get(v, best_h["frame_idx"])
                 all_kfs = self.loader.get_all_video_keyframes(v) if self.loader else [f_top]
                 if not all_kfs:
                     all_kfs = [f_top]

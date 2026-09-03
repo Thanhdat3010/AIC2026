@@ -4345,15 +4345,15 @@
   "A7": {
     "config_id": "A7",
     "total_queries": 32,
-    "kis_score": 0.8454545454545456,
-    "qa_score": 0.14285714285714285,
+    "kis_score": 0.8181818181818182,
+    "qa_score": 0.31428571428571433,
     "trake_score": 0.6444444444444444,
-    "macro_score": 0.6729166666666666,
+    "macro_score": 0.6916666666666667,
     "video_r1": 0.71875,
-    "video_r5": 0.84375,
+    "video_r5": 0.875,
     "video_r20": 0.9375,
-    "video_r100": 0.96875,
-    "avg_latency_ms": 5993.42455714941,
+    "video_r100": 0.9375,
+    "avg_latency_ms": 31017.428025603294,
     "detailed_results": [
       {
         "r_at_k": {
@@ -4487,7 +4487,7 @@
         ],
         "query_id": "test-qa-01",
         "task_type": "qa",
-        "latency_ms": 14080.036163330078,
+        "latency_ms": 99795.46761512756,
         "score": 0.0
       },
       {
@@ -4622,7 +4622,7 @@
         ],
         "query_id": "test-kis-02",
         "task_type": "kis",
-        "latency_ms": 2418.488025665283,
+        "latency_ms": 28811.30361557007,
         "score": 0.6
       },
       {
@@ -4757,7 +4757,7 @@
         ],
         "query_id": "test-kis-03",
         "task_type": "kis",
-        "latency_ms": 4236.059665679932,
+        "latency_ms": 16072.87335395813,
         "score": 1.0
       },
       {
@@ -4892,20 +4892,20 @@
         ],
         "query_id": "test-kis-04",
         "task_type": "kis",
-        "latency_ms": 2742.5031661987305,
+        "latency_ms": 13059.100151062012,
         "score": 1.0
       },
       {
         "r_at_k": {
-          "R@1": 1.0,
-          "R@5": 1.0,
-          "R@20": 1.0,
+          "R@1": 0.0,
+          "R@5": 0.0,
+          "R@20": 0.0,
           "R@50": 1.0,
           "R@100": 1.0
         },
-        "final_score": 1.0,
-        "first_pos_rank": 1,
-        "first_perfect_rank": 1,
+        "final_score": 0.4,
+        "first_pos_rank": 25,
+        "first_perfect_rank": 25,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -4922,33 +4922,33 @@
         "window_duration": 93,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "PERFECT_RANK_1",
+        "error_type": "PARTIAL_HIT",
         "r_scores": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
           1.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
           0.0,
           0.0,
           0.0,
@@ -5027,24 +5027,24 @@
         ],
         "query_id": "test-qa-05",
         "task_type": "qa",
-        "latency_ms": 12398.841142654419,
-        "score": 1.0
+        "latency_ms": 121430.37867546082,
+        "score": 0.4
       },
       {
         "r_at_k": {
-          "R@1": 1.0,
-          "R@5": 1.0,
+          "R@1": 0.0,
+          "R@5": 0.0,
           "R@20": 1.0,
           "R@50": 1.0,
           "R@100": 1.0
         },
-        "final_score": 1.0,
-        "first_pos_rank": 1,
-        "first_perfect_rank": 1,
-        "video_hit_rank": 1,
-        "video_mrr": 1.0,
+        "final_score": 0.6,
+        "first_pos_rank": 6,
+        "first_perfect_rank": 6,
+        "video_hit_rank": 2,
+        "video_mrr": 0.5,
         "video_recall_at_k": {
-          "V-R@1": 1.0,
+          "V-R@1": 0.0,
           "V-R@5": 1.0,
           "V-R@10": 1.0,
           "V-R@20": 1.0,
@@ -5057,36 +5057,36 @@
         "window_duration": 410,
         "window_cat": "LONG (>120f)",
         "trake_event_summary": [],
-        "error_type": "PERFECT_RANK_1",
+        "error_type": "PARTIAL_HIT",
         "r_scores": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
           1.0,
           1.0,
           1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
           1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
           0.0,
           0.0,
           0.0,
@@ -5162,8 +5162,8 @@
         ],
         "query_id": "test-kis-06",
         "task_type": "kis",
-        "latency_ms": 2410.853624343872,
-        "score": 1.0
+        "latency_ms": 2944.1261291503906,
+        "score": 0.6
       },
       {
         "r_at_k": {
@@ -5297,7 +5297,7 @@
         ],
         "query_id": "test-qa-07",
         "task_type": "qa",
-        "latency_ms": 14050.631523132324,
+        "latency_ms": 188506.88362121582,
         "score": 0.0
       },
       {
@@ -5432,7 +5432,7 @@
         ],
         "query_id": "test-kis-08",
         "task_type": "kis",
-        "latency_ms": 2230.4179668426514,
+        "latency_ms": 18263.307571411133,
         "score": 1.0
       },
       {
@@ -5567,7 +5567,7 @@
         ],
         "query_id": "test-kis-09",
         "task_type": "kis",
-        "latency_ms": 2381.812572479248,
+        "latency_ms": 15382.585287094116,
         "score": 1.0
       },
       {
@@ -5576,28 +5576,28 @@
           "R@5": 0.0,
           "R@20": 0.0,
           "R@50": 0.0,
-          "R@100": 1.0
+          "R@100": 0.0
         },
-        "final_score": 0.2,
-        "first_pos_rank": 79,
-        "first_perfect_rank": 79,
-        "video_hit_rank": 58,
-        "video_mrr": 0.017241379310344827,
+        "final_score": 0.0,
+        "first_pos_rank": -1,
+        "first_perfect_rank": -1,
+        "video_hit_rank": -1,
+        "video_mrr": 0.0,
         "video_recall_at_k": {
           "V-R@1": 0.0,
           "V-R@5": 0.0,
           "V-R@10": 0.0,
           "V-R@20": 0.0,
           "V-R@50": 0.0,
-          "V-R@100": 1.0
+          "V-R@100": 0.0
         },
-        "min_frame_distance": 0,
-        "near_miss_5": true,
-        "near_miss_25": true,
+        "min_frame_distance": -1,
+        "near_miss_5": false,
+        "near_miss_25": false,
         "window_duration": 39,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "VIDEO_LATE (>Top20)",
+        "error_type": "VIDEO_NOT_IN_TOP100",
         "r_scores": [
           0.0,
           0.0,
@@ -5677,7 +5677,7 @@
           0.0,
           0.0,
           0.0,
-          1.0,
+          0.0,
           0.0,
           0.0,
           0.0,
@@ -5702,26 +5702,26 @@
         ],
         "query_id": "test-kis-10",
         "task_type": "kis",
-        "latency_ms": 3814.638137817383,
-        "score": 0.2
+        "latency_ms": 2559.0248107910156,
+        "score": 0.0
       },
       {
         "r_at_k": {
           "R@1": 0.0,
           "R@5": 0.0,
-          "R@20": 0.0,
+          "R@20": 1.0,
           "R@50": 1.0,
           "R@100": 1.0
         },
-        "final_score": 0.4,
-        "first_pos_rank": 29,
-        "first_perfect_rank": 29,
-        "video_hit_rank": 14,
-        "video_mrr": 0.07142857142857142,
+        "final_score": 0.6,
+        "first_pos_rank": 18,
+        "first_perfect_rank": 18,
+        "video_hit_rank": 7,
+        "video_mrr": 0.14285714285714285,
         "video_recall_at_k": {
           "V-R@1": 0.0,
           "V-R@5": 0.0,
-          "V-R@10": 0.0,
+          "V-R@10": 1.0,
           "V-R@20": 1.0,
           "V-R@50": 1.0,
           "V-R@100": 1.0
@@ -5751,18 +5751,18 @@
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
           1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
           0.0,
           0.0,
           0.0,
@@ -5837,26 +5837,26 @@
         ],
         "query_id": "test-kis-11",
         "task_type": "kis",
-        "latency_ms": 2360.218286514282,
-        "score": 0.4
+        "latency_ms": 39470.03269195557,
+        "score": 0.6
       },
       {
         "r_at_k": {
           "R@1": 0.0,
           "R@5": 0.0,
-          "R@20": 1.0,
+          "R@20": 0.0,
           "R@50": 1.0,
           "R@100": 1.0
         },
-        "final_score": 0.6,
-        "first_pos_rank": 20,
-        "first_perfect_rank": 20,
-        "video_hit_rank": 8,
-        "video_mrr": 0.125,
+        "final_score": 0.4,
+        "first_pos_rank": 34,
+        "first_perfect_rank": 34,
+        "video_hit_rank": 16,
+        "video_mrr": 0.0625,
         "video_recall_at_k": {
           "V-R@1": 0.0,
           "V-R@5": 0.0,
-          "V-R@10": 1.0,
+          "V-R@10": 0.0,
           "V-R@20": 1.0,
           "V-R@50": 1.0,
           "V-R@100": 1.0
@@ -5888,21 +5888,21 @@
           0.0,
           0.0,
           0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
           1.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
           0.0,
           0.0,
           0.0,
@@ -5972,41 +5972,41 @@
         ],
         "query_id": "test-kis-12",
         "task_type": "kis",
-        "latency_ms": 2158.9195728302,
-        "score": 0.6
+        "latency_ms": 19161.749362945557,
+        "score": 0.4
       },
       {
         "r_at_k": {
-          "R@1": 0.0,
-          "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@1": 1.0,
+          "R@5": 1.0,
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
-        "video_hit_rank": 6,
-        "video_mrr": 0.16666666666666666,
+        "final_score": 1.0,
+        "first_pos_rank": 1,
+        "first_perfect_rank": 1,
+        "video_hit_rank": 1,
+        "video_mrr": 1.0,
         "video_recall_at_k": {
-          "V-R@1": 0.0,
-          "V-R@5": 0.0,
+          "V-R@1": 1.0,
+          "V-R@5": 1.0,
           "V-R@10": 1.0,
           "V-R@20": 1.0,
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 6373,
-        "near_miss_5": false,
-        "near_miss_25": false,
+        "min_frame_distance": 0,
+        "near_miss_5": true,
+        "near_miss_25": true,
         "window_duration": 124,
         "window_cat": "LONG (>120f)",
         "trake_event_summary": [],
-        "error_type": "FRAME_MISS",
+        "error_type": "PERFECT_RANK_1",
         "r_scores": [
-          0.0,
-          0.0,
-          0.0,
+          1.0,
+          1.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -6107,8 +6107,8 @@
         ],
         "query_id": "test-qa-13",
         "task_type": "qa",
-        "latency_ms": 19176.432847976685,
-        "score": 0.0
+        "latency_ms": 122530.2345752716,
+        "score": 1.0
       },
       {
         "r_at_k": {
@@ -6242,7 +6242,7 @@
         ],
         "query_id": "test-kis-14",
         "task_type": "kis",
-        "latency_ms": 2104.4185161590576,
+        "latency_ms": 2440.5012130737305,
         "score": 1.0
       },
       {
@@ -6377,7 +6377,7 @@
         ],
         "query_id": "test-qa-15",
         "task_type": "qa",
-        "latency_ms": 13248.546838760376,
+        "latency_ms": 87832.31329917908,
         "score": 0.0
       },
       {
@@ -6512,7 +6512,7 @@
         ],
         "query_id": "test-kis-16",
         "task_type": "kis",
-        "latency_ms": 2331.1500549316406,
+        "latency_ms": 2086.2514972686768,
         "score": 1.0
       },
       {
@@ -6651,7 +6651,7 @@
         ],
         "query_id": "test-trake-17",
         "task_type": "trake",
-        "latency_ms": 4065.324306488037,
+        "latency_ms": 4721.17280960083,
         "score": 0.26666666666666666
       },
       {
@@ -6786,7 +6786,7 @@
         ],
         "query_id": "test-kis-18",
         "task_type": "kis",
-        "latency_ms": 2110.1739406585693,
+        "latency_ms": 3441.01881980896,
         "score": 1.0
       },
       {
@@ -6921,7 +6921,7 @@
         ],
         "query_id": "test-kis-19",
         "task_type": "kis",
-        "latency_ms": 2080.1823139190674,
+        "latency_ms": 2923.86531829834,
         "score": 1.0
       },
       {
@@ -7056,7 +7056,7 @@
         ],
         "query_id": "test-kis-20",
         "task_type": "kis",
-        "latency_ms": 1926.8367290496826,
+        "latency_ms": 7491.518974304199,
         "score": 0.6
       },
       {
@@ -7191,7 +7191,7 @@
         ],
         "query_id": "test-kis-21",
         "task_type": "kis",
-        "latency_ms": 2109.830379486084,
+        "latency_ms": 2762.0279788970947,
         "score": 1.0
       },
       {
@@ -7326,7 +7326,7 @@
         ],
         "query_id": "test-kis-22",
         "task_type": "kis",
-        "latency_ms": 2072.031259536743,
+        "latency_ms": 7879.240274429321,
         "score": 0.8
       },
       {
@@ -7338,10 +7338,10 @@
           "R@100": 1.0
         },
         "final_score": 0.6,
-        "first_pos_rank": 14,
-        "first_perfect_rank": 14,
-        "video_hit_rank": 5,
-        "video_mrr": 0.2,
+        "first_pos_rank": 12,
+        "first_perfect_rank": 12,
+        "video_hit_rank": 4,
+        "video_mrr": 0.25,
         "video_recall_at_k": {
           "V-R@1": 0.0,
           "V-R@5": 1.0,
@@ -7369,10 +7369,10 @@
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
           1.0,
           1.0,
+          0.0,
+          0.0,
           0.0,
           0.0,
           0.0,
@@ -7461,7 +7461,7 @@
         ],
         "query_id": "test-kis-23",
         "task_type": "kis",
-        "latency_ms": 2815.2616024017334,
+        "latency_ms": 2871.4072704315186,
         "score": 0.6
       },
       {
@@ -7596,7 +7596,7 @@
         ],
         "query_id": "test-kis-24",
         "task_type": "kis",
-        "latency_ms": 2988.2826805114746,
+        "latency_ms": 6675.037145614624,
         "score": 0.8
       },
       {
@@ -7735,7 +7735,7 @@
         ],
         "query_id": "test-trake-25",
         "task_type": "trake",
-        "latency_ms": 5056.289196014404,
+        "latency_ms": 6299.185037612915,
         "score": 1.0
       },
       {
@@ -7870,7 +7870,7 @@
         ],
         "query_id": "test-kis-26",
         "task_type": "kis",
-        "latency_ms": 2356.6837310791016,
+        "latency_ms": 8891.299962997437,
         "score": 1.0
       },
       {
@@ -8005,7 +8005,7 @@
         ],
         "query_id": "test-qa-27",
         "task_type": "qa",
-        "latency_ms": 13411.022424697876,
+        "latency_ms": 50221.94170951843,
         "score": 0.0
       },
       {
@@ -8144,7 +8144,7 @@
         ],
         "query_id": "test-trake-28",
         "task_type": "trake",
-        "latency_ms": 4026.783227920532,
+        "latency_ms": 10486.619234085083,
         "score": 0.6666666666666666
       },
       {
@@ -8279,20 +8279,20 @@
         ],
         "query_id": "test-kis-29",
         "task_type": "kis",
-        "latency_ms": 1988.6059761047363,
+        "latency_ms": 5648.690700531006,
         "score": 1.0
       },
       {
         "r_at_k": {
           "R@1": 0.0,
-          "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@5": 1.0,
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 0.8,
+        "first_pos_rank": 5,
+        "first_perfect_rank": 5,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -8309,13 +8309,13 @@
         "window_duration": 40,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
+        "error_type": "PERFECT_IN_TOP5",
         "r_scores": [
           0.0,
           0.0,
           0.0,
           0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -8414,8 +8414,8 @@
         ],
         "query_id": "test-qa-30",
         "task_type": "qa",
-        "latency_ms": 37846.52280807495,
-        "score": 0.0
+        "latency_ms": 82512.32647895813,
+        "score": 0.8
       },
       {
         "r_at_k": {
@@ -8549,7 +8549,7 @@
         ],
         "query_id": "test-kis-31",
         "task_type": "kis",
-        "latency_ms": 2786.541700363159,
+        "latency_ms": 5010.873079299927,
         "score": 1.0
       },
       {
@@ -8684,7 +8684,7 @@
         ],
         "query_id": "test-kis-32",
         "task_type": "kis",
-        "latency_ms": 2005.2454471588135,
+        "latency_ms": 4375.338554382324,
         "score": 1.0
       }
     ]
@@ -26080,15 +26080,15 @@
   "A8": {
     "config_id": "A8",
     "total_queries": 32,
-    "kis_score": 0.8545454545454546,
-    "qa_score": 0.2857142857142857,
+    "kis_score": 0.8545454545454544,
+    "qa_score": 0.31428571428571433,
     "trake_score": 0.7333333333333333,
-    "macro_score": 0.71875,
-    "video_r1": 0.75,
-    "video_r5": 0.84375,
-    "video_r20": 0.9375,
+    "macro_score": 0.7250000000000001,
+    "video_r1": 0.78125,
+    "video_r5": 0.875,
+    "video_r20": 0.90625,
     "video_r100": 0.96875,
-    "avg_latency_ms": 3456.585817039013,
+    "avg_latency_ms": 12656.260654330254,
     "detailed_results": [
       {
         "r_at_k": {
@@ -26222,7 +26222,7 @@
         ],
         "query_id": "test-qa-01",
         "task_type": "qa",
-        "latency_ms": 11551.469326019287,
+        "latency_ms": 29150.78330039978,
         "score": 0.0
       },
       {
@@ -26357,7 +26357,7 @@
         ],
         "query_id": "test-kis-02",
         "task_type": "kis",
-        "latency_ms": 445.68872451782227,
+        "latency_ms": 637.3279094696045,
         "score": 1.0
       },
       {
@@ -26492,7 +26492,7 @@
         ],
         "query_id": "test-kis-03",
         "task_type": "kis",
-        "latency_ms": 622.7562427520752,
+        "latency_ms": 1363.0762100219727,
         "score": 1.0
       },
       {
@@ -26627,20 +26627,20 @@
         ],
         "query_id": "test-kis-04",
         "task_type": "kis",
-        "latency_ms": 259.07373428344727,
+        "latency_ms": 419.97528076171875,
         "score": 1.0
       },
       {
         "r_at_k": {
-          "R@1": 1.0,
-          "R@5": 1.0,
-          "R@20": 1.0,
+          "R@1": 0.0,
+          "R@5": 0.0,
+          "R@20": 0.0,
           "R@50": 1.0,
           "R@100": 1.0
         },
-        "final_score": 1.0,
-        "first_pos_rank": 1,
-        "first_perfect_rank": 1,
+        "final_score": 0.4,
+        "first_pos_rank": 25,
+        "first_perfect_rank": 25,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -26657,33 +26657,33 @@
         "window_duration": 93,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "PERFECT_RANK_1",
+        "error_type": "PARTIAL_HIT",
         "r_scores": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
           1.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
           0.0,
           0.0,
           0.0,
@@ -26762,8 +26762,8 @@
         ],
         "query_id": "test-qa-05",
         "task_type": "qa",
-        "latency_ms": 12587.474822998047,
-        "score": 1.0
+        "latency_ms": 51286.59653663635,
+        "score": 0.4
       },
       {
         "r_at_k": {
@@ -26897,7 +26897,7 @@
         ],
         "query_id": "test-kis-06",
         "task_type": "kis",
-        "latency_ms": 494.9910640716553,
+        "latency_ms": 622.8420734405518,
         "score": 1.0
       },
       {
@@ -27032,7 +27032,7 @@
         ],
         "query_id": "test-qa-07",
         "task_type": "qa",
-        "latency_ms": 12675.100803375244,
+        "latency_ms": 29328.80449295044,
         "score": 0.0
       },
       {
@@ -27167,7 +27167,7 @@
         ],
         "query_id": "test-kis-08",
         "task_type": "kis",
-        "latency_ms": 521.8141078948975,
+        "latency_ms": 560.7435703277588,
         "score": 1.0
       },
       {
@@ -27302,7 +27302,7 @@
         ],
         "query_id": "test-kis-09",
         "task_type": "kis",
-        "latency_ms": 250.10037422180176,
+        "latency_ms": 369.84944343566895,
         "score": 1.0
       },
       {
@@ -27314,10 +27314,10 @@
           "R@100": 1.0
         },
         "final_score": 0.2,
-        "first_pos_rank": 77,
-        "first_perfect_rank": 77,
-        "video_hit_rank": 57,
-        "video_mrr": 0.017543859649122806,
+        "first_pos_rank": 76,
+        "first_perfect_rank": 76,
+        "video_hit_rank": 53,
+        "video_mrr": 0.018867924528301886,
         "video_recall_at_k": {
           "V-R@1": 0.0,
           "V-R@5": 0.0,
@@ -27409,8 +27409,8 @@
           0.0,
           0.0,
           0.0,
-          0.0,
           1.0,
+          0.0,
           0.0,
           0.0,
           0.0,
@@ -27437,26 +27437,26 @@
         ],
         "query_id": "test-kis-10",
         "task_type": "kis",
-        "latency_ms": 219.67411041259766,
+        "latency_ms": 503.2944679260254,
         "score": 0.2
       },
       {
         "r_at_k": {
           "R@1": 0.0,
           "R@5": 0.0,
-          "R@20": 0.0,
+          "R@20": 1.0,
           "R@50": 1.0,
           "R@100": 1.0
         },
-        "final_score": 0.4,
-        "first_pos_rank": 28,
-        "first_perfect_rank": 28,
-        "video_hit_rank": 13,
-        "video_mrr": 0.07692307692307693,
+        "final_score": 0.6,
+        "first_pos_rank": 20,
+        "first_perfect_rank": 20,
+        "video_hit_rank": 8,
+        "video_mrr": 0.125,
         "video_recall_at_k": {
           "V-R@1": 0.0,
           "V-R@5": 0.0,
-          "V-R@10": 0.0,
+          "V-R@10": 1.0,
           "V-R@20": 1.0,
           "V-R@50": 1.0,
           "V-R@100": 1.0
@@ -27488,15 +27488,15 @@
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
           1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
           0.0,
           0.0,
           0.0,
@@ -27572,27 +27572,27 @@
         ],
         "query_id": "test-kis-11",
         "task_type": "kis",
-        "latency_ms": 223.82760047912598,
-        "score": 0.4
+        "latency_ms": 362.26487159729004,
+        "score": 0.6
       },
       {
         "r_at_k": {
           "R@1": 0.0,
           "R@5": 0.0,
           "R@20": 0.0,
-          "R@50": 1.0,
+          "R@50": 0.0,
           "R@100": 1.0
         },
-        "final_score": 0.4,
-        "first_pos_rank": 33,
-        "first_perfect_rank": 33,
-        "video_hit_rank": 16,
-        "video_mrr": 0.0625,
+        "final_score": 0.2,
+        "first_pos_rank": 53,
+        "first_perfect_rank": 53,
+        "video_hit_rank": 31,
+        "video_mrr": 0.03225806451612903,
         "video_recall_at_k": {
           "V-R@1": 0.0,
           "V-R@5": 0.0,
           "V-R@10": 0.0,
-          "V-R@20": 1.0,
+          "V-R@20": 0.0,
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
@@ -27602,8 +27602,28 @@
         "window_duration": 24,
         "window_cat": "SHORT (<=30f)",
         "trake_event_summary": [],
-        "error_type": "PARTIAL_HIT",
+        "error_type": "VIDEO_LATE (>Top20)",
         "r_scores": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
           0.0,
           0.0,
           0.0,
@@ -27683,65 +27703,45 @@
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
           0.0
         ],
         "query_id": "test-kis-12",
         "task_type": "kis",
-        "latency_ms": 261.68179512023926,
-        "score": 0.4
+        "latency_ms": 371.7184066772461,
+        "score": 0.2
       },
       {
         "r_at_k": {
-          "R@1": 0.0,
-          "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@1": 1.0,
+          "R@5": 1.0,
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
-        "video_hit_rank": 6,
-        "video_mrr": 0.16666666666666666,
+        "final_score": 1.0,
+        "first_pos_rank": 1,
+        "first_perfect_rank": 1,
+        "video_hit_rank": 1,
+        "video_mrr": 1.0,
         "video_recall_at_k": {
-          "V-R@1": 0.0,
-          "V-R@5": 0.0,
+          "V-R@1": 1.0,
+          "V-R@5": 1.0,
           "V-R@10": 1.0,
           "V-R@20": 1.0,
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 6373,
-        "near_miss_5": false,
-        "near_miss_25": false,
+        "min_frame_distance": 0,
+        "near_miss_5": true,
+        "near_miss_25": true,
         "window_duration": 124,
         "window_cat": "LONG (>120f)",
         "trake_event_summary": [],
-        "error_type": "FRAME_MISS",
+        "error_type": "PERFECT_RANK_1",
         "r_scores": [
-          0.0,
-          0.0,
-          0.0,
+          1.0,
+          1.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -27842,8 +27842,8 @@
         ],
         "query_id": "test-qa-13",
         "task_type": "qa",
-        "latency_ms": 13488.386631011963,
-        "score": 0.0
+        "latency_ms": 35103.832721710205,
+        "score": 1.0
       },
       {
         "r_at_k": {
@@ -27977,7 +27977,7 @@
         ],
         "query_id": "test-kis-14",
         "task_type": "kis",
-        "latency_ms": 547.6195812225342,
+        "latency_ms": 689.842700958252,
         "score": 1.0
       },
       {
@@ -28112,7 +28112,7 @@
         ],
         "query_id": "test-qa-15",
         "task_type": "qa",
-        "latency_ms": 16717.872142791748,
+        "latency_ms": 31913.026332855225,
         "score": 0.0
       },
       {
@@ -28247,7 +28247,7 @@
         ],
         "query_id": "test-kis-16",
         "task_type": "kis",
-        "latency_ms": 481.1851978302002,
+        "latency_ms": 653.003454208374,
         "score": 1.0
       },
       {
@@ -28386,7 +28386,7 @@
         ],
         "query_id": "test-trake-17",
         "task_type": "trake",
-        "latency_ms": 1367.0473098754883,
+        "latency_ms": 3081.860303878784,
         "score": 0.5333333333333333
       },
       {
@@ -28521,7 +28521,7 @@
         ],
         "query_id": "test-kis-18",
         "task_type": "kis",
-        "latency_ms": 238.79623413085938,
+        "latency_ms": 453.77254486083984,
         "score": 1.0
       },
       {
@@ -28656,7 +28656,7 @@
         ],
         "query_id": "test-kis-19",
         "task_type": "kis",
-        "latency_ms": 227.59437561035156,
+        "latency_ms": 355.0891876220703,
         "score": 1.0
       },
       {
@@ -28791,7 +28791,7 @@
         ],
         "query_id": "test-kis-20",
         "task_type": "kis",
-        "latency_ms": 214.1740322113037,
+        "latency_ms": 371.05703353881836,
         "score": 0.6
       },
       {
@@ -28926,7 +28926,7 @@
         ],
         "query_id": "test-kis-21",
         "task_type": "kis",
-        "latency_ms": 219.77496147155762,
+        "latency_ms": 356.9643497467041,
         "score": 1.0
       },
       {
@@ -29061,7 +29061,7 @@
         ],
         "query_id": "test-kis-22",
         "task_type": "kis",
-        "latency_ms": 240.73123931884766,
+        "latency_ms": 356.306791305542,
         "score": 0.8
       },
       {
@@ -29196,7 +29196,7 @@
         ],
         "query_id": "test-kis-23",
         "task_type": "kis",
-        "latency_ms": 235.86463928222656,
+        "latency_ms": 364.67599868774414,
         "score": 0.6
       },
       {
@@ -29331,7 +29331,7 @@
         ],
         "query_id": "test-kis-24",
         "task_type": "kis",
-        "latency_ms": 259.00936126708984,
+        "latency_ms": 479.398250579834,
         "score": 0.8
       },
       {
@@ -29470,7 +29470,7 @@
         ],
         "query_id": "test-trake-25",
         "task_type": "trake",
-        "latency_ms": 2307.323217391968,
+        "latency_ms": 6356.002330780029,
         "score": 1.0
       },
       {
@@ -29605,7 +29605,7 @@
         ],
         "query_id": "test-kis-26",
         "task_type": "kis",
-        "latency_ms": 412.51420974731445,
+        "latency_ms": 621.8760013580322,
         "score": 1.0
       },
       {
@@ -29740,7 +29740,7 @@
         ],
         "query_id": "test-qa-27",
         "task_type": "qa",
-        "latency_ms": 16665.17400741577,
+        "latency_ms": 98398.357629776,
         "score": 0.0
       },
       {
@@ -29879,7 +29879,7 @@
         ],
         "query_id": "test-trake-28",
         "task_type": "trake",
-        "latency_ms": 1895.4463005065918,
+        "latency_ms": 5799.598932266235,
         "score": 0.6666666666666666
       },
       {
@@ -30014,20 +30014,20 @@
         ],
         "query_id": "test-kis-29",
         "task_type": "kis",
-        "latency_ms": 220.9012508392334,
+        "latency_ms": 552.2675514221191,
         "score": 1.0
       },
       {
         "r_at_k": {
-          "R@1": 1.0,
+          "R@1": 0.0,
           "R@5": 1.0,
           "R@20": 1.0,
           "R@50": 1.0,
           "R@100": 1.0
         },
-        "final_score": 1.0,
-        "first_pos_rank": 1,
-        "first_perfect_rank": 1,
+        "final_score": 0.8,
+        "first_pos_rank": 5,
+        "first_perfect_rank": 5,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -30044,13 +30044,13 @@
         "window_duration": 40,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "PERFECT_RANK_1",
+        "error_type": "PERFECT_IN_TOP5",
         "r_scores": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
           1.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
           0.0,
           0.0,
           0.0,
@@ -30149,8 +30149,8 @@
         ],
         "query_id": "test-qa-30",
         "task_type": "qa",
-        "latency_ms": 14087.637901306152,
-        "score": 1.0
+        "latency_ms": 103442.86298751831,
+        "score": 0.8
       },
       {
         "r_at_k": {
@@ -30205,9 +30205,9 @@
           0.0,
           0.0,
           0.0,
-          1.0,
-          1.0,
           0.0,
+          1.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -30284,7 +30284,7 @@
         ],
         "query_id": "test-kis-31",
         "task_type": "kis",
-        "latency_ms": 473.62494468688965,
+        "latency_ms": 425.87924003601074,
         "score": 1.0
       },
       {
@@ -30419,7 +30419,7 @@
         ],
         "query_id": "test-kis-32",
         "task_type": "kis",
-        "latency_ms": 196.41590118408203,
+        "latency_ms": 247.3900318145752,
         "score": 1.0
       }
     ]

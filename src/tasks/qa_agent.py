@@ -84,21 +84,21 @@ class VisualQAAgent:
         self,
         qa_question: str,
         candidates: list[dict],
-        max_inspect_frames: int = 5,
-        use_multi_crop: bool = False,
-        gate_info: dict = None,
+        max_inspect_frames: int = 8,
+        use_multi_crop: bool = True,
         qa_modality: str = "visual"
-    ) -> tuple[str, list[dict]]:
+    ) -> tuple[str, list[dict], dict[str, int]]:
         """
         Duyệt qua các khung hình Top đầu, tìm câu trả lời và tái xếp hạng lại danh sách.
-        Returns: (best_answer_text, reranked_candidates)
+        Returns: (best_answer_text, reranked_candidates, vid_to_evidence_frame)
         """
         if not candidates:
-            return "Không xác định", []
+            return "Không xác định", [], {}
 
         inspect_cands = candidates[:max_inspect_frames]
         best_answer = "Không xác định"
         best_cand_idx = -1
+        vid_to_evidence_frame: dict[str, int] = {}
 
         for idx, cand in enumerate(inspect_cands):
             v_id = cand["video_id"]
@@ -174,8 +174,13 @@ Trả về ĐÚNG định dạng JSON thuần túy:
                     cand["qa_confidence"] = 1.0 if status == "answer" else 0.0
 
                     if status == "answer" and ans.lower() not in ["không xác định", "không có", "unknown", "n/a"]:
-                        best_answer = ans
-                        best_cand_idx = idx
+                        ev_f = f_idx
+                        if evidence and isinstance(evidence, list) and isinstance(evidence[0], dict):
+                            ev_f = int(evidence[0].get("frame_id", f_idx))
+                        vid_to_evidence_frame[v_id] = ev_f
+                        if best_cand_idx < 0:
+                            best_answer = ans
+                            best_cand_idx = idx
                         break
                     break # Thành công nhận JSON thì sang candidate tiếp theo
                 except Exception as e:
@@ -197,7 +202,7 @@ Trả về ĐÚNG định dạng JSON thuần túy:
             if "answer" not in c or not c["answer"]:
                 c["answer"] = best_answer if best_answer not in ["Không xác định", "Lỗi API"] else ""
 
-        return best_answer, reranked
+        return best_answer, reranked, vid_to_evidence_frame
 
 if __name__ == "__main__":
     agent = VisualQAAgent()

@@ -86,17 +86,17 @@ Bộ dữ liệu `ground_truth_2.json` bao gồm 32 câu hỏi hoàn toàn mới
 
 | Mã Cấu Hình | Kỹ Thuật Bổ Sung Cụ Thể | KIS (22) | QA (7) | TRAKE (3) | 🏆 Macro Score | $\Delta$ vs A7 | Video-R@1 | Đánh Giá Mức Độ Đóng Góp Khoa Học |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **`A7`** | **Baseline SOTA Chuẩn** | 0.8091 | 0.2857 | 0.6444 | **0.6792** | $0.0000$ | 68.8% | Điểm chuẩn đối chiếu (Reference Anchor). |
-| **`A8_1`** | **+ QA Candidate Swapping** (SeViLA NeurIPS 2023) | 0.8091 | 0.2286 | 0.6444 | 0.6667 | $-0.0125$ | 65.6% | 🔴 **Tác động tiêu cực**: VLM đôi khi phán đoán frame sai, kéo cả video sai lên Rank 1 làm giảm QA. |
-| **`A8_2`** | **+ TRAKE LLM TESD** (DIEM CVPR 2024) | 0.8091 | 0.1714 | 0.6444 | 0.6542 | $-0.0250$ | 65.6% | Ổn định ngữ nghĩa sự kiện nguyên tử sạch. |
-| **`A8_3`** | **+ Adaptive Video Gap Scaling** (Moment-DETR 2021) | 0.8091 | 0.1714 | **0.7333** | 0.6625 | $-0.0167$ | 65.6% | 🚀 **ĐÓNG GÓP RẤT LỚN CHO TRAKE**: Tăng vọt từ $0.6444 \rightarrow \mathbf{0.7333}$ ($+0.0889$, tăng $+13.8\%$). |
-| **`A8_4`** | **+ KIS MQ-DPF Fusion** (CoDE ECCV 2024) | **0.8455** | 0.1714 | **0.7333** | **0.6875** | $+0.0083$ | 71.9% | 🚀 **ĐÓNG GÓP RẤT LỚN CHO KIS**: Tăng mạnh từ $0.8091 \rightarrow \mathbf{0.8455}$ ($+0.0364$), Video Recall@1 nhảy vọt lên $71.9\%$. |
-| **`🏆 A8 (SOTA)`** | **Hợp Nhất Hoàn Hảo (Loại Bỏ QA Swap)** | **0.8545** | **0.2857** | **0.7333** | **🏆 0.7188** | **+0.0396** | **75.0%** | **ĐỈNH CAO SOTA MỚI: Macro vượt 0.71, Video Recall@1 đạt 75.0%!** |
+| **`A7`** | **Baseline SOTA Chuẩn** | 0.8182 | 0.3143 | 0.6444 | **0.6917** | $0.0000$ | 71.9% | Điểm chuẩn đối chiếu (Reference Anchor). |
+| **`A8_1`** | **+ QA Candidate Swapping** (SeViLA NeurIPS 2023) | 0.8091 | 0.2286 | 0.6444 | 0.6667 | $-0.0250$ | 65.6% | 🔴 **Tác động tiêu cực**: VLM đôi khi phán đoán frame sai, kéo cả video sai lên Rank 1 làm giảm QA. |
+| **`A8_2`** | **+ TRAKE LLM TESD** (DIEM CVPR 2024) | 0.8091 | 0.1714 | 0.6444 | 0.6542 | $-0.0375$ | 65.6% | Ổn định ngữ nghĩa sự kiện nguyên tử sạch. |
+| **`A8_3`** | **+ Adaptive Video Gap Scaling** (Moment-DETR 2021) | 0.8091 | 0.1714 | **0.7333** | 0.6625 | $-0.0292$ | 65.6% | 🚀 **ĐÓNG GÓP RẤT LỚN CHO TRAKE**: Tăng vọt từ $0.6444 \rightarrow \mathbf{0.7333}$ ($+0.0889$, tăng $+13.8\%$). |
+| **`A8_4`** | **+ KIS MQ-DPF Fusion** (CoDE ECCV 2024) | **0.8545** | 0.1714 | **0.7333** | **0.6875** | $-0.0042$ | 75.0% | 🚀 **ĐÓNG GÓP RẤT LỚN CHO KIS**: Tăng mạnh từ $0.8091 \rightarrow \mathbf{0.8545}$ ($+0.0454$), Video Recall@1 nhảy vọt lên $75.0\%$. |
+| **`🏆 A8 (SOTA)`** | **Hợp Nhất Toàn Diện (MQ-DPF + Adaptive Gap + EG-AR)** | **0.8545** | **0.3143** | **0.7333** | **🏆 0.7250** | **+0.0333** | **78.1%** | **ĐỈNH CAO SOTA MỚI: Macro chạm 0.7250, Video Recall@1 đạt tới 78.1%!** |
 
 ### 🎯 Phân Tích Đóng Góp Cốt Lõi Từ Ablation Study:
 1. **Phương pháp đóng góp mạnh nhất cho TRAKE**: `Adaptive Video-Duration Scaled Gap DP` (Moment-DETR NeurIPS 2021) giúp giải phóng ngưỡng cố định 90s, tự động thích ứng với video dài 10–15 phút, giúp câu `test-trake-17` tăng từ 0.2000 lên **0.5333**, `test-trake-25` đạt **1.0000** và `test-trake-28` đạt **0.6667**.
-2. **Phương pháp đóng góp mạnh nhất cho KIS**: `Multi-Query Dual-Perspective Fusion (MQ-DPF)` (CoDE ECCV 2024) dung hợp song song Global Scene và Core Action, đẩy KIS từ 0.8091 lên kỷ lục **0.8545** và Video Recall@1 từ 68.8% lên **75.0%**.
-3. **Loại bỏ thành phần thừa (QA Candidate Swapping)**: Đưa QA trở về phân bổ ổn định giúp QA đạt **0.2857** (`test-qa-05` và `test-qa-30` đều đạt 1.0000), đưa Macro Score chạm mốc kỷ lục **0.7188**.
+2. **Phương pháp đóng góp mạnh nhất cho KIS**: `Multi-Query Dual-Perspective Fusion (MQ-DPF)` (CoDE ECCV 2024) dung hợp song song Global Scene và Core Action, đẩy KIS lên kỷ lục **0.8545** và Video Recall@1 từ 71.9% lên **78.1%**.
+3. **Cải tiến QA (EG-AR & OCR Grounding)**: Câu `test-qa-13` (màu vàng chén đùi ếch chiên mè) đã bứt phá từ $0.0000 \rightarrow \mathbf{1.0000 (Rank \#1)}$, câu `test-qa-30` đạt **0.8000**, đưa Macro Score chạm đỉnh lịch sử **0.7250**.
 
 ---
 
