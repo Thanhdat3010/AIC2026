@@ -188,8 +188,8 @@ class QAHandler:
         if not best_answer or best_answer.lower() in ["không xác định", "unknown", "n/a"]:
             best_answer = "10" if is_count else "Đèo Ngang"
 
-        # SeViLA (NeurIPS 2023): QA Candidate Swapping (A8_1..A8)
-        use_qa_swap = config_name in ["A8_1", "A8_2", "A8_3", "A8_4", "A8", "A8_SOTA"]
+        # SeViLA (NeurIPS 2023): QA Candidate Swapping: Chỉ kích hoạt cho biến thể kiểm thử A8_1..A8_4; Cấu hình A8 và A8_SOTA chính thức dùng cơ chế phân bổ ổn định chuẩn
+        use_qa_swap = config_name in ["A8_1", "A8_2", "A8_3", "A8_4"]
         if use_qa_swap and reranked_candidates:
             hits = reranked_candidates
 
