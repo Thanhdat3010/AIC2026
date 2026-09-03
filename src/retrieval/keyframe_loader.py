@@ -92,6 +92,44 @@ class KeyframeZipLoader:
 
         return None
 
+    def get_image_bytes(self, video_id: str, frame_idx: int) -> bytes:
+        """
+        Đọc trực tiếp raw JPEG bytes từ file zip không qua bước giải mã PIL (sub-millisecond streaming).
+        """
+        key = (video_id, int(frame_idx))
+        if key in self.lookup:
+            k_idx = self.lookup[key]
+        else:
+            df_v = self.df_frames[self.df_frames["video_id"] == video_id]
+            if df_v.empty:
+                return None
+            diffs = (df_v["frame_idx"] - frame_idx).abs()
+            nearest_row = df_v.loc[diffs.idxmin()]
+            k_idx = int(nearest_row["keyframe_index"])
+
+        prefix = video_id.split("_")[0]
+        candidate_zips = [k for k in self.zip_handles.keys() if f"Keyframes_{prefix}" in k]
+        if not candidate_zips:
+            return None
+
+        name_formats = [
+            f"keyframes/{video_id}/{k_idx:03d}.jpg",
+            f"keyframes/{video_id}/{k_idx:04d}.jpg",
+            f"keyframes/{video_id}/{k_idx}.jpg",
+            f"{video_id}/{k_idx:03d}.jpg",
+            f"{video_id}/{k_idx:04d}.jpg",
+            f"{video_id}/{k_idx}.jpg",
+        ]
+
+        for zname in candidate_zips:
+            zh = self.zip_handles[zname]
+            for target_name in name_formats:
+                try:
+                    return zh.read(target_name)
+                except KeyError:
+                    continue
+        return None
+
     def load_frame(self, video_id: str, frame_idx: int) -> Image.Image:
         """Alias cho get_image."""
         return self.get_image(video_id, frame_idx)

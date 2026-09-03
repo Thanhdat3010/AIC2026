@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIC 2026 Championship Multi-Modal Platform (SOTA A8)</title>
+  
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  
+  <!-- CSS Design System -->
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <span>🏆 AIC 2026 SOTA PLATFORM</span>
+      <span style="font-size: 0.75rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.3);">ENGINE A8</span>
+    </div>
+
+    <div class="nav-controls">
+      <div class="contest-select-group">
+        <label>📁 Gói nộp:</label>
+        <select id="select-output-pkg" class="custom-select"></select>
+      </div>
+
+      <div class="contest-select-group">
+        <label>📋 Gói đề:</label>
+        <select id="select-query-pkg" class="custom-select"></select>
+      </div>
+
+      <div class="team-badge">
+        <span class="pulse-dot"></span>
+        <span id="team-status-text">1 thành viên online</span>
+      </div>
+
+      <button id="btn-undo" class="btn-player-step" style="padding: 6px 12px;" title="Hoàn tác thao tác gần nhất (Ctrl + Z)">
+        ⏪ Hoàn Tác (Ctrl+Z)
+      </button>
+
+      <button id="btn-download-zip" class="btn-zip-download" title="Tải file zip nộp Ban Tổ Chức">
+        📦 Tải Submission.zip (<span id="contest-progress">0/0</span>)
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN 3-COLUMN WORKSPACE -->
+  <main class="main-wrapper">
+
+    <!-- LEFT COLUMN: CONTEST QUESTIONS LIST -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">
+          <span>📋 DANH SÁCH ĐỀ THI</span>
+          <span style="font-size: 0.75rem; color: #38bdf8;">AIC 2026</span>
+        </div>
+      </div>
+      <div class="query-list" id="query-list">
+        <!-- Javascript renders query items here -->
+      </div>
+    </aside>
+
+    <!-- CENTER COLUMN: OMNIBAR & CARDS GALLERY -->
+    <section class="gallery-container">
+      <!-- OMNIBAR -->
+      <div class="omnibar-section">
+        <div class="omnibar-wrapper">
+          <input
+            type="text"
+            id="omnibar-input"
+            class="omnibar-input"
+            placeholder="Nhập hoặc dán câu hỏi thi đấu... (Phím tắt: Ctrl + K hoặc /, Enter để tìm)"
+          />
+          <button id="btn-search" class="btn-search">
+            <span>⚡ Tìm Kiếm</span>
+          </button>
+        </div>
+
+        <div class="active-query-display">
+          <span id="active-query-text" style="font-style: italic;">Đang tải câu hỏi...</span>
+          <span id="active-query-tag" class="query-tag tag-kis">KIS TASK</span>
+        </div>
+
+        <div class="stats-bar">
+          <div>
+            <span>Ứng viên: <strong id="stats-count" class="stats-metric">0</strong></span>
+            <span style="margin: 0 10px;">•</span>
+            <span>Độ trễ suy luận: <strong id="stats-latency" class="stats-metric">0 ms</strong></span>
+          </div>
+          <div>
+            <span>Lõi: <strong>A8_SOTA</strong> (MQ-DPF 0.8545 + Adaptive Gap 0.7333 + EG-AR)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- GALLERY 100+ CARDS -->
+      <div class="gallery-scroll">
+        <div class="cards-grid" id="cards-grid">
+          <!-- Javascript renders candidate cards here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: FRAME-ACCURATE PLAYER & TRAKE STUDIO -->
+    <aside class="inspector-panel">
+      <div class="panel-header">
+        <span>🎬 VIDEO & FRAME INSPECTOR</span>
+        <button id="btn-open-override" class="btn-player-step" style="background: rgba(234, 179, 8, 0.2); border-color: rgba(234, 179, 8, 0.4); color: #fde047;">
+          ➕ Ghim Thủ Công (Tab)
+        </button>
+      </div>
+
+      <!-- VIDEO PLAYER -->
+      <div class="player-container">
+        <video id="video-element" class="video-element" controls preload="metadata"></video>
+        <div class="player-overlay-bar">
+          <div>
+            <span id="current-frame-val" class="frame-display">#0</span>
+            <span id="current-time-val" style="font-family: monospace; font-size: 0.75rem; color: #94a3b8; margin-left: 6px;">[00:00.000]</span>
+          </div>
+          <div class="player-controls">
+            <button id="btn-prev-5f" class="btn-player-step" title="Lùi 5 frames">-5f</button>
+            <button id="btn-prev-frame" class="btn-player-step" title="Lùi 1 frame (Phím [ )">-1f</button>
+            <button id="btn-toggle-play" class="btn-player-step" title="Play/Pause (Phím Space)">⏯️</button>
+            <button id="btn-next-frame" class="btn-player-step" title="Tiến 1 frame (Phím ] )">+1f</button>
+            <button id="btn-next-5f" class="btn-player-step" title="Tiến 5 frames">+5f</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SURROUNDING FILMSTRIP -->
+      <div class="filmstrip-container">
+        <div class="filmstrip-title">🎞️ DẢI PHIM NGỮ CẢNH (CLICK ĐỂ TUA ĐẾN FRAME):</div>
+        <div class="filmstrip-scroll" id="filmstrip-scroll">
+          <!-- Filmstrip thumbnails rendered here -->
+        </div>
+      </div>
+
+      <!-- TRAKE STUDIO (DYNAMICALLY DISPLAYED FOR TRAKE) -->
+      <div class="trake-studio-box" id="trake-studio-container" style="display: none;">
+        <div class="trake-studio-header">
+          <span>⏱️ TRAKE 4-TRACK STUDIO</span>
+          <span id="trake-validation-status" style="font-size: 0.78rem; font-weight: 600;">Chờ gán frames...</span>
+        </div>
+        <div id="trake-slots" style="display: flex; flex-direction: column; gap: 8px;">
+          <!-- Trake event slots rendered here -->
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 6px;">
+          <button id="btn-sort-trake" class="btn-player-step" style="flex: 1;">🔄 Sắp xếp tăng dần</button>
+          <button id="btn-save-trake" class="btn-snap-frame" style="flex: 1.5;">💾 Lưu Chuỗi TRAKE</button>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- MANUAL OVERRIDE MODAL DIALOG -->
+  <div class="modal-overlay" id="modal-override">
+    <div class="modal-card">
+      <div class="modal-title">👑 GHIM THỦ CÔNG CLIP & FRAME (MANUAL OVERRIDE)</div>
+      <div class="form-group">
+        <label>🎬 Video ID:</label>
+        <input type="text" id="override-vid" class="form-input" placeholder="VD: L24_V002" />
+      </div>
+      <div class="form-group">
+        <label>🖼️ Frame Index:</label>
+        <input type="number" id="override-frame" class="form-input" placeholder="VD: 225" />
+      </div>
+      <div class="form-group" id="override-qa-group" style="display: none;">
+        <label>💬 Đáp án QA (Answer):</label>
+        <input type="text" id="override-qa" class="form-input" placeholder="VD: lá cờ màu đỏ" />
+      </div>
+      <div class="form-group" id="override-trake-group" style="display: none;">
+        <label>⏱️ Chuỗi Frames TRAKE (phân cách bằng dấu phẩy):</label>
+        <input type="text" id="override-trake" class="form-input" placeholder="VD: 2842,4996,5870" />
+      </div>
+      <div class="modal-actions">
+        <button id="btn-close-override" class="btn-modal btn-cancel">Hủy</button>
+        <button id="btn-confirm-override" class="btn-modal btn-submit-override">👑 Ghim Lên Rank #1</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="/static/js/websocket.js"></script>
+  <script src="/static/js/player.js"></script>
+  <script src="/static/js/trake.js"></script>
+  <script src="/static/js/manual_override.js"></script>
+  <script src="/static/js/app.js"></script>
+
+</body>
+</html>
