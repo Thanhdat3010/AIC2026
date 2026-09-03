@@ -130,6 +130,26 @@ class LLMQueryRefiner:
 
         is_count_query = bool(re.search(r"(bao nhiêu|con số|mấy|số lượng|hiển thị|ghi trên)", lower_q))
 
+        # Bóc tách sự kiện cấu trúc chuẩn xác theo các mốc E1..En hoặc Cảnh 1..n
+        explicit_subevents = []
+        video_intro = ""
+        if task_type == "trake":
+            lines = [l.strip() for l in raw_clean.splitlines() if l.strip()]
+            intro_lines = []
+            marker_regex = re.compile(r'^(?:[eE]|Cảnh|Sự kiện|Event|Bước)\s*(\d+)[:\s.-]+(.*)', re.IGNORECASE)
+            for l in lines:
+                m = marker_regex.match(l)
+                if m:
+                    explicit_subevents.append(m.group(2).strip())
+                else:
+                    if not explicit_subevents:
+                        intro_lines.append(l)
+            if len(explicit_subevents) < 2:
+                matches = list(re.finditer(r'(?:^|[\n;.]\s*)(?:[eE]|Cảnh|Sự kiện|Event|Bước)\s*(\d+)[:\s.-]+(.*?)(?=(?:[\n;.]\s*)(?:[eE]|Cảnh|Sự kiện|Event|Bước)\s*\d+[:\s.-]+|$)', raw_clean, re.DOTALL | re.IGNORECASE))
+                if len(matches) >= 2:
+                    explicit_subevents = [m.group(2).strip() for m in matches]
+            video_intro = ' '.join(intro_lines).strip()
+
         prompt = f"""Bạn là Chuyên gia Xử lý Ngôn ngữ & Truy xuất Video Đa Phương Thức (DIEM CVPR 2024 / CoDE ECCV 2024 / ROCLING 2025 Framework).
 Nhiệm vụ: Phân tích cấu trúc ngữ nghĩa câu truy vấn tiếng Việt từ Ban tổ chức thành các thành phần thị giác, thoại, chữ viết, câu hỏi trực diện và chuỗi sự kiện nguyên tử tuần tự.
 
@@ -137,7 +157,10 @@ Nhiệm vụ: Phân tích cấu trúc ngữ nghĩa câu truy vấn tiếng Việ
 Loại bài toán: {task_type.upper()}
 
 Yêu cầu phân rã đặc biệt:
-1. Nếu là bài toán TRAKE hoặc câu có chuỗi hành động: Bóc tách thành mảng các sự kiện con NGUYÊN TỬ (Atomic Events) theo đúng thứ tự thời gian. Mỗi sự kiện phải là một câu mô tả hành động độc lập, tự đứng vững, TUYỆT ĐỐI KHÔNG chứa bất kỳ tiền tố nào như 'E1:', 'E2:', 'Bước 1:', 'Đầu tiên', 'sau đó', 'tiếp theo', 'cuối cùng'.
+1. Nếu là bài toán TRAKE:
+   - Câu dẫn mở đầu (như 'Đoạn video bắt đầu bằng...', 'Video về khu vườn...') là mô tả video để tìm video mẹ, TUYỆT ĐỐI KHÔNG coi câu dẫn là một sự kiện con! Đưa câu dẫn vào 'visual_scene_vi'.
+   - Số lượng sự kiện trong 'sub_events_vi' BẮT BUỘC PHẢI KHỚP CHÍNH XÁC với số mục đánh số trong đề bài (ví dụ đề có E1, E2, E3 thì đúng 3 sự kiện; đề có Cảnh 1..4 hoặc E1..E4 thì đúng 4 sự kiện).
+   - Mỗi sự kiện con là một câu mô tả hành động độc lập, loại bỏ các tiền tố 'E1:', 'E2:', 'Cảnh 1:'.
 2. Nếu là bài toán KIS hoặc QA: Trích xuất thêm 'core_action_vi' và 'core_action_en' (chỉ giữ lại Chủ thể chính + Hành động cốt lõi, loại bỏ bối cảnh phụ).
 
 Hãy trả về duy nhất định dạng JSON sau (không thêm văn bản ngoài JSON):
@@ -172,16 +195,15 @@ Hãy trả về duy nhất định dạng JSON sau (không thêm văn bản ngo�
             parsed = self._fallback_refine(raw_clean, task_type)
 
         # Hậu xử lý làm sạch triệt để mọi tiền tố rác trong sub_events (DIEM CVPR 2024 TESD)
-        clean_prefix_regex = r"^(?:(?:[eE]|sự kiện|event|bước|cảnh|scene|giai đoạn)\s*\d+[\s:.-]*|\d+[\.\)]\s*|(?:đầu tiên|tiếp theo|sau đó|kế đến|kế tiếp|cuối cùng|lần lượt|rồi)\s*[:,\s.-]*)+"
-        if "sub_events_vi" in parsed and isinstance(parsed["sub_events_vi"], list):
-            cleaned_evs = []
-            for ev in parsed["sub_events_vi"]:
-                if isinstance(ev, str):
-                    c = re.sub(clean_prefix_regex, "", ev.strip(), flags=re.IGNORECASE).strip()
-                    if len(c) > 3:
-                        cleaned_evs.append(c)
-            if cleaned_evs:
-                parsed["sub_events_vi"] = cleaned_evs
+        # Nếu đề bài có các mốc đánh số rõ ràng (E1..En hoặc Cảnh 1..n), bắt buộc tuân theo số lượng đó
+        if task_type == "trake" and len(explicit_subevents) >= 2:
+            cleaned_deterministic = []
+            for ev in explicit_subevents:
+                c = re.sub(clean_prefix_regex, "", ev.strip(), flags=re.IGNORECASE).strip()
+                cleaned_deterministic.append(c if len(c) > 3 else ev.strip())
+            parsed["sub_events_vi"] = cleaned_deterministic
+            if video_intro:
+                parsed["visual_scene_vi"] = video_intro
 
         if "sub_events_en" in parsed and isinstance(parsed["sub_events_en"], list):
             cleaned_en_evs = []

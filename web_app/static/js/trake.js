@@ -26,7 +26,7 @@ class TrakeStudio {
   }
 
   parseSubeventTitles(queryText) {
-    if (!queryText) return ["Sự kiện 1", "Sự kiện 2", "Sự kiện 3", "Sự kiện 4"];
+    if (!queryText) return ["Sự kiện 1", "Sự kiện 2", "Sự kiện 3"];
     const lines = queryText.split('\n').map(l => l.trim()).filter(Boolean);
     let titles = [];
 
@@ -34,7 +34,7 @@ class TrakeStudio {
     for (const l of lines) {
       if (prefixRegex.test(l)) {
         const cleaned = l.replace(prefixRegex, '').trim();
-        if (cleaned) titles.push(cleaned.slice(0, 35));
+        if (cleaned) titles.push(cleaned.slice(0, 45));
       }
     }
 
@@ -43,26 +43,36 @@ class TrakeStudio {
       let match;
       while ((match = inlineRegex.exec(queryText)) !== null) {
         if (match[1] && match[1].trim().length > 3) {
-          titles.push(match[1].trim().slice(0, 35));
+          titles.push(match[1].trim().slice(0, 45));
         }
       }
     }
 
-    while (titles.length < 4) {
-      titles.push(`Sự kiện ${titles.length + 1}`);
+    // Không ép lên 4 nếu đề chỉ có 2 hoặc 3 events!
+    if (titles.length === 0) {
+      titles = ["Sự kiện 1", "Sự kiện 2", "Sự kiện 3"];
     }
-    return titles.slice(0, 4);
+    return titles;
   }
 
   setupQuery(queryText) {
     this.subeventTitles = this.parseSubeventTitles(queryText);
-    this.assignedFrames = [null, null, null, null];
+    const n = this.subeventTitles.length;
+    this.assignedFrames = new Array(n).fill(null);
 
     for (let i = 0; i < 4; i++) {
-      const descEl = document.getElementById(`trake-desc-${i}`);
-      if (descEl) descEl.textContent = this.subeventTitles[i] || `Sự kiện ${i + 1}`;
-      const valEl = document.getElementById(`trake-val-${i}`);
-      if (valEl) valEl.textContent = "#---";
+      const itemEl = document.getElementById(`trake-item-${i}`);
+      if (itemEl) {
+        if (i < n) {
+          itemEl.style.display = "flex";
+          const descEl = document.getElementById(`trake-desc-${i}`);
+          if (descEl) descEl.textContent = this.subeventTitles[i];
+          const valEl = document.getElementById(`trake-val-${i}`);
+          if (valEl) valEl.textContent = "#---";
+        } else {
+          itemEl.style.display = "none";
+        }
+      }
     }
 
     this.validateMonotonic();
@@ -72,9 +82,12 @@ class TrakeStudio {
     if (!framesList || framesList.length === 0) return;
     if (videoId) this.currentVideoId = videoId;
 
-    this.assignedFrames = [null, null, null, null];
-    framesList.forEach((f, idx) => {
-      if (idx < 4 && f !== null && !isNaN(f)) {
+    const n = this.subeventTitles.length || 3;
+    this.assignedFrames = new Array(n).fill(null);
+    const effectiveFrames = framesList.slice(0, n);
+
+    effectiveFrames.forEach((f, idx) => {
+      if (f !== null && !isNaN(f)) {
         this.assignedFrames[idx] = parseInt(f);
         const valEl = document.getElementById(`trake-val-${idx}`);
         if (valEl) {
@@ -86,7 +99,7 @@ class TrakeStudio {
     for (let i = 0; i < 4; i++) {
       const itemEl = document.getElementById(`trake-item-${i}`);
       if (itemEl) {
-        itemEl.style.display = (i < framesList.length || i < 3) ? "flex" : "none";
+        itemEl.style.display = (i < n) ? "flex" : "none";
       }
     }
 
@@ -125,9 +138,30 @@ class TrakeStudio {
     const statusEl = document.getElementById("trake-val-status");
     if (!statusEl) return;
 
+    const n = this.subeventTitles.length || 3;
     const validFrames = this.assignedFrames.filter(f => f !== null);
     if (validFrames.length < 2) {
-      statusEl.textContent = "Chờ gán...";
+      statusEl.textContent = `Chờ gán (0/${n})...`;
+      statusEl.style.color = "#94a3b8";
+      return;
+    }
+
+    let isStrictlyIncreasing = true;
+    for (let i = 0; i < validFrames.length - 1; i++) {
+      if (validFrames[i] >= validFrames[i + 1]) {
+        isStrictlyIncreasing = false;
+        break;
+      }
+    }
+
+    if (isStrictlyIncreasing) {
+      statusEl.textContent = `✅ Hợp lệ (${validFrames.length}/${n} events)`;
+      statusEl.style.color = "#34d399";
+    } else {
+      statusEl.textContent = "⚠️ Lệch thứ tự thời gian!";
+      statusEl.style.color = "#ef4444";
+    }
+  }
       statusEl.style.color = "#94a3b8";
       return;
     }

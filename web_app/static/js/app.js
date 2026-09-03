@@ -303,13 +303,16 @@ class AppController {
       const timeStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 
       let subHtml = "";
+      let validFrames = [];
       if (isTrake && c.event_frames && c.event_frames.length > 0) {
-        subHtml = `<div style="font-size: 0.74rem; font-weight: 800; color: #fbbf24; background: rgba(245,158,11,0.15); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(245,158,11,0.3); font-family: monospace;">⏱️ Events: ${c.event_frames.map(f => '#' + f).join(' ➔ ')}</div>`;
+        const expectedCount = window.trakeStudio?.subeventTitles?.length || c.event_frames.length;
+        validFrames = c.event_frames.slice(0, expectedCount);
+        subHtml = `<div style="font-size: 0.74rem; font-weight: 800; color: #fbbf24; background: rgba(245,158,11,0.15); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(245,158,11,0.3); font-family: monospace;">⏱️ Events: ${validFrames.map(f => '#' + f).join(' ➔ ')}</div>`;
       } else if (!isTrake && c.answer) {
         subHtml = `<div style="font-size: 0.76rem; font-weight: 700; color: #a7f3d0; background: rgba(16,185,129,0.15); padding: 3px 6px; border-radius: 4px;">💬 "${c.answer}"</div>`;
       }
 
-      const evParam = (c.event_frames && c.event_frames.length > 0) ? JSON.stringify(c.event_frames) : 'null';
+      const evParam = (validFrames.length > 0) ? JSON.stringify(validFrames) : ((c.event_frames && c.event_frames.length > 0) ? JSON.stringify(c.event_frames) : 'null');
 
       cardEl.innerHTML = `
         <div class="card-img-box" onclick='window.app.previewVideo("${c.video_id}", ${c.frame_idx}, ${evParam})'>
