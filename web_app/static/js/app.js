@@ -1,6 +1,5 @@
 /**
- * AIC 2026 Championship Console - Core Application Coordinator
- * Quản lý vòng đời tìm kiếm, hiển thị danh sách 100+ card ứng viên và tương tác thi đấu.
+ * AIC 2026 Championship Console - Core Application Coordinator (Streamlined Edition)
  */
 
 class AppController {
@@ -19,76 +18,72 @@ class AppController {
     this.statsCountEl = document.getElementById("stats-count");
     this.outputSelectEl = document.getElementById("select-output-pkg");
     this.querySelectEl = document.getElementById("select-query-pkg");
+    this.toastEl = document.getElementById("toast-notice");
+    this.toastMsgEl = document.getElementById("toast-msg");
 
     this.initEvents();
     this.loadPackages();
   }
 
   initEvents() {
-    // Nút tìm kiếm
     document.getElementById("btn-search")?.addEventListener("click", () => this.executeSearch());
 
-    // Nút tải zip
     document.getElementById("btn-download-zip")?.addEventListener("click", () => {
       window.location.href = `/api/contest/download_zip?output_package=${this.selectedOutputPkg}`;
     });
 
-    // Nút Hoàn Tác (Undo)
     document.getElementById("btn-undo")?.addEventListener("click", () => this.executeUndo());
 
-    // Thay đổi package
     this.outputSelectEl?.addEventListener("change", (e) => {
       this.selectedOutputPkg = e.target.value;
       this.loadQueries();
     });
+
     this.querySelectEl?.addEventListener("change", (e) => {
       this.selectedQueryPkg = e.target.value;
       this.loadQueries();
     });
 
-    // Hệ thống phím tắt toàn cục (Competitive Hotkeys)
+    // Hotkeys
     window.addEventListener("keydown", (e) => {
-      // Ctrl + K hoặc /: Nhảy nhanh vào ô tìm kiếm
       if ((e.ctrlKey && e.key.toLowerCase() === 'k') || (e.key === '/' && document.activeElement.tagName !== 'INPUT')) {
         e.preventDefault();
         this.omnibarInput?.focus();
         this.omnibarInput?.select();
       }
 
-      // Ctrl + Enter: Thực thi tìm kiếm
       if (e.ctrlKey && e.key === 'Enter') {
         e.preventDefault();
         this.executeSearch();
       }
 
-      // Ctrl + Z: Hoàn tác
       if (e.ctrlKey && e.key.toLowerCase() === 'z' && document.activeElement.tagName !== 'INPUT') {
         e.preventDefault();
         this.executeUndo();
       }
 
-      // Space: Play/Pause Video (khi không gõ chữ)
       if (e.code === 'Space' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
         e.preventDefault();
         window.videoInspector?.togglePlay();
       }
 
-      // [ và ]: Lùi/Tiến 1 frame
       if (e.key === '[' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
         window.videoInspector?.stepFrame(-1);
       }
       if (e.key === ']' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
         window.videoInspector?.stepFrame(1);
       }
-
-      // Tab: Mở modal ghim nhanh hoặc snap
-      if (e.key === 'Tab' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
-        e.preventDefault();
-        if (window.manualOverrideModal && window.videoInspector) {
-          window.manualOverrideModal.open(window.videoInspector.currentVideoId, window.videoInspector.currentFrameIdx);
-        }
-      }
     });
+  }
+
+  showToast(msg) {
+    if (!this.toastEl || !this.toastMsgEl) return;
+    this.toastMsgEl.textContent = msg;
+    this.toastEl.style.display = "flex";
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => {
+      this.toastEl.style.display = "none";
+    }, 2500);
   }
 
   async loadPackages() {
@@ -110,7 +105,7 @@ class AppController {
 
       this.loadQueries();
     } catch (e) {
-      console.error("Lỗi nạp danh sách packages:", e);
+      console.error("Lỗi nạp packages:", e);
     }
   }
 
@@ -121,36 +116,37 @@ class AppController {
       const data = await res.json();
       const queries = data.queries || [];
 
-      // Cập nhật tiến độ
       const progressEl = document.getElementById("contest-progress");
-      if (progressEl) progressEl.textContent = `${data.completed} / ${data.total} câu`;
+      if (progressEl) progressEl.textContent = `${data.completed}/${data.total}`;
+
+      const summaryEl = document.getElementById("questions-summary");
+      if (summaryEl) summaryEl.textContent = `${data.completed}/${data.total} câu`;
 
       if (!this.queryListEl) return;
       this.queryListEl.innerHTML = "";
 
-      queries.forEach((q, idx) => {
+      queries.forEach((q) => {
         const item = document.createElement("div");
-        item.className = "query-item";
-        item.id = `q-item-${q.id}`;
+        item.className = "question-card";
+        item.id = `q-card-${q.id}`;
         
-        const tagClass = q.task_type.toLowerCase() === 'qa' ? 'tag-qa' : (q.task_type.toLowerCase() === 'trake' ? 'tag-trake' : 'tag-kis');
-        const statusClass = q.is_completed ? 'status-done' : 'status-pending';
-        const statusText = q.is_completed ? '✅ Đã lưu' : '⏳ Chưa nộp';
+        const tagType = q.task_type.toLowerCase();
+        const statusClass = q.is_completed ? 'done' : 'pending';
+        const statusText = q.is_completed ? '✅ Đã nộp' : '⏳ Chưa nộp';
 
         item.innerHTML = `
-          <div class="query-header">
-            <span class="query-tag ${tagClass}">${q.task_type}</span>
-            <span class="query-status ${statusClass}">${statusText}</span>
+          <div class="q-card-top">
+            <span class="q-tag ${tagType}">${q.task_type}</span>
+            <span class="q-status ${statusClass}">${statusText}</span>
           </div>
-          <div style="font-weight: 700; font-size: 0.88rem; color: #f8fafc;">${q.id}</div>
-          <div class="query-snippet">${q.content}</div>
+          <div class="q-id">${q.id}</div>
+          <div class="q-content">${q.content}</div>
         `;
 
         item.addEventListener("click", () => this.selectQuery(q));
         this.queryListEl.appendChild(item);
       });
 
-      // Tự động chọn câu đầu tiên
       if (queries.length > 0 && !this.currentQueryData) {
         this.selectQuery(queries[0]);
       }
@@ -161,30 +157,30 @@ class AppController {
 
   selectQuery(q) {
     this.currentQueryData = q;
-    
-    // Highlight item
-    this.queryListEl?.querySelectorAll('.query-item').forEach(el => el.classList.remove('active'));
-    document.getElementById(`q-item-${q.id}`)?.classList.add('active');
 
-    // Cập nhật Omnibar
+    // Highlight card
+    this.queryListEl?.querySelectorAll('.question-card').forEach(el => el.classList.remove('active'));
+    document.getElementById(`q-card-${q.id}`)?.classList.add('active');
+
+    // Omnibar
     if (this.omnibarInput) this.omnibarInput.value = q.content;
     if (this.activeQueryTextEl) this.activeQueryTextEl.textContent = `[${q.id}]: "${q.content}"`;
     if (this.activeQueryTagEl) {
       this.activeQueryTagEl.textContent = `${q.task_type} TASK`;
-      this.activeQueryTagEl.className = `query-tag tag-${q.task_type.toLowerCase()}`;
+      this.activeQueryTagEl.className = `q-tag ${q.task_type.toLowerCase()}`;
     }
 
-    // Thiết lập TRAKE Studio nếu là TRAKE
-    if (window.trakeStudio) {
-      window.trakeStudio.setupQuery(q.content, q.task_type);
+    // Ẩn hiện các trạm đặc thù (QA vs TRAKE)
+    const qaBox = document.getElementById("qa-answer-station");
+    const trakeBox = document.getElementById("trake-station");
+    if (qaBox) qaBox.style.display = (q.task_type === "QA") ? "flex" : "none";
+    if (trakeBox) trakeBox.style.display = (q.task_type === "TRAKE") ? "flex" : "none";
+
+    if (window.trakeStudio && q.task_type === "TRAKE") {
+      window.trakeStudio.setupQuery(q.content);
     }
 
-    // Thông báo cho đồng đội qua WebSocket
-    if (window.collabClient) {
-      window.collabClient.notifyQuerySelect({ id: q.id, task_type: q.task_type, content: q.content });
-    }
-
-    // Nạp kết quả đã lưu trước đó nếu có
+    // Nạp kết quả
     this.loadCurrentSubmissionData(q.id);
   }
 
@@ -193,8 +189,7 @@ class AppController {
       const res = await fetch(`/api/contest/submission_data?output_package=${this.selectedOutputPkg}&query_id=${queryId}`);
       const data = await res.json();
       if (data.exists && data.rows && data.rows.length > 0) {
-        // Render các dòng đã nộp
-        const formattedResults = data.rows.map((parts, idx) => {
+        const formatted = data.rows.map((parts, idx) => {
           return {
             rank: idx + 1,
             video_id: parts[0],
@@ -203,9 +198,16 @@ class AppController {
             score: 1.0 - (idx * 0.005)
           };
         });
-        this.renderCards(formattedResults);
+
+        // Điền trước đáp án QA nếu có
+        if (this.currentQueryData?.task_type === "QA" && formatted[0]?.answer) {
+          const qaField = document.getElementById("qa-input-field");
+          if (qaField) qaField.value = formatted[0].answer;
+        }
+
+        this.renderCards(formatted);
       } else {
-        // Chưa có kết quả, tự động chạy tìm kiếm A8_SOTA
+        // Tự động tìm kiếm nếu chưa có kết quả
         this.executeSearch();
       }
     } catch (e) {
@@ -218,7 +220,7 @@ class AppController {
     if (!query) return;
 
     const taskType = this.currentQueryData ? this.currentQueryData.task_type.toLowerCase() : "auto";
-    if (this.statsLatencyEl) this.statsLatencyEl.textContent = "Đang tìm kiếm...";
+    if (this.statsLatencyEl) this.statsLatencyEl.textContent = "Đang tìm...";
 
     try {
       const res = await fetch("/api/search/auto", {
@@ -236,18 +238,16 @@ class AppController {
       if (data.status === "success") {
         this.currentResults = data.results || [];
         if (this.statsLatencyEl) this.statsLatencyEl.textContent = `${data.latency_ms} ms`;
-        if (this.statsCountEl) this.statsCountEl.textContent = `${this.currentResults.length} ứng viên`;
+        if (this.statsCountEl) this.statsCountEl.textContent = `${this.currentResults.length}`;
 
         this.renderCards(this.currentResults);
 
-        // Tự động lưu kết quả vào gói bài nộp
         if (this.currentQueryData) {
           this.saveCurrentResults(this.currentResults);
         }
       }
     } catch (e) {
       if (this.statsLatencyEl) this.statsLatencyEl.textContent = "Lỗi kết nối!";
-      console.error(e);
     }
   }
 
@@ -261,10 +261,10 @@ class AppController {
       const isTop5 = (rank <= 5 && !isR1);
 
       const cardEl = document.createElement("div");
-      cardEl.className = `card-item ${isR1 ? 'rank-1' : (isTop5 ? 'rank-top5' : 'rank-normal')}`;
+      cardEl.className = `candidate-card ${isR1 ? 'rank-1' : (isTop5 ? 'rank-top5' : '')}`;
       
-      const badgeClass = isR1 ? 'badge-rank-1' : (isTop5 ? 'badge-rank-top5' : 'badge-rank-normal');
-      const badgeText = isR1 ? '👑 Rank 1' : (isTop5 ? `🥈 #${rank}` : `#${rank}`);
+      const badgeClass = isR1 ? 'rank-pill-1' : (isTop5 ? 'rank-pill-top5' : 'rank-pill-normal');
+      const badgeText = isR1 ? '👑 RANK 1' : `#${rank}`;
 
       const timeSec = (c.frame_idx / 25).toFixed(1);
       const m = Math.floor(timeSec / 60);
@@ -273,24 +273,24 @@ class AppController {
 
       let qaHtml = "";
       if (c.answer) {
-        qaHtml = `<div class="qa-answer-box">💬 Đáp án: "${c.answer}"</div>`;
+        qaHtml = `<div style="font-size: 0.76rem; font-weight: 700; color: #a7f3d0; background: rgba(16,185,129,0.15); padding: 3px 6px; border-radius: 4px;">💬 "${c.answer}"</div>`;
       }
 
       cardEl.innerHTML = `
-        <div class="card-thumb-wrapper" onclick="window.app.previewCandidate('${c.video_id}', ${c.frame_idx})">
-          <img class="card-thumb-img" src="/api/media/keyframe/${c.video_id}/${c.frame_idx}" loading="lazy" alt="${c.video_id}" />
-          <span class="badge-rank ${badgeClass}">${badgeText}</span>
-          <span class="badge-time">${timeStr} (#${c.frame_idx})</span>
+        <div class="card-img-box" onclick="window.app.previewVideo('${c.video_id}', ${c.frame_idx})">
+          <img class="card-img" src="/api/media/keyframe/${c.video_id}/${c.frame_idx}" loading="lazy" alt="${c.video_id}" />
+          <span class="card-badge-rank ${badgeClass}">${badgeText}</span>
+          <span class="card-badge-time">${timeStr} (#${c.frame_idx})</span>
         </div>
-        <div class="card-details">
-          <div class="card-video-info">
-            <span class="card-vid-name">${c.video_id}</span>
-            <span class="card-frame-idx">Frame: ${c.frame_idx}</span>
+        <div class="card-body">
+          <div class="card-meta">
+            <span style="color: #fff;">${c.video_id}</span>
+            <span style="color: #94a3b8; font-family: monospace; font-size: 0.8rem;">#${c.frame_idx}</span>
           </div>
           ${qaHtml}
-          <div class="card-actions">
-            <button class="btn-card-action" onclick="window.app.previewCandidate('${c.video_id}', ${c.frame_idx})">👁️ Soi Video</button>
-            <button class="btn-card-action btn-set-rank1" onclick="window.app.quickSetRank1('${c.video_id}', ${c.frame_idx}, '${c.answer || ''}')">👑 Ghim R1</button>
+          <div class="card-actions-row">
+            <button class="btn-card" onclick="window.app.previewVideo('${c.video_id}', ${c.frame_idx})">👁️ Xem Video</button>
+            <button class="btn-card pin-r1" onclick="window.app.quickPinRank1('${c.video_id}', ${c.frame_idx}, '${c.answer || ''}')">👑 Ghim R1</button>
           </div>
         </div>
       `;
@@ -298,19 +298,18 @@ class AppController {
       this.cardsGridEl.appendChild(cardEl);
     });
 
-    // Mở video đầu tiên vào player
     if (results.length > 0 && window.videoInspector) {
       window.videoInspector.loadVideo(results[0].video_id, results[0].frame_idx);
     }
   }
 
-  previewCandidate(videoId, frameIdx) {
+  previewVideo(videoId, frameIdx) {
     if (window.videoInspector) {
       window.videoInspector.loadVideo(videoId, frameIdx);
     }
   }
 
-  async quickSetRank1(videoId, frameIdx, answer = "") {
+  async quickPinRank1(videoId, frameIdx, answer = "") {
     if (!this.currentQueryData) return;
     try {
       const res = await fetch("/api/contest/override_rank1", {
@@ -327,11 +326,11 @@ class AppController {
       });
       const data = await res.json();
       if (data.status === "success") {
+        this.showToast(`Đã ghim ${videoId} (#${frameIdx}) làm Rank #1!`);
         this.loadCurrentSubmissionData(this.currentQueryData.id);
-        alert(`👑 Đã ghim ${videoId} (#${frameIdx}) lên Rank 1!`);
       }
     } catch (e) {
-      console.error("Lỗi ghim rank 1:", e);
+      console.error(e);
     }
   }
 
@@ -348,10 +347,9 @@ class AppController {
           rows: results
         })
       });
-      // Cập nhật trạng thái checkmark
       this.loadQueries();
     } catch (e) {
-      console.warn("Lỗi auto-save:", e);
+      console.warn("Lỗi lưu:", e);
     }
   }
 
@@ -361,10 +359,10 @@ class AppController {
       const res = await fetch(`/api/contest/undo?output_package=${this.selectedOutputPkg}&query_id=${this.currentQueryData.id}`, { method: "POST" });
       const data = await res.json();
       if (data.status === "success") {
-        alert("⏪ " + data.message);
+        this.showToast("Đã hoàn tác thao tác gần nhất!");
         this.loadCurrentSubmissionData(this.currentQueryData.id);
       } else {
-        alert(data.detail || "Không có thao tác để hoàn tác.");
+        alert(data.detail || "Không có dữ liệu hoàn tác.");
       }
     } catch (e) {
       alert("Lỗi hoàn tác: " + e);
