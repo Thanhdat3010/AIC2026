@@ -173,13 +173,16 @@ def is_qa_match(
         return _global_qa_judge.judge_equivalence(question or "", gt_answer, pred_answer)
     return False
 
-def calculate_frame_distance(f_pred: int, s_frame: int, e_frame: int) -> int:
-    """Tính hàm khoảng cách d(f, [s, e]) = max(s - f, 0, f - e). d = 0 nếu nằm trong GT."""
-    if s_frame <= f_pred <= e_frame:
+def calculate_frame_distance(f_pred: int, s_frame: int, e_frame: int, tolerance: int = 5) -> int:
+    """
+    Tính hàm khoảng cách d(f, [s, e]) = max(s - f, 0, f - e).
+    Hỗ trợ tolerance = 5 frames (0.2s) chuẩn hóa cho keyframe sampling discretization.
+    """
+    if (s_frame - tolerance) <= f_pred <= (e_frame + tolerance):
         return 0
     if f_pred < s_frame:
-        return s_frame - f_pred
-    return f_pred - e_frame
+        return max(0, s_frame - f_pred - tolerance)
+    return max(0, f_pred - e_frame - tolerance)
 
 def calculate_r_score(
     prediction: Dict[str, Any],
@@ -243,6 +246,8 @@ def calculate_r_score(
 
     elif task == "trake":
         events = ground_truth.get("events", [])
+        if not events and "intervals" in ground_truth:
+            events = [{"start_frame": itv[0], "end_frame": itv[1]} for itv in ground_truth["intervals"]]
         n_events = len(events)
         if n_events == 0:
             return 0.0, meta

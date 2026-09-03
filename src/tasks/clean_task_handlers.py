@@ -43,8 +43,53 @@ class KISHandler:
             ocr_keywords=ocr_kws,
             asr_keywords=asr_kws,
             config_name=config_name,
-            top_k=top_k
+            top_k=top_k * 2
         )
+
+        # 3. Temporal Proximity Density Expansion (U-CESE Suggestion Window Inspired)
+        # Khắc phục triệt để TEMPORAL_NEAR_MISS bằng cách mở rộng chùm keyframes lân cận cho Top Videos
+        if config_name in ["A7", "A8", "A9", "A10", "A10_FINAL"] and final_hits:
+            expanded_rows = []
+            seen_pairs = set()
+            
+            top_vids = []
+            vid_best_hit = {}
+            for h in final_hits:
+                v = h["video_id"]
+                if v not in vid_best_hit:
+                    vid_best_hit[v] = h
+                    top_vids.append(v)
+                    
+            loader = self.search_core.loader
+            for v_rank, v in enumerate(top_vids[:10]):
+                best_h = vid_best_hit[v]
+                f_top = best_h["frame_idx"]
+                all_kfs = loader.get_all_video_keyframes(v) if loader else [f_top]
+                if not all_kfs:
+                    all_kfs = [f_top]
+                    
+                sorted_nearby = sorted(all_kfs, key=lambda f: abs(f - f_top))
+                # Phân bổ chùm keyframe: Top 1 (5 frames), Top 2-3 (3 frames), Top 4-5 (2 frames)
+                n_expand = 5 if v_rank == 0 else (3 if v_rank < 3 else 2)
+                
+                for kf in sorted_nearby[:n_expand]:
+                    if (v, kf) not in seen_pairs:
+                        seen_pairs.add((v, kf))
+                        item = dict(best_h)
+                        item["frame_idx"] = kf
+                        expanded_rows.append(item)
+                        
+            for h in final_hits:
+                pair = (h["video_id"], h["frame_idx"])
+                if pair not in seen_pairs:
+                    seen_pairs.add((pair[0], pair[1]))
+                    expanded_rows.append(h)
+                if len(expanded_rows) >= top_k:
+                    break
+                    
+            final_hits = expanded_rows[:top_k]
+            for r_idx, r in enumerate(final_hits, 1):
+                r["rank"] = r_idx
 
         latency_ms = (time.time() - t0) * 1000
         info["refined"] = refined
@@ -164,30 +209,46 @@ class QAHandler:
         use_pure_vector = config_name in ["A6_3", "A7", "A8", "A9", "A10", "A10_FINAL", "A6_1", "A6_2"]
         
         if use_pure_vector:
-            # T3: Pure Vector-Driven Ranking với MMR Deduplication tránh lặp frame sát nhau
+            # T3: Proximity-Enhanced Distribution: Cấp chùm keyframe lân cận cho Top Candidates để chống TEMPORAL_NEAR_MISS
             final_rows = []
-            seen_vid_windows = set()
+            seen_pairs = set()
+
+            # Trích xuất danh sách video xếp theo mức độ ưu tiên
+            top_vids = []
+            vid_best_hit = {}
             for h in hits:
                 v = h["video_id"]
-                f = h["frame_idx"]
-                win_key = (v, f // 50)  # Cửa sổ 50 frames (2 giây)
-                if win_key not in seen_vid_windows:
-                    seen_vid_windows.add(win_key)
-                    final_rows.append({
-                        "video_id": v,
-                        "frame_idx": f,
-                        "answer": best_answer,
-                        "rank": len(final_rows) + 1
-                    })
-                    if len(final_rows) >= top_k:
-                        break
+                if v not in vid_best_hit:
+                    vid_best_hit[v] = h
+                    top_vids.append(v)
 
-            # Điền tiếp nếu chưa đủ 100 dòng
+            # Cấp chùm frame cho 8 video hàng đầu: Top 1 (6 frames), Top 2-3 (4 frames), Top 4-8 (2 frames)
+            for v_rank, v in enumerate(top_vids[:8]):
+                best_h = vid_best_hit[v]
+                f_top = best_h["frame_idx"]
+                all_kfs = self.loader.get_all_video_keyframes(v) if self.loader else [f_top]
+                if not all_kfs:
+                    all_kfs = [f_top]
+                
+                sorted_nearby = sorted(all_kfs, key=lambda f: abs(f - f_top))
+                n_alloc = 6 if v_rank == 0 else (4 if v_rank < 3 else 2)
+                for kf in sorted_nearby[:n_alloc]:
+                    if (v, kf) not in seen_pairs:
+                        seen_pairs.add((v, kf))
+                        final_rows.append({
+                            "video_id": v,
+                            "frame_idx": kf,
+                            "answer": best_answer,
+                            "rank": len(final_rows) + 1
+                        })
+
+            # Điền tiếp các ứng viên khác đến khi đủ top_k
             for h in hits:
                 if len(final_rows) >= top_k:
                     break
                 v, f = h["video_id"], h["frame_idx"]
-                if (v, f) not in [(r["video_id"], r["frame_idx"]) for r in final_rows]:
+                if (v, f) not in seen_pairs:
+                    seen_pairs.add((v, f))
                     final_rows.append({
                         "video_id": v,
                         "frame_idx": f,
@@ -278,18 +339,29 @@ class TRAKEHandler:
         sub_events_en = refined.get("sub_events_en", [])
         
         if not sub_events_vi or len(sub_events_vi) < 2:
-            lines = [l.strip() for l in query_vi.split("\n") if l.strip()]
-            extracted = []
-            for l in lines:
-                if re.search(r"^(?:[eE]|sự kiện|event|bước|cảnh|scene|giai đoạn)\s*\d+[\s:.-]*", l, re.IGNORECASE) or re.search(r"^\d+[\.\)]\s*", l):
-                    cl = re.sub(r"^(?:[eE]|sự kiện|event|bước|cảnh|scene|giai đoạn)\s*\d+[\s:.-]*\s*", "", l, flags=re.IGNORECASE)
-                    cl = re.sub(r"^\d+[\.\)]\s*", "", cl)
-                    if cl: extracted.append(cl)
-            if len(extracted) >= 2:
-                sub_events_vi = extracted
+            # Bóc tách tự nhiên từ câu văn tiếng Việt (ví dụ: 'phân cảnh A, phân cảnh B, và phân cảnh C')
+            raw_splits = re.split(r"(?:,\s*(?:và\s*)?phân cảnh\s*|\bphân cảnh\s*|,\s*(?:và\s*)?bước\s*|\bbước\s*\d*[:\s.-]*|;\s*|\bvà phân cảnh\s*)", query_vi, flags=re.IGNORECASE)
+            cleaned = []
+            for p in raw_splits:
+                cl = re.sub(r"^(?:hãy tìm và liệt kê theo thứ tự thời gian|các phân cảnh liên quan đến[^:]*[:]?|của[^:]*[:]?|liên quan đến[^:]*[:]?)\s*", "", p, flags=re.IGNORECASE).strip()
+                cl = cl.rstrip(",;.")
+                if len(cl) > 8:
+                    cleaned.append(cl)
+            if len(cleaned) >= 2:
+                sub_events_vi = cleaned
             else:
-                parts = [p.strip() for p in re.split(r"(?:[eE]|cảnh|sự kiện)\s*\d+[:\s.-]+|;\s*|sau đó|tiếp theo|kế đến", query_vi, flags=re.IGNORECASE) if len(p.strip()) > 8]
-                sub_events_vi = parts if len(parts) >= 2 else [query_vi, query_vi, query_vi]
+                lines = [l.strip() for l in query_vi.split("\n") if l.strip()]
+                extracted = []
+                for l in lines:
+                    if re.search(r"^(?:[eE]|sự kiện|event|bước|cảnh|scene|giai đoạn)\s*\d+[\s:.-]*", l, re.IGNORECASE) or re.search(r"^\d+[\.\)]\s*", l):
+                        cl = re.sub(r"^(?:[eE]|sự kiện|event|bước|cảnh|scene|giai đoạn)\s*\d+[\s:.-]*\s*", "", l, flags=re.IGNORECASE)
+                        cl = re.sub(r"^\d+[\.\)]\s*", "", cl)
+                        if cl: extracted.append(cl)
+                if len(extracted) >= 2:
+                    sub_events_vi = extracted
+                else:
+                    parts = [p.strip() for p in re.split(r"(?:[eE]|cảnh|sự kiện)\s*\d+[:\s.-]+|;\s*|sau đó|tiếp theo|kế đến", query_vi, flags=re.IGNORECASE) if len(p.strip()) > 8]
+                    sub_events_vi = parts if len(parts) >= 2 else [query_vi, query_vi, query_vi]
 
         # Nếu cấu hình là A0..A4 (chưa kích hoạt Joint TRAKE DP) -> fallback đơn giản
         if config_name in ["A0", "A1", "A2", "A3", "A4"]:
@@ -308,8 +380,7 @@ class TRAKEHandler:
             latency_ms = (time.time() - t0) * 1000
             return rows, {"config": config_name, "num_events": num_ev, "latency_ms": latency_ms}, latency_ms
 
-        # 2. Chạy thuật toán D3TW / NN-Viterbi Segmental DP
-        use_bilingual_events = config_name in ["A6_4", "A7", "A8", "A9", "A10_FINAL"] and bool(sub_events_en)
+        # 2. Chạy thuật toán D3TW / Monotonic Dynamic Programming
         events_to_align = sub_events_vi
         
         results = self.trake_agent.align_events(
@@ -319,7 +390,7 @@ class TRAKEHandler:
             use_multi_query=True,
             use_event_coverage=True,
             use_row_norm_dp=True,
-            use_segmental_dp=True
+            use_segmental_dp=False
         )
 
         # 3. Đảm bảo đủ 100 dòng chuẩn BTC và đúng số lượng N cột events

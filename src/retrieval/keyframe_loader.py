@@ -23,11 +23,14 @@ class KeyframeZipLoader:
     def __init__(self, keyframes_dir: Path = None, processed_dir: Path = None):
         if keyframes_dir is None:
             keyframes_dir = BASE_DIR / "raw" / "batch_1" / "Keyframes"
-        if processed_dir is None:
-            processed_dir = BASE_DIR / "data" / "batch_1" / "processed"
+        elif isinstance(keyframes_dir, str) and not ("/" in keyframes_dir or "\\" in keyframes_dir):
+            batch_name = keyframes_dir
+            keyframes_dir = BASE_DIR / "raw" / batch_name / "Keyframes"
+            if processed_dir is None:
+                processed_dir = BASE_DIR / "data" / batch_name / "processed"
 
-        self.keyframes_dir = keyframes_dir
-        self.processed_dir = processed_dir
+        self.keyframes_dir = Path(keyframes_dir)
+        self.processed_dir = Path(processed_dir) if processed_dir is not None else (BASE_DIR / "data" / "batch_1" / "processed")
 
         # Đọc bảng tra cứu frames.parquet (Vectorized dictionary lookup)
         self.df_frames = pd.read_parquet(self.processed_dir / "frames.parquet")

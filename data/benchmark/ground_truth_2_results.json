@@ -2,15 +2,15 @@
   "A0": {
     "config_id": "A0",
     "total_queries": 32,
-    "kis_score": 0.4818181818181818,
+    "kis_score": 0.7363636363636363,
     "qa_score": 0.0,
-    "trake_score": 0.0,
-    "macro_score": 0.33125000000000004,
+    "trake_score": 0.044444444444444446,
+    "macro_score": 0.5104166666666667,
     "video_r1": 0.53125,
     "video_r5": 0.6875,
     "video_r20": 0.75,
     "video_r100": 0.8125,
-    "avg_latency_ms": 110.59246957302094,
+    "avg_latency_ms": 156.35403245687485,
     "detailed_results": [
       {
         "r_at_k": {
@@ -33,8 +33,8 @@
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 9,
-        "near_miss_5": false,
+        "min_frame_distance": 4,
+        "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 83,
         "window_cat": "MEDIUM (31-120f)",
@@ -144,20 +144,20 @@
         ],
         "query_id": "test-qa-01",
         "task_type": "qa",
-        "latency_ms": 705.143928527832,
+        "latency_ms": 1188.610315322876,
         "score": 0.0
       },
       {
         "r_at_k": {
           "R@1": 0.0,
           "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 0.6,
+        "first_pos_rank": 7,
+        "first_perfect_rank": 7,
         "video_hit_rank": 5,
         "video_mrr": 0.2,
         "video_recall_at_k": {
@@ -168,13 +168,13 @@
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 2,
+        "min_frame_distance": 0,
         "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 49,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
+        "error_type": "PARTIAL_HIT",
         "r_scores": [
           0.0,
           0.0,
@@ -182,7 +182,7 @@
           0.0,
           0.0,
           0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -279,20 +279,20 @@
         ],
         "query_id": "test-kis-02",
         "task_type": "kis",
-        "latency_ms": 96.62127494812012,
-        "score": 0.0
+        "latency_ms": 134.55891609191895,
+        "score": 0.6
       },
       {
         "r_at_k": {
-          "R@1": 0.0,
-          "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@1": 1.0,
+          "R@5": 1.0,
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 1.0,
+        "first_pos_rank": 1,
+        "first_perfect_rank": 1,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -303,15 +303,15 @@
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 4,
+        "min_frame_distance": 0,
         "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 30,
         "window_cat": "SHORT (<=30f)",
         "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
+        "error_type": "PERFECT_RANK_1",
         "r_scores": [
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -414,8 +414,8 @@
         ],
         "query_id": "test-kis-03",
         "task_type": "kis",
-        "latency_ms": 89.66755867004395,
-        "score": 0.0
+        "latency_ms": 123.80146980285645,
+        "score": 1.0
       },
       {
         "r_at_k": {
@@ -549,7 +549,7 @@
         ],
         "query_id": "test-kis-04",
         "task_type": "kis",
-        "latency_ms": 98.94943237304688,
+        "latency_ms": 124.67098236083984,
         "score": 1.0
       },
       {
@@ -684,7 +684,7 @@
         ],
         "query_id": "test-qa-05",
         "task_type": "qa",
-        "latency_ms": 95.70670127868652,
+        "latency_ms": 122.43843078613281,
         "score": 0.0
       },
       {
@@ -819,7 +819,7 @@
         ],
         "query_id": "test-kis-06",
         "task_type": "kis",
-        "latency_ms": 90.00468254089355,
+        "latency_ms": 142.1363353729248,
         "score": 0.6
       },
       {
@@ -954,7 +954,7 @@
         ],
         "query_id": "test-qa-07",
         "task_type": "qa",
-        "latency_ms": 91.9797420501709,
+        "latency_ms": 131.05130195617676,
         "score": 0.0
       },
       {
@@ -986,6 +986,29 @@
         "trake_event_summary": [],
         "error_type": "PARTIAL_HIT",
         "r_scores": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
           0.0,
           0.0,
           0.0,
@@ -1062,47 +1085,24 @@
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
           0.0
         ],
         "query_id": "test-kis-08",
         "task_type": "kis",
-        "latency_ms": 92.26107597351074,
+        "latency_ms": 133.9426040649414,
         "score": 0.6
       },
       {
         "r_at_k": {
-          "R@1": 0.0,
+          "R@1": 1.0,
           "R@5": 1.0,
           "R@20": 1.0,
           "R@50": 1.0,
           "R@100": 1.0
         },
-        "final_score": 0.8,
-        "first_pos_rank": 3,
-        "first_perfect_rank": 3,
+        "final_score": 1.0,
+        "first_pos_rank": 1,
+        "first_perfect_rank": 1,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -1119,9 +1119,9 @@
         "window_duration": 118,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "PERFECT_IN_TOP5",
+        "error_type": "PERFECT_RANK_1",
         "r_scores": [
-          0.0,
+          1.0,
           0.0,
           1.0,
           0.0,
@@ -1224,8 +1224,8 @@
         ],
         "query_id": "test-kis-09",
         "task_type": "kis",
-        "latency_ms": 93.34373474121094,
-        "score": 0.8
+        "latency_ms": 165.95768928527832,
+        "score": 1.0
       },
       {
         "r_at_k": {
@@ -1359,20 +1359,20 @@
         ],
         "query_id": "test-kis-10",
         "task_type": "kis",
-        "latency_ms": 88.99831771850586,
+        "latency_ms": 119.58813667297363,
         "score": 0.0
       },
       {
         "r_at_k": {
           "R@1": 0.0,
-          "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@5": 1.0,
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 0.8,
+        "first_pos_rank": 4,
+        "first_perfect_rank": 4,
         "video_hit_rank": 4,
         "video_mrr": 0.25,
         "video_recall_at_k": {
@@ -1383,18 +1383,18 @@
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 1,
+        "min_frame_distance": 0,
         "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 24,
         "window_cat": "SHORT (<=30f)",
         "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
+        "error_type": "PERFECT_IN_TOP5",
         "r_scores": [
           0.0,
           0.0,
           0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -1494,20 +1494,20 @@
         ],
         "query_id": "test-kis-11",
         "task_type": "kis",
-        "latency_ms": 85.76512336730957,
-        "score": 0.0
+        "latency_ms": 119.28963661193848,
+        "score": 0.8
       },
       {
         "r_at_k": {
           "R@1": 0.0,
           "R@5": 0.0,
           "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 0.4,
+        "first_pos_rank": 40,
+        "first_perfect_rank": 40,
         "video_hit_rank": 32,
         "video_mrr": 0.03125,
         "video_recall_at_k": {
@@ -1518,7 +1518,7 @@
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 2,
+        "min_frame_distance": 0,
         "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 24,
@@ -1565,7 +1565,7 @@
           0.0,
           0.0,
           0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -1629,8 +1629,8 @@
         ],
         "query_id": "test-kis-12",
         "task_type": "kis",
-        "latency_ms": 90.59739112854004,
-        "score": 0.0
+        "latency_ms": 117.7518367767334,
+        "score": 0.4
       },
       {
         "r_at_k": {
@@ -1764,7 +1764,7 @@
         ],
         "query_id": "test-qa-13",
         "task_type": "qa",
-        "latency_ms": 87.4636173248291,
+        "latency_ms": 119.09627914428711,
         "score": 0.0
       },
       {
@@ -1899,7 +1899,7 @@
         ],
         "query_id": "test-kis-14",
         "task_type": "kis",
-        "latency_ms": 91.72368049621582,
+        "latency_ms": 121.25372886657715,
         "score": 1.0
       },
       {
@@ -2034,7 +2034,7 @@
         ],
         "query_id": "test-qa-15",
         "task_type": "qa",
-        "latency_ms": 91.24612808227539,
+        "latency_ms": 119.19879913330078,
         "score": 0.0
       },
       {
@@ -2066,6 +2066,13 @@
         "trake_event_summary": [],
         "error_type": "PERFECT_RANK_1",
         "r_scores": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
           1.0,
           0.0,
           0.0,
@@ -2113,14 +2120,7 @@
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -2169,7 +2169,7 @@
         ],
         "query_id": "test-kis-16",
         "task_type": "kis",
-        "latency_ms": 89.16354179382324,
+        "latency_ms": 116.30535125732422,
         "score": 1.0
       },
       {
@@ -2304,20 +2304,20 @@
         ],
         "query_id": "test-trake-17",
         "task_type": "trake",
-        "latency_ms": 88.17100524902344,
+        "latency_ms": 117.99240112304688,
         "score": 0.0
       },
       {
         "r_at_k": {
-          "R@1": 0.0,
-          "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@1": 1.0,
+          "R@5": 1.0,
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 1.0,
+        "first_pos_rank": 1,
+        "first_perfect_rank": 1,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -2328,15 +2328,15 @@
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 1,
+        "min_frame_distance": 0,
         "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 76,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
+        "error_type": "PERFECT_RANK_1",
         "r_scores": [
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -2439,20 +2439,20 @@
         ],
         "query_id": "test-kis-18",
         "task_type": "kis",
-        "latency_ms": 91.11952781677246,
-        "score": 0.0
+        "latency_ms": 122.24841117858887,
+        "score": 1.0
       },
       {
         "r_at_k": {
-          "R@1": 0.0,
+          "R@1": 1.0,
           "R@5": 1.0,
           "R@20": 1.0,
           "R@50": 1.0,
           "R@100": 1.0
         },
-        "final_score": 0.8,
-        "first_pos_rank": 2,
-        "first_perfect_rank": 2,
+        "final_score": 1.0,
+        "first_pos_rank": 1,
+        "first_perfect_rank": 1,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -2469,9 +2469,9 @@
         "window_duration": 48,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "PERFECT_IN_TOP5",
+        "error_type": "PERFECT_RANK_1",
         "r_scores": [
-          0.0,
+          1.0,
           1.0,
           0.0,
           0.0,
@@ -2574,8 +2574,8 @@
         ],
         "query_id": "test-kis-19",
         "task_type": "kis",
-        "latency_ms": 90.03329277038574,
-        "score": 0.8
+        "latency_ms": 118.63040924072266,
+        "score": 1.0
       },
       {
         "r_at_k": {
@@ -2709,7 +2709,7 @@
         ],
         "query_id": "test-kis-20",
         "task_type": "kis",
-        "latency_ms": 90.24357795715332,
+        "latency_ms": 115.70477485656738,
         "score": 0.8
       },
       {
@@ -2844,7 +2844,7 @@
         ],
         "query_id": "test-kis-21",
         "task_type": "kis",
-        "latency_ms": 90.17348289489746,
+        "latency_ms": 120.85342407226562,
         "score": 1.0
       },
       {
@@ -2852,12 +2852,12 @@
           "R@1": 0.0,
           "R@5": 0.0,
           "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 0.4,
+        "first_pos_rank": 32,
+        "first_perfect_rank": 32,
         "video_hit_rank": 2,
         "video_mrr": 0.5,
         "video_recall_at_k": {
@@ -2868,13 +2868,13 @@
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 1,
+        "min_frame_distance": 0,
         "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 35,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
+        "error_type": "PARTIAL_HIT",
         "r_scores": [
           0.0,
           0.0,
@@ -2907,6 +2907,7 @@
           0.0,
           0.0,
           0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -2939,8 +2940,7 @@
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -2979,8 +2979,8 @@
         ],
         "query_id": "test-kis-22",
         "task_type": "kis",
-        "latency_ms": 85.64400672912598,
-        "score": 0.0
+        "latency_ms": 116.62006378173828,
+        "score": 0.4
       },
       {
         "r_at_k": {
@@ -3114,7 +3114,7 @@
         ],
         "query_id": "test-kis-23",
         "task_type": "kis",
-        "latency_ms": 90.61694145202637,
+        "latency_ms": 118.67332458496094,
         "score": 0.6
       },
       {
@@ -3249,7 +3249,7 @@
         ],
         "query_id": "test-kis-24",
         "task_type": "kis",
-        "latency_ms": 92.38338470458984,
+        "latency_ms": 118.85690689086914,
         "score": 0.6
       },
       {
@@ -3258,10 +3258,10 @@
           "R@5": 0.0,
           "R@20": 0.0,
           "R@50": 0.0,
-          "R@100": 0.0
+          "R@100": 0.3333333333333333
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
+        "final_score": 0.06666666666666667,
+        "first_pos_rank": 73,
         "first_perfect_rank": -1,
         "video_hit_rank": 3,
         "video_mrr": 0.3333333333333333,
@@ -3278,8 +3278,12 @@
         "near_miss_25": false,
         "window_duration": 1,
         "window_cat": "SHORT (<=30f)",
-        "trake_event_summary": [],
-        "error_type": "FRAME_MISS",
+        "trake_event_summary": [
+          "E1: +6651f",
+          "E2: +4497f",
+          "E3: +3473f"
+        ],
+        "error_type": "PARTIAL_HIT",
         "r_scores": [
           0.0,
           0.0,
@@ -3353,7 +3357,7 @@
           0.0,
           0.0,
           0.0,
-          0.0,
+          0.3333333333333333,
           0.0,
           0.0,
           0.0,
@@ -3384,8 +3388,8 @@
         ],
         "query_id": "test-trake-25",
         "task_type": "trake",
-        "latency_ms": 89.20478820800781,
-        "score": 0.0
+        "latency_ms": 118.29924583435059,
+        "score": 0.06666666666666667
       },
       {
         "r_at_k": {
@@ -3519,7 +3523,7 @@
         ],
         "query_id": "test-kis-26",
         "task_type": "kis",
-        "latency_ms": 96.80867195129395,
+        "latency_ms": 118.71623992919922,
         "score": 0.0
       },
       {
@@ -3654,7 +3658,7 @@
         ],
         "query_id": "test-qa-27",
         "task_type": "qa",
-        "latency_ms": 93.8875675201416,
+        "latency_ms": 121.55985832214355,
         "score": 0.0
       },
       {
@@ -3663,10 +3667,10 @@
           "R@5": 0.0,
           "R@20": 0.0,
           "R@50": 0.0,
-          "R@100": 0.0
+          "R@100": 0.3333333333333333
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
+        "final_score": 0.06666666666666667,
+        "first_pos_rank": 94,
         "first_perfect_rank": -1,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
@@ -3683,8 +3687,12 @@
         "near_miss_25": false,
         "window_duration": 1,
         "window_cat": "SHORT (<=30f)",
-        "trake_event_summary": [],
-        "error_type": "FRAME_MISS",
+        "trake_event_summary": [
+          "E1: +14224f",
+          "E2: +8861f",
+          "E3: +8292f"
+        ],
+        "error_type": "PARTIAL_HIT",
         "r_scores": [
           0.0,
           0.0,
@@ -3779,7 +3787,7 @@
           0.0,
           0.0,
           0.0,
-          0.0,
+          0.3333333333333333,
           0.0,
           0.0,
           0.0,
@@ -3789,8 +3797,8 @@
         ],
         "query_id": "test-trake-28",
         "task_type": "trake",
-        "latency_ms": 90.03591537475586,
-        "score": 0.0
+        "latency_ms": 118.18361282348633,
+        "score": 0.06666666666666667
       },
       {
         "r_at_k": {
@@ -3828,6 +3836,7 @@
           0.0,
           0.0,
           0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -3862,8 +3871,7 @@
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -3924,7 +3932,7 @@
         ],
         "query_id": "test-kis-29",
         "task_type": "kis",
-        "latency_ms": 90.79813957214355,
+        "latency_ms": 119.72618103027344,
         "score": 0.8
       },
       {
@@ -4059,7 +4067,7 @@
         ],
         "query_id": "test-qa-30",
         "task_type": "qa",
-        "latency_ms": 89.0047550201416,
+        "latency_ms": 120.73087692260742,
         "score": 0.0
       },
       {
@@ -4087,6 +4095,141 @@
         "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 72,
+        "window_cat": "MEDIUM (31-120f)",
+        "trake_event_summary": [],
+        "error_type": "PERFECT_RANK_1",
+        "r_scores": [
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "query_id": "test-kis-31",
+        "task_type": "kis",
+        "latency_ms": 117.26069450378418,
+        "score": 1.0
+      },
+      {
+        "r_at_k": {
+          "R@1": 1.0,
+          "R@5": 1.0,
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
+        },
+        "final_score": 1.0,
+        "first_pos_rank": 1,
+        "first_perfect_rank": 1,
+        "video_hit_rank": 1,
+        "video_mrr": 1.0,
+        "video_recall_at_k": {
+          "V-R@1": 1.0,
+          "V-R@5": 1.0,
+          "V-R@10": 1.0,
+          "V-R@20": 1.0,
+          "V-R@50": 1.0,
+          "V-R@100": 1.0
+        },
+        "min_frame_distance": 0,
+        "near_miss_5": true,
+        "near_miss_25": true,
+        "window_duration": 76,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
         "error_type": "PERFECT_RANK_1",
@@ -4192,160 +4335,25 @@
           0.0,
           0.0
         ],
-        "query_id": "test-kis-31",
-        "task_type": "kis",
-        "latency_ms": 91.75753593444824,
-        "score": 1.0
-      },
-      {
-        "r_at_k": {
-          "R@1": 0.0,
-          "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
-        },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
-        "video_hit_rank": 1,
-        "video_mrr": 1.0,
-        "video_recall_at_k": {
-          "V-R@1": 1.0,
-          "V-R@5": 1.0,
-          "V-R@10": 1.0,
-          "V-R@20": 1.0,
-          "V-R@50": 1.0,
-          "V-R@100": 1.0
-        },
-        "min_frame_distance": 1,
-        "near_miss_5": true,
-        "near_miss_25": true,
-        "window_duration": 76,
-        "window_cat": "MEDIUM (31-120f)",
-        "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
-        "r_scores": [
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0
-        ],
         "query_id": "test-kis-32",
         "task_type": "kis",
-        "latency_ms": 100.44050216674805,
-        "score": 0.0
+        "latency_ms": 119.62080001831055,
+        "score": 1.0
       }
     ]
   },
   "A7": {
     "config_id": "A7",
     "total_queries": 32,
-    "kis_score": 0.5454545454545454,
-    "qa_score": 0.14285714285714285,
-    "trake_score": 0.0,
-    "macro_score": 0.40625,
-    "video_r1": 0.65625,
-    "video_r5": 0.90625,
-    "video_r20": 0.9375,
-    "video_r100": 1.0,
-    "avg_latency_ms": 54181.49343878031,
+    "kis_score": 0.781818181818182,
+    "qa_score": 0.34285714285714286,
+    "trake_score": 0.6222222222222222,
+    "macro_score": 0.6708333333333334,
+    "video_r1": 0.6875,
+    "video_r5": 0.875,
+    "video_r20": 0.90625,
+    "video_r100": 0.9375,
+    "avg_latency_ms": 4969.635263085365,
     "detailed_results": [
       {
         "r_at_k": {
@@ -4368,8 +4376,8 @@
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 9,
-        "near_miss_5": false,
+        "min_frame_distance": 4,
+        "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 83,
         "window_cat": "MEDIUM (31-120f)",
@@ -4479,20 +4487,20 @@
         ],
         "query_id": "test-qa-01",
         "task_type": "qa",
-        "latency_ms": 103409.74521636963,
+        "latency_ms": 11542.654991149902,
         "score": 0.0
       },
       {
         "r_at_k": {
-          "R@1": 0.0,
-          "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@1": 1.0,
+          "R@5": 1.0,
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 1.0,
+        "first_pos_rank": 1,
+        "first_perfect_rank": 1,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -4503,17 +4511,17 @@
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 2,
+        "min_frame_distance": 0,
         "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 49,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
+        "error_type": "PERFECT_RANK_1",
         "r_scores": [
+          1.0,
           0.0,
-          0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -4614,20 +4622,20 @@
         ],
         "query_id": "test-kis-02",
         "task_type": "kis",
-        "latency_ms": 2320.9738731384277,
-        "score": 0.0
+        "latency_ms": 2666.1577224731445,
+        "score": 1.0
       },
       {
         "r_at_k": {
-          "R@1": 0.0,
-          "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@1": 1.0,
+          "R@5": 1.0,
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 1.0,
+        "first_pos_rank": 1,
+        "first_perfect_rank": 1,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -4638,15 +4646,15 @@
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 4,
+        "min_frame_distance": 0,
         "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 30,
         "window_cat": "SHORT (<=30f)",
         "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
+        "error_type": "PERFECT_RANK_1",
         "r_scores": [
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -4749,8 +4757,8 @@
         ],
         "query_id": "test-kis-03",
         "task_type": "kis",
-        "latency_ms": 4433.507204055786,
-        "score": 0.0
+        "latency_ms": 6122.796535491943,
+        "score": 1.0
       },
       {
         "r_at_k": {
@@ -4884,7 +4892,7 @@
         ],
         "query_id": "test-kis-04",
         "task_type": "kis",
-        "latency_ms": 30939.180374145508,
+        "latency_ms": 2625.852346420288,
         "score": 1.0
       },
       {
@@ -4917,7 +4925,7 @@
         "error_type": "PERFECT_RANK_1",
         "r_scores": [
           1.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -5019,7 +5027,7 @@
         ],
         "query_id": "test-qa-05",
         "task_type": "qa",
-        "latency_ms": 40977.11372375488,
+        "latency_ms": 12409.570932388306,
         "score": 1.0
       },
       {
@@ -5031,10 +5039,10 @@
           "R@100": 1.0
         },
         "final_score": 0.6,
-        "first_pos_rank": 7,
-        "first_perfect_rank": 7,
-        "video_hit_rank": 3,
-        "video_mrr": 0.3333333333333333,
+        "first_pos_rank": 6,
+        "first_perfect_rank": 6,
+        "video_hit_rank": 2,
+        "video_mrr": 0.5,
         "video_recall_at_k": {
           "V-R@1": 0.0,
           "V-R@5": 1.0,
@@ -5056,29 +5064,8 @@
           0.0,
           0.0,
           0.0,
-          0.0,
           1.0,
           1.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
           1.0,
           0.0,
           0.0,
@@ -5112,6 +5099,27 @@
           0.0,
           0.0,
           0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -5154,7 +5162,7 @@
         ],
         "query_id": "test-kis-06",
         "task_type": "kis",
-        "latency_ms": 3395.266532897949,
+        "latency_ms": 2529.2115211486816,
         "score": 0.6
       },
       {
@@ -5168,8 +5176,8 @@
         "final_score": 0.0,
         "first_pos_rank": -1,
         "first_perfect_rank": -1,
-        "video_hit_rank": 5,
-        "video_mrr": 0.2,
+        "video_hit_rank": 2,
+        "video_mrr": 0.5,
         "video_recall_at_k": {
           "V-R@1": 0.0,
           "V-R@5": 1.0,
@@ -5289,20 +5297,20 @@
         ],
         "query_id": "test-qa-07",
         "task_type": "qa",
-        "latency_ms": 36523.98610115051,
+        "latency_ms": 13237.738609313965,
         "score": 0.0
       },
       {
         "r_at_k": {
           "R@1": 0.0,
-          "R@5": 1.0,
-          "R@20": 1.0,
+          "R@5": 0.0,
+          "R@20": 0.0,
           "R@50": 1.0,
           "R@100": 1.0
         },
-        "final_score": 0.8,
-        "first_pos_rank": 2,
-        "first_perfect_rank": 2,
+        "final_score": 0.4,
+        "first_pos_rank": 26,
+        "first_perfect_rank": 26,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -5319,8 +5327,32 @@
         "window_duration": 72,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "PERFECT_IN_TOP5",
+        "error_type": "PARTIAL_HIT",
         "r_scores": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
           0.0,
           1.0,
           0.0,
@@ -5328,31 +5360,7 @@
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -5424,20 +5432,20 @@
         ],
         "query_id": "test-kis-08",
         "task_type": "kis",
-        "latency_ms": 7054.203033447266,
-        "score": 0.8
+        "latency_ms": 2459.0861797332764,
+        "score": 0.4
       },
       {
         "r_at_k": {
-          "R@1": 0.0,
+          "R@1": 1.0,
           "R@5": 1.0,
           "R@20": 1.0,
           "R@50": 1.0,
           "R@100": 1.0
         },
-        "final_score": 0.8,
-        "first_pos_rank": 2,
-        "first_perfect_rank": 2,
+        "final_score": 1.0,
+        "first_pos_rank": 1,
+        "first_perfect_rank": 1,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -5454,12 +5462,12 @@
         "window_duration": 118,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "PERFECT_IN_TOP5",
+        "error_type": "PERFECT_RANK_1",
         "r_scores": [
-          0.0,
+          1.0,
           1.0,
           0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -5559,8 +5567,8 @@
         ],
         "query_id": "test-kis-09",
         "task_type": "kis",
-        "latency_ms": 13337.019443511963,
-        "score": 0.8
+        "latency_ms": 2167.0801639556885,
+        "score": 1.0
       },
       {
         "r_at_k": {
@@ -5568,28 +5576,28 @@
           "R@5": 0.0,
           "R@20": 0.0,
           "R@50": 0.0,
-          "R@100": 1.0
+          "R@100": 0.0
         },
-        "final_score": 0.2,
-        "first_pos_rank": 74,
-        "first_perfect_rank": 74,
-        "video_hit_rank": 63,
-        "video_mrr": 0.015873015873015872,
+        "final_score": 0.0,
+        "first_pos_rank": -1,
+        "first_perfect_rank": -1,
+        "video_hit_rank": -1,
+        "video_mrr": 0.0,
         "video_recall_at_k": {
           "V-R@1": 0.0,
           "V-R@5": 0.0,
           "V-R@10": 0.0,
           "V-R@20": 0.0,
           "V-R@50": 0.0,
-          "V-R@100": 1.0
+          "V-R@100": 0.0
         },
-        "min_frame_distance": 0,
-        "near_miss_5": true,
-        "near_miss_25": true,
+        "min_frame_distance": -1,
+        "near_miss_5": false,
+        "near_miss_25": false,
         "window_duration": 39,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "VIDEO_LATE (>Top20)",
+        "error_type": "VIDEO_NOT_IN_TOP100",
         "r_scores": [
           0.0,
           0.0,
@@ -5664,7 +5672,7 @@
           0.0,
           0.0,
           0.0,
-          1.0,
+          0.0,
           0.0,
           0.0,
           0.0,
@@ -5694,20 +5702,20 @@
         ],
         "query_id": "test-kis-10",
         "task_type": "kis",
-        "latency_ms": 2207.245349884033,
-        "score": 0.2
+        "latency_ms": 2081.331968307495,
+        "score": 0.0
       },
       {
         "r_at_k": {
           "R@1": 0.0,
           "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 0.6,
+        "first_pos_rank": 12,
+        "first_perfect_rank": 12,
         "video_hit_rank": 4,
         "video_mrr": 0.25,
         "video_recall_at_k": {
@@ -5718,13 +5726,13 @@
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 1,
+        "min_frame_distance": 0,
         "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 24,
         "window_cat": "SHORT (<=30f)",
         "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
+        "error_type": "PARTIAL_HIT",
         "r_scores": [
           0.0,
           0.0,
@@ -5737,7 +5745,7 @@
           0.0,
           0.0,
           0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -5829,8 +5837,8 @@
         ],
         "query_id": "test-kis-11",
         "task_type": "kis",
-        "latency_ms": 40987.34736442566,
-        "score": 0.0
+        "latency_ms": 2284.977674484253,
+        "score": 0.6
       },
       {
         "r_at_k": {
@@ -5838,28 +5846,28 @@
           "R@5": 0.0,
           "R@20": 0.0,
           "R@50": 0.0,
-          "R@100": 0.0
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
-        "video_hit_rank": 12,
-        "video_mrr": 0.08333333333333333,
+        "final_score": 0.2,
+        "first_pos_rank": 91,
+        "first_perfect_rank": 91,
+        "video_hit_rank": 48,
+        "video_mrr": 0.020833333333333332,
         "video_recall_at_k": {
           "V-R@1": 0.0,
           "V-R@5": 0.0,
           "V-R@10": 0.0,
-          "V-R@20": 1.0,
+          "V-R@20": 0.0,
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 2,
+        "min_frame_distance": 0,
         "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 24,
         "window_cat": "SHORT (<=30f)",
         "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
+        "error_type": "VIDEO_LATE (>Top20)",
         "r_scores": [
           0.0,
           0.0,
@@ -5951,7 +5959,7 @@
           0.0,
           0.0,
           0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -5964,20 +5972,20 @@
         ],
         "query_id": "test-kis-12",
         "task_type": "kis",
-        "latency_ms": 2355.2868366241455,
-        "score": 0.0
+        "latency_ms": 2660.759449005127,
+        "score": 0.2
       },
       {
         "r_at_k": {
           "R@1": 0.0,
           "R@5": 0.0,
           "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 0.4,
+        "first_pos_rank": 25,
+        "first_perfect_rank": 25,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -5994,7 +6002,7 @@
         "window_duration": 124,
         "window_cat": "LONG (>120f)",
         "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
+        "error_type": "PARTIAL_HIT",
         "r_scores": [
           0.0,
           0.0,
@@ -6020,7 +6028,7 @@
           0.0,
           0.0,
           0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -6099,8 +6107,8 @@
         ],
         "query_id": "test-qa-13",
         "task_type": "qa",
-        "latency_ms": 136679.25715446472,
-        "score": 0.0
+        "latency_ms": 10907.051086425781,
+        "score": 0.4
       },
       {
         "r_at_k": {
@@ -6133,7 +6141,7 @@
         "r_scores": [
           1.0,
           1.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -6234,7 +6242,7 @@
         ],
         "query_id": "test-kis-14",
         "task_type": "kis",
-        "latency_ms": 23137.04800605774,
+        "latency_ms": 2080.897569656372,
         "score": 1.0
       },
       {
@@ -6248,23 +6256,23 @@
         "final_score": 0.0,
         "first_pos_rank": -1,
         "first_perfect_rank": -1,
-        "video_hit_rank": 67,
-        "video_mrr": 0.014925373134328358,
+        "video_hit_rank": -1,
+        "video_mrr": 0.0,
         "video_recall_at_k": {
           "V-R@1": 0.0,
           "V-R@5": 0.0,
           "V-R@10": 0.0,
           "V-R@20": 0.0,
           "V-R@50": 0.0,
-          "V-R@100": 1.0
+          "V-R@100": 0.0
         },
-        "min_frame_distance": 1,
-        "near_miss_5": true,
-        "near_miss_25": true,
+        "min_frame_distance": -1,
+        "near_miss_5": false,
+        "near_miss_25": false,
         "window_duration": 32,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "VIDEO_LATE (>Top20)",
+        "error_type": "VIDEO_NOT_IN_TOP100",
         "r_scores": [
           0.0,
           0.0,
@@ -6369,7 +6377,7 @@
         ],
         "query_id": "test-qa-15",
         "task_type": "qa",
-        "latency_ms": 93575.92058181763,
+        "latency_ms": 11021.47626876831,
         "score": 0.0
       },
       {
@@ -6402,8 +6410,8 @@
         "error_type": "PERFECT_RANK_1",
         "r_scores": [
           1.0,
-          0.0,
-          0.0,
+          1.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -6504,25 +6512,25 @@
         ],
         "query_id": "test-kis-16",
         "task_type": "kis",
-        "latency_ms": 1988.4991645812988,
+        "latency_ms": 2439.2623901367188,
         "score": 1.0
       },
       {
         "r_at_k": {
           "R@1": 0.0,
           "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@20": 0.3333333333333333,
+          "R@50": 0.3333333333333333,
+          "R@100": 0.3333333333333333
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
+        "final_score": 0.2,
+        "first_pos_rank": 9,
         "first_perfect_rank": -1,
-        "video_hit_rank": 4,
-        "video_mrr": 0.25,
+        "video_hit_rank": 9,
+        "video_mrr": 0.1111111111111111,
         "video_recall_at_k": {
           "V-R@1": 0.0,
-          "V-R@5": 1.0,
+          "V-R@5": 0.0,
           "V-R@10": 1.0,
           "V-R@20": 1.0,
           "V-R@50": 1.0,
@@ -6533,8 +6541,12 @@
         "near_miss_25": false,
         "window_duration": 1,
         "window_cat": "SHORT (<=30f)",
-        "trake_event_summary": [],
-        "error_type": "FRAME_MISS",
+        "trake_event_summary": [
+          "E1: +150f",
+          "E2: -199f",
+          "E3: HIT (d=0)"
+        ],
+        "error_type": "PARTIAL_HIT",
         "r_scores": [
           0.0,
           0.0,
@@ -6544,7 +6556,7 @@
           0.0,
           0.0,
           0.0,
-          0.0,
+          0.3333333333333333,
           0.0,
           0.0,
           0.0,
@@ -6639,20 +6651,20 @@
         ],
         "query_id": "test-trake-17",
         "task_type": "trake",
-        "latency_ms": 6649.966716766357,
-        "score": 0.0
+        "latency_ms": 6181.404113769531,
+        "score": 0.2
       },
       {
         "r_at_k": {
-          "R@1": 0.0,
-          "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@1": 1.0,
+          "R@5": 1.0,
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 1.0,
+        "first_pos_rank": 1,
+        "first_perfect_rank": 1,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -6663,18 +6675,18 @@
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 1,
+        "min_frame_distance": 0,
         "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 76,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
+        "error_type": "PERFECT_RANK_1",
         "r_scores": [
+          1.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -6774,20 +6786,20 @@
         ],
         "query_id": "test-kis-18",
         "task_type": "kis",
-        "latency_ms": 16702.27098464966,
-        "score": 0.0
+        "latency_ms": 2188.915729522705,
+        "score": 1.0
       },
       {
         "r_at_k": {
-          "R@1": 0.0,
+          "R@1": 1.0,
           "R@5": 1.0,
           "R@20": 1.0,
           "R@50": 1.0,
           "R@100": 1.0
         },
-        "final_score": 0.8,
-        "first_pos_rank": 2,
-        "first_perfect_rank": 2,
+        "final_score": 1.0,
+        "first_pos_rank": 1,
+        "first_perfect_rank": 1,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -6804,13 +6816,13 @@
         "window_duration": 48,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "PERFECT_IN_TOP5",
+        "error_type": "PERFECT_RANK_1",
         "r_scores": [
-          0.0,
+          1.0,
           1.0,
           0.0,
           0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -6909,20 +6921,20 @@
         ],
         "query_id": "test-kis-19",
         "task_type": "kis",
-        "latency_ms": 18777.15516090393,
-        "score": 0.8
+        "latency_ms": 2086.780071258545,
+        "score": 1.0
       },
       {
         "r_at_k": {
           "R@1": 0.0,
-          "R@5": 1.0,
+          "R@5": 0.0,
           "R@20": 1.0,
           "R@50": 1.0,
           "R@100": 1.0
         },
-        "final_score": 0.8,
-        "first_pos_rank": 3,
-        "first_perfect_rank": 3,
+        "final_score": 0.6,
+        "first_pos_rank": 6,
+        "first_perfect_rank": 6,
         "video_hit_rank": 2,
         "video_mrr": 0.5,
         "video_recall_at_k": {
@@ -6939,16 +6951,16 @@
         "window_duration": 61,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "PERFECT_IN_TOP5",
+        "error_type": "PARTIAL_HIT",
         "r_scores": [
+          0.0,
+          0.0,
+          0.0,
           0.0,
           0.0,
           1.0,
           0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -7044,8 +7056,8 @@
         ],
         "query_id": "test-kis-20",
         "task_type": "kis",
-        "latency_ms": 2144.7360515594482,
-        "score": 0.8
+        "latency_ms": 1993.0696487426758,
+        "score": 0.6
       },
       {
         "r_at_k": {
@@ -7079,7 +7091,7 @@
           1.0,
           1.0,
           0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -7179,20 +7191,20 @@
         ],
         "query_id": "test-kis-21",
         "task_type": "kis",
-        "latency_ms": 2171.2889671325684,
+        "latency_ms": 2282.038450241089,
         "score": 1.0
       },
       {
         "r_at_k": {
           "R@1": 0.0,
-          "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@5": 1.0,
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 0.8,
+        "first_pos_rank": 3,
+        "first_perfect_rank": 3,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -7203,19 +7215,19 @@
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 1,
+        "min_frame_distance": 0,
         "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 35,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
+        "error_type": "PERFECT_IN_TOP5",
         "r_scores": [
           0.0,
           0.0,
+          1.0,
           0.0,
-          0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -7314,8 +7326,8 @@
         ],
         "query_id": "test-kis-22",
         "task_type": "kis",
-        "latency_ms": 2858.119487762451,
-        "score": 0.0
+        "latency_ms": 1914.7214889526367,
+        "score": 0.8
       },
       {
         "r_at_k": {
@@ -7326,10 +7338,10 @@
           "R@100": 1.0
         },
         "final_score": 0.6,
-        "first_pos_rank": 7,
-        "first_perfect_rank": 7,
-        "video_hit_rank": 5,
-        "video_mrr": 0.2,
+        "first_pos_rank": 12,
+        "first_perfect_rank": 12,
+        "video_hit_rank": 4,
+        "video_mrr": 0.25,
         "video_recall_at_k": {
           "V-R@1": 0.0,
           "V-R@5": 1.0,
@@ -7352,13 +7364,13 @@
           0.0,
           0.0,
           0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
           1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -7449,20 +7461,20 @@
         ],
         "query_id": "test-kis-23",
         "task_type": "kis",
-        "latency_ms": 2253.924608230591,
+        "latency_ms": 2089.014768600464,
         "score": 0.6
       },
       {
         "r_at_k": {
           "R@1": 0.0,
-          "R@5": 0.0,
+          "R@5": 1.0,
           "R@20": 1.0,
           "R@50": 1.0,
           "R@100": 1.0
         },
-        "final_score": 0.6,
-        "first_pos_rank": 7,
-        "first_perfect_rank": 7,
+        "final_score": 0.8,
+        "first_pos_rank": 2,
+        "first_perfect_rank": 2,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -7479,15 +7491,15 @@
         "window_duration": 65,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "PARTIAL_HIT",
+        "error_type": "PERFECT_IN_TOP5",
         "r_scores": [
           0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
+          1.0,
           0.0,
           1.0,
+          0.0,
+          0.0,
+          0.0,
           0.0,
           0.0,
           0.0,
@@ -7584,20 +7596,20 @@
         ],
         "query_id": "test-kis-24",
         "task_type": "kis",
-        "latency_ms": 23235.13674736023,
-        "score": 0.6
+        "latency_ms": 2075.8612155914307,
+        "score": 0.8
       },
       {
         "r_at_k": {
-          "R@1": 0.0,
-          "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@1": 1.0,
+          "R@5": 1.0,
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 1.0,
+        "first_pos_rank": 1,
+        "first_perfect_rank": 1,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -7613,10 +7625,14 @@
         "near_miss_25": false,
         "window_duration": 1,
         "window_cat": "SHORT (<=30f)",
-        "trake_event_summary": [],
-        "error_type": "FRAME_MISS",
+        "trake_event_summary": [
+          "E1: HIT (d=0)",
+          "E2: HIT (d=0)",
+          "E3: HIT (d=0)"
+        ],
+        "error_type": "PERFECT_RANK_1",
         "r_scores": [
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -7719,22 +7735,22 @@
         ],
         "query_id": "test-trake-25",
         "task_type": "trake",
-        "latency_ms": 24325.151920318604,
-        "score": 0.0
+        "latency_ms": 9457.051753997803,
+        "score": 1.0
       },
       {
         "r_at_k": {
           "R@1": 0.0,
-          "R@5": 1.0,
+          "R@5": 0.0,
           "R@20": 1.0,
           "R@50": 1.0,
           "R@100": 1.0
         },
-        "final_score": 0.8,
-        "first_pos_rank": 3,
-        "first_perfect_rank": 3,
-        "video_hit_rank": 3,
-        "video_mrr": 0.3333333333333333,
+        "final_score": 0.6,
+        "first_pos_rank": 6,
+        "first_perfect_rank": 6,
+        "video_hit_rank": 2,
+        "video_mrr": 0.5,
         "video_recall_at_k": {
           "V-R@1": 0.0,
           "V-R@5": 1.0,
@@ -7749,16 +7765,16 @@
         "window_duration": 75,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "PERFECT_IN_TOP5",
+        "error_type": "PARTIAL_HIT",
         "r_scores": [
+          0.0,
+          0.0,
+          0.0,
           0.0,
           0.0,
           1.0,
           0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -7854,8 +7870,8 @@
         ],
         "query_id": "test-kis-26",
         "task_type": "kis",
-        "latency_ms": 4024.719476699829,
-        "score": 0.8
+        "latency_ms": 2389.5578384399414,
+        "score": 0.6
       },
       {
         "r_at_k": {
@@ -7868,10 +7884,10 @@
         "final_score": 0.0,
         "first_pos_rank": -1,
         "first_perfect_rank": -1,
-        "video_hit_rank": 3,
-        "video_mrr": 0.3333333333333333,
+        "video_hit_rank": 1,
+        "video_mrr": 1.0,
         "video_recall_at_k": {
-          "V-R@1": 0.0,
+          "V-R@1": 1.0,
           "V-R@5": 1.0,
           "V-R@10": 1.0,
           "V-R@20": 1.0,
@@ -7989,19 +8005,19 @@
         ],
         "query_id": "test-qa-27",
         "task_type": "qa",
-        "latency_ms": 369826.5175819397,
+        "latency_ms": 13333.056926727295,
         "score": 0.0
       },
       {
         "r_at_k": {
-          "R@1": 0.0,
-          "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@1": 0.6666666666666666,
+          "R@5": 0.6666666666666666,
+          "R@20": 0.6666666666666666,
+          "R@50": 0.6666666666666666,
+          "R@100": 0.6666666666666666
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
+        "final_score": 0.6666666666666666,
+        "first_pos_rank": 1,
         "first_perfect_rank": -1,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
@@ -8018,10 +8034,14 @@
         "near_miss_25": false,
         "window_duration": 1,
         "window_cat": "SHORT (<=30f)",
-        "trake_event_summary": [],
-        "error_type": "FRAME_MISS",
+        "trake_event_summary": [
+          "E1: +3690f",
+          "E2: HIT (d=0)",
+          "E3: HIT (d=0)"
+        ],
+        "error_type": "PARTIAL_HIT",
         "r_scores": [
-          0.0,
+          0.6666666666666666,
           0.0,
           0.0,
           0.0,
@@ -8124,8 +8144,8 @@
         ],
         "query_id": "test-trake-28",
         "task_type": "trake",
-        "latency_ms": 20331.5372467041,
-        "score": 0.0
+        "latency_ms": 5447.386980056763,
+        "score": 0.6666666666666666
       },
       {
         "r_at_k": {
@@ -8157,8 +8177,8 @@
         "error_type": "PERFECT_RANK_1",
         "r_scores": [
           1.0,
-          0.0,
-          0.0,
+          1.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -8259,20 +8279,20 @@
         ],
         "query_id": "test-kis-29",
         "task_type": "kis",
-        "latency_ms": 8525.379180908203,
+        "latency_ms": 2004.791021347046,
         "score": 1.0
       },
       {
         "r_at_k": {
-          "R@1": 0.0,
-          "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@1": 1.0,
+          "R@5": 1.0,
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 1.0,
+        "first_pos_rank": 1,
+        "first_perfect_rank": 1,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -8283,16 +8303,16 @@
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 1,
+        "min_frame_distance": 0,
         "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 40,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
+        "error_type": "PERFECT_RANK_1",
         "r_scores": [
-          0.0,
-          0.0,
+          1.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -8394,8 +8414,8 @@
         ],
         "query_id": "test-qa-30",
         "task_type": "qa",
-        "latency_ms": 401761.3604068756,
-        "score": 0.0
+        "latency_ms": 11681.05411529541,
+        "score": 1.0
       },
       {
         "r_at_k": {
@@ -8427,6 +8447,8 @@
         "error_type": "PERFECT_RANK_1",
         "r_scores": [
           1.0,
+          1.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -8449,10 +8471,8 @@
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
+          1.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -8529,20 +8549,20 @@
         ],
         "query_id": "test-kis-31",
         "task_type": "kis",
-        "latency_ms": 111456.55822753906,
+        "latency_ms": 2368.3154582977295,
         "score": 1.0
       },
       {
         "r_at_k": {
-          "R@1": 0.0,
-          "R@5": 0.0,
-          "R@20": 0.0,
-          "R@50": 0.0,
-          "R@100": 0.0
+          "R@1": 1.0,
+          "R@5": 1.0,
+          "R@20": 1.0,
+          "R@50": 1.0,
+          "R@100": 1.0
         },
-        "final_score": 0.0,
-        "first_pos_rank": -1,
-        "first_perfect_rank": -1,
+        "final_score": 1.0,
+        "first_pos_rank": 1,
+        "first_perfect_rank": 1,
         "video_hit_rank": 1,
         "video_mrr": 1.0,
         "video_recall_at_k": {
@@ -8553,15 +8573,15 @@
           "V-R@50": 1.0,
           "V-R@100": 1.0
         },
-        "min_frame_distance": 1,
+        "min_frame_distance": 0,
         "near_miss_5": true,
         "near_miss_25": true,
         "window_duration": 76,
         "window_cat": "MEDIUM (31-120f)",
         "trake_event_summary": [],
-        "error_type": "TEMPORAL_NEAR_MISS (<=25f)",
+        "error_type": "PERFECT_RANK_1",
         "r_scores": [
-          0.0,
+          1.0,
           0.0,
           0.0,
           0.0,
@@ -8664,8 +8684,8 @@
         ],
         "query_id": "test-kis-32",
         "task_type": "kis",
-        "latency_ms": 175442.36731529236,
-        "score": 0.0
+        "latency_ms": 2299.403429031372,
+        "score": 1.0
       }
     ]
   }
