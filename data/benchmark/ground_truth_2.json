@@ -1,0 +1,350 @@
+{
+  "benchmark_version": "2.0",
+  "created_by": "Team AIC 2026",
+  "total_queries": 32,
+  "test_cases": [
+    {
+      "query_id": "test-qa-01",
+      "task_type": "qa",
+      "query_text": "Trong phân cảnh ngoài trời có dải băng cảnh báo đỏ trắng và cột nước phun thẳng đứng lên trời từ mặt đất, người đàn ông mặc áo thun có họa tiết sọc ngang đứng ở tiền cảnh đang đeo phụ kiện gì trên cổ tay phải của mình?",
+      "ground_truth": {
+        "video_id": "L21_V001",
+        "start_frame": 6288,
+        "end_frame": 6370,
+        "frame_idx": 6330,
+        "answer": "chuỗi hạt"
+      }
+    },
+    {
+      "query_id": "test-kis-02",
+      "task_type": "kis",
+      "query_text": "Hai người phụ nữ ngồi bệt trên sàn trước những tấm chiếu dệt hoa văn nhiều màu treo trên vách; người phụ nữ bên trái mặc áo màu xanh ngọc bích đeo kính cận, người phụ nữ bên phải mặc áo hoa văn màu đỏ mận cùng ngồi thao tác trên khung dệt chiếu nằm ngang.",
+      "ground_truth": {
+        "video_id": "L21_V016",
+        "start_frame": 8216,
+        "end_frame": 8264
+      }
+    },
+    {
+      "query_id": "test-kis-03",
+      "task_type": "kis",
+      "query_text": "Trước tấm phông nền màu xanh dương có in danh sách các chuyên khoa y tế, người đàn ông mặc sơ mi trắng dùng hai tay khoác và chỉnh chiếc áo blouse trắng qua vai chàng trai trẻ đeo kính cận đang đeo dây thẻ màu xanh dương trước ngực.",
+      "ground_truth": {
+        "video_id": "L22_V002",
+        "start_frame": 1872,
+        "end_frame": 1901
+      }
+    },
+    {
+      "query_id": "test-kis-04",
+      "task_type": "kis",
+      "query_text": "Trong màn biểu diễn võ thuật trên đường phố, ba võ sinh cởi trần thắt băng đỏ trên đầu xếp chồng lên nhau nằm trên các bàn chông nhọn, trong khi một chiến sĩ mặc áo đen đứng phía trên dùng búa tạ đập vỡ tấm đá đặt trên ngực người trên cùng.",
+      "ground_truth": {
+        "video_id": "L22_V018",
+        "start_frame": 2274,
+        "end_frame": 2339
+      }
+    },
+    {
+      "query_id": "test-qa-05",
+      "task_type": "qa",
+      "query_text": "Ở lề đường của một chặng đua thể thao, cạnh linh vật màu vàng đeo kính râm và người phụ nữ mặc áo dài đội cài tóc lấp lánh, người đứng cạnh cầm bảng điện tử màu đen đang hiển thị chữ số LED màu đỏ nào?",
+      "ground_truth": {
+        "video_id": "L23_V001",
+        "start_frame": 0,
+        "end_frame": 92,
+        "frame_idx": 43,
+        "answer": "2"
+      }
+    },
+    {
+      "query_id": "test-kis-06",
+      "task_type": "kis",
+      "query_text": "Cảnh quay toàn cảnh flycam từ trên cao nhìn xuống đoạn đường dẫn uốn cong lên cây cầu treo dây võng lớn bắc qua vịnh biển; trên mặt đường có ô tô màu trắng di chuyển phía trước đoàn mô tô mở đường và các tay đua xe đạp.",
+      "ground_truth": {
+        "video_id": "L23_V012",
+        "start_frame": 2432,
+        "end_frame": 2841
+      }
+    },
+    {
+      "query_id": "test-qa-07",
+      "task_type": "qa",
+      "query_text": "Trong hội trường sự kiện lễ hội, trước dãy bàn đại biểu phủ khăn trắng, người đàn ông mặc áo thun có cổ màu xanh dương đeo thẻ ban tổ chức trước ngực đang dùng hai tay giơ cao vật gì lên trên đầu?",
+      "ground_truth": {
+        "video_id": "L24_V002",
+        "start_frame": 124,
+        "end_frame": 327,
+        "frame_idx": 225,
+        "answer": "lá cờ màu đỏ"
+      }
+    },
+    {
+      "query_id": "test-kis-08",
+      "task_type": "kis",
+      "query_text": "Cận cảnh đội nhạc công lễ hội: người thanh niên mặc võ phục màu đỏ viền vàng có cắm cờ ngũ sắc sau lưng giơ cao hai dùi gỗ đánh liên hồi vào quả trống lân lớn, bên cạnh có đồng đội gõ chiêng đồng trên giá đỡ kim loại.",
+      "ground_truth": {
+        "video_id": "L24_V015",
+        "start_frame": 1734,
+        "end_frame": 1805
+      }
+    },
+    {
+      "query_id": "test-kis-09",
+      "task_type": "kis",
+      "query_text": "Cận cảnh hai nhạc công hóa trang vẽ mặt nạ tuồng hoa văn đỏ đen mặc trang phục màu trắng viền đỏ: người phía trước giơ bắt chéo hai dùi trống màu đen trên đầu trước quả trống lớn, người phía sau gõ chiêng đồng.",
+      "ground_truth": {
+        "video_id": "L24_V030",
+        "start_frame": 546,
+        "end_frame": 663
+      }
+    },
+    {
+      "query_id": "test-kis-10",
+      "task_type": "kis",
+      "query_text": "Cảnh quay góc nhìn thẳng từ trên cao nhìn xuống sân bóng rổ màu xanh lá: các cầu thủ mặc áo đấu màu xanh lá viền vàng và áo đỏ cùng nhảy lên tranh chấp khi quả bóng rổ màu đỏ đang bay về phía bảng rổ màu trắng.",
+      "ground_truth": {
+        "video_id": "L25_V001",
+        "start_frame": 2463,
+        "end_frame": 2501
+      }
+    },
+    {
+      "query_id": "test-kis-11",
+      "task_type": "kis",
+      "query_text": "Trong phòng thực hành công nghệ, người đàn ông mặc sơ mi trắng đeo dây thẻ màu xanh dương chỉ ngón tay vào màn hình cảm ứng gắn trước ngực của robot hình người màu trắng phối cam.",
+      "ground_truth": {
+        "video_id": "L25_V029",
+        "start_frame": 5174,
+        "end_frame": 5197
+      }
+    },
+    {
+      "query_id": "test-kis-12",
+      "task_type": "kis",
+      "query_text": "Trước phông nền rèm sọc đứng màu trắng, ba nam sinh đeo kính mặc áo sơ mi đồng phục trắng có thêu logo trước ngực ngồi trên ghế tròn cùng gảy đàn guitar acoustic và hát.",
+      "ground_truth": {
+        "video_id": "L25_V059",
+        "start_frame": 6858,
+        "end_frame": 6881
+      }
+    },
+    {
+      "query_id": "test-qa-13",
+      "task_type": "qa",
+      "query_text": "Trong phân cảnh giới thiệu món ăn có bảng chữ màu đỏ 'ĐÙI ẾCH CHIÊN MÈ' đặt trên bàn gỗ, chén đựng nước sốt chấm hình bông hoa ở góc dưới bên phải có màu gì?",
+      "ground_truth": {
+        "video_id": "L26_V001",
+        "start_frame": 576,
+        "end_frame": 699,
+        "frame_idx": 637,
+        "answer": "màu vàng"
+      }
+    },
+    {
+      "query_id": "test-kis-14",
+      "task_type": "kis",
+      "query_text": "Cận cảnh chiếc vá lưới kim loại vớt các miếng mề gà đã chần chín ra khỏi nồi thủy tinh màu hổ phách đang sôi trên bếp.",
+      "ground_truth": {
+        "video_id": "L26_V033",
+        "start_frame": 3048,
+        "end_frame": 3110
+      }
+    },
+    {
+      "query_id": "test-qa-15",
+      "task_type": "qa",
+      "query_text": "Trong phân cảnh đầu bếp mặc áo trắng cầm chiếc hộp đựng gia vị hình vuông màu trắng, chữ màu trắng in bên trong biểu tượng màu đỏ ở thân hộp là chữ gì?",
+      "ground_truth": {
+        "video_id": "L26_V065",
+        "start_frame": 2372,
+        "end_frame": 2403,
+        "frame_idx": 2387,
+        "answer": "ĐƯỜNG"
+      }
+    },
+    {
+      "query_id": "test-kis-16",
+      "task_type": "kis",
+      "query_text": "Cận cảnh đôi bàn tay dùng dao bếp bản lớn cán nâu thái quả xoài chín màu vàng thành các lát dài mỏng trên mặt thớt gỗ.",
+      "ground_truth": {
+        "video_id": "L26_V100",
+        "start_frame": 1846,
+        "end_frame": 1947
+      }
+    },
+    {
+      "query_id": "test-trake-17",
+      "task_type": "trake",
+      "query_text": "Hãy tìm và liệt kê theo thứ tự thời gian các phân cảnh liên quan đến phi lê cá trê: phân cảnh thái sợi phi lê cá trên thớt gỗ, phân cảnh chiên các miếng cá trong chảo dầu sôi, và phân cảnh gắp cá chiên giòn để lên đĩa lót giấy thấm dầu màu trắng.",
+      "ground_truth": {
+        "video_id": "L26_V148",
+        "intervals": [
+          [2176, 2277],
+          [5196, 5291],
+          [5326, 5389]
+        ]
+      }
+    },
+    {
+      "query_id": "test-kis-18",
+      "task_type": "kis",
+      "query_text": "Cận cảnh đôi bàn tay đeo găng ni lông trong suốt dùng dao thái và xếp các lát chuối chín cùng những lát dâu tây đỏ tươi lên một chiếc đĩa thủy tinh trong suốt.",
+      "ground_truth": {
+        "video_id": "L26_V200",
+        "start_frame": 2210,
+        "end_frame": 2285
+      }
+    },
+    {
+      "query_id": "test-kis-19",
+      "task_type": "kis",
+      "query_text": "Cận cảnh những chiếc bánh hoành thánh vừa được gói xong tạo hình nếp gấp cánh hoa xếp trên chiếc đĩa sứ vuông màu trắng.",
+      "ground_truth": {
+        "video_id": "L26_V249",
+        "start_frame": 5484,
+        "end_frame": 5531
+      }
+    },
+    {
+      "query_id": "test-kis-20",
+      "task_type": "kis",
+      "query_text": "Cận cảnh đĩa sứ tròn màu trắng xếp những viên chả tôm sống màu hồng nhạt lấm tấm tiêu và ớt đỏ.",
+      "ground_truth": {
+        "video_id": "L26_V300",
+        "start_frame": 4242,
+        "end_frame": 4302
+      }
+    },
+    {
+      "query_id": "test-kis-21",
+      "task_type": "kis",
+      "query_text": "Cận cảnh các viên chả sống được lăn bao phủ một lớp cốm hạt màu xanh lá cây tươi xếp trên chiếc đĩa sứ tròn màu trắng.",
+      "ground_truth": {
+        "video_id": "L26_V348",
+        "start_frame": 5090,
+        "end_frame": 5172
+      }
+    },
+    {
+      "query_id": "test-kis-22",
+      "task_type": "kis",
+      "query_text": "Cận cảnh đôi bàn tay dùng bay kim loại phết lớp nhân màu vàng lên mặt chiếc bánh pancake tròn màu nâu đặt trên đĩa sứ màu đỏ viền tròn.",
+      "ground_truth": {
+        "video_id": "L26_V400",
+        "start_frame": 5172,
+        "end_frame": 5206
+      }
+    },
+    {
+      "query_id": "test-kis-23",
+      "task_type": "kis",
+      "query_text": "Cận cảnh đôi bàn tay cầm chén nhỏ màu vàng đổ những hạt mè đen vào tô bột chiên giòn màu trắng ngà và khuấy đều bằng muỗng kim loại.",
+      "ground_truth": {
+        "video_id": "L26_V449",
+        "start_frame": 4682,
+        "end_frame": 4770
+      }
+    },
+    {
+      "query_id": "test-kis-24",
+      "task_type": "kis",
+      "query_text": "Cận cảnh người dẫn chương trình mặc áo ngắn tay màu xanh lá cây đeo kính mắt gọng đen viền vuông cầm chiếc vé màu trắng trước cabin cáp treo màu đỏ.",
+      "ground_truth": {
+        "video_id": "L27_V001",
+        "start_frame": 5972,
+        "end_frame": 6036
+      }
+    },
+    {
+      "query_id": "test-trake-25",
+      "task_type": "trake",
+      "query_text": "Hãy tìm và liệt kê theo thứ tự thời gian các phân cảnh của cô gái mặc áo đen váy trắng dài: phân cảnh ngồi trên xe lôi xích lô màu trắng viền xanh lá vẫy tay chào trước cổng đền thờ họ Mạc, phân cảnh bước lên cầu thang gỗ ngoài trời của nhà lưu niệm Tao đàn Chiêu Anh Các, và phân cảnh đi dạo dọc theo con đường lát đá giữa rặng cây xanh trong khuôn viên lăng mộ.",
+      "ground_truth": {
+        "video_id": "L27_V007",
+        "intervals": [
+          [2842, 2889],
+          [4996, 5068],
+          [5870, 6117]
+        ]
+      }
+    },
+    {
+      "query_id": "test-kis-26",
+      "task_type": "kis",
+      "query_text": "Góc quay từ trên cao nhìn xuống lề đường chợ: người phụ nữ đội khăn trùm đầu màu đỏ mận ngồi cạnh rổ nhựa tròn màu đỏ đựng cá tươi bán cho người phụ nữ cắp chiếc thùng các-tông dán băng keo đỏ.",
+      "ground_truth": {
+        "video_id": "L28_V001",
+        "start_frame": 12022,
+        "end_frame": 12096
+      }
+    },
+    {
+      "query_id": "test-qa-27",
+      "task_type": "qa",
+      "query_text": "Trong phân cảnh đường phố có các xe máy đang lưu thông, chiếc xe ô tô màu trắng di chuyển về phía trước có biển số xe là gì?",
+      "ground_truth": {
+        "video_id": "L28_V011",
+        "start_frame": 3012,
+        "end_frame": 3131,
+        "frame_idx": 3071,
+        "answer": "65A-400.08"
+      }
+    },
+    {
+      "query_id": "test-trake-28",
+      "task_type": "trake",
+      "query_text": "Hãy tìm và liệt kê theo thứ tự thời gian các phân cảnh liên quan đến sản phẩm thủ công từ cây lục bình: phân cảnh cận cảnh đôi bàn tay đan bím các sợi lục bình khô, phân cảnh cận cảnh bộ bình trà đan bằng lục bình thêu hoa đỏ trên kệ trưng bày, và phân cảnh cận cảnh chiếc túi xách hình bán nguyệt đan bằng lục bình đính hoa hồng đỏ.",
+      "ground_truth": {
+        "video_id": "L29_V001",
+        "intervals": [
+          [3650, 3797],
+          [8880, 9185],
+          [9746, 9779]
+        ]
+      }
+    },
+    {
+      "query_id": "test-kis-29",
+      "task_type": "kis",
+      "query_text": "Cận cảnh người phụ nữ mặc áo sơ mi trắng đeo hoa tai hình trái tim dùng tay nâng và giới thiệu một chùm nho xanh trước ống kính máy quay.",
+      "ground_truth": {
+        "video_id": "L29_V013",
+        "start_frame": 16004,
+        "end_frame": 16073
+      }
+    },
+    {
+      "query_id": "test-qa-30",
+      "task_type": "qa",
+      "query_text": "Trong phân cảnh cận cảnh hai chiếc cờ lê kim loại màu bạc nằm trên nền xi măng cạnh khung sườn xe đạp, dòng chữ tiếng Anh in hoa dập nổi trên thân chiếc cờ lê bên dưới là chữ gì?",
+      "ground_truth": {
+        "video_id": "L30_V001",
+        "start_frame": 1182,
+        "end_frame": 1221,
+        "frame_idx": 1201,
+        "answer": "CHROME VANADIUM"
+      }
+    },
+    {
+      "query_id": "test-kis-31",
+      "task_type": "kis",
+      "query_text": "Cận cảnh cô gái đeo khăn vải hoa nhiều màu che kín mắt nằm ngửa ngâm mình dưới dòng nước suối trong khi có người nhỏ giọt nước lên trán.",
+      "ground_truth": {
+        "video_id": "L30_V033",
+        "start_frame": 1970,
+        "end_frame": 2041
+      }
+    },
+    {
+      "query_id": "test-kis-32",
+      "task_type": "kis",
+      "query_text": "Trong quán ăn, cô gái trẻ mặc áo đầm màu đen tay bồng dùng hai tay bưng một tô phở sứ màu trắng bước đi bưng thức ăn cho khách.",
+      "ground_truth": {
+        "video_id": "L30_V064",
+        "start_frame": 3006,
+        "end_frame": 3081
+      }
+    }
+  ]
+}

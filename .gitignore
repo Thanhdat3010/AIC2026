@@ -12,6 +12,8 @@ __pycache__/
 *.tar
 *.gz
 *.exe
+*.pdf
+scratch/
 
 # Ignore data folder contents but preserve structure via .gitkeep
 raw/**
