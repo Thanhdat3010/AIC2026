@@ -4,11 +4,33 @@ from typing import Optional, Literal
 from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException
 
+import numpy as np
 from src.retrieval.unified_search_core import UnifiedSearchCore
 from src.query.llm_query_refiner import LLMQueryRefiner
 from src.tasks.clean_task_handlers import KISHandler, QAHandler, TRAKEHandler
 
 router = APIRouter(prefix="/api/search", tags=["search"])
+
+def sanitize_for_json(obj):
+    if isinstance(obj, dict):
+        return {
+            k: sanitize_for_json(v)
+            for k, v in obj.items()
+            if k not in ["sim_matrix", "pts_times", "features", "embedding", "v_feats"]
+        }
+    elif isinstance(obj, (list, tuple)):
+        return [sanitize_for_json(x) for x in obj]
+    elif isinstance(obj, np.ndarray):
+        return [sanitize_for_json(x) for x in obj.tolist()]
+    elif isinstance(obj, (np.integer, int)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, float)):
+        return float(obj)
+    elif isinstance(obj, (np.bool_, bool)):
+        return bool(obj)
+    elif isinstance(obj, str) or obj is None:
+        return obj
+    return str(obj)
 
 # Shared Singleton Instances
 _search_core = None
@@ -79,7 +101,7 @@ async def unified_search(req: SearchRequest):
         preds, info, lat = kis_handler.search(q, top_k=req.top_k, config_name=req.config_name)
     total_latency_ms = (time.perf_counter() - t0) * 1000
 
-    return {
+    return sanitize_for_json({
         "status": "success",
         "task_type": task,
         "config_name": req.config_name,
@@ -87,7 +109,7 @@ async def unified_search(req: SearchRequest):
         "latency_ms": round(total_latency_ms, 1),
         "info": info,
         "results": preds
-    }
+    })
 
 @router.post("/kis")
 async def search_kis_explicit(req: SearchRequest):
@@ -95,14 +117,14 @@ async def search_kis_explicit(req: SearchRequest):
     t0 = time.perf_counter()
     preds, info, lat = kis_handler.search(req.query, top_k=req.top_k, config_name=req.config_name)
     total_lat = (time.perf_counter() - t0) * 1000
-    return {
+    return sanitize_for_json({
         "status": "success",
         "task_type": "kis",
         "total_results": len(preds),
         "latency_ms": round(total_lat, 1),
         "info": info,
         "results": preds
-    }
+    })
 
 @router.post("/qa")
 async def search_qa_explicit(req: SearchRequest):
@@ -110,14 +132,14 @@ async def search_qa_explicit(req: SearchRequest):
     t0 = time.perf_counter()
     preds, info, lat = qa_handler.search(req.query, top_k=req.top_k, config_name=req.config_name)
     total_lat = (time.perf_counter() - t0) * 1000
-    return {
+    return sanitize_for_json({
         "status": "success",
         "task_type": "qa",
         "total_results": len(preds),
         "latency_ms": round(total_lat, 1),
         "info": info,
         "results": preds
-    }
+    })
 
 @router.post("/trake")
 async def search_trake_explicit(req: SearchRequest):
@@ -125,11 +147,11 @@ async def search_trake_explicit(req: SearchRequest):
     t0 = time.perf_counter()
     preds, info, lat = trake_handler.search(req.query, top_k=req.top_k, config_name=req.config_name)
     total_lat = (time.perf_counter() - t0) * 1000
-    return {
+    return sanitize_for_json({
         "status": "success",
         "task_type": "trake",
         "total_results": len(preds),
         "latency_ms": round(total_lat, 1),
         "info": info,
         "results": preds
-    }
+    })

@@ -426,13 +426,20 @@ class TRAKEHandler:
         seen = set()
         for rank, r in enumerate(results, 1):
             ef = r.get("event_frames", r.get("events", []))
-            r["events"] = [str(x) for x in ef]
-            r["event_frames"] = [int(x) for x in ef]
-            key = (r["video_id"], tuple(r["events"]))
+            clean_events = [str(x) for x in ef]
+            clean_frames = [int(x) for x in ef]
+            key = (str(r["video_id"]), tuple(clean_events))
             if key not in seen:
                 seen.add(key)
-                r["rank"] = len(final_results) + 1
-                final_results.append(r)
+                clean_r = {
+                    "rank": len(final_results) + 1,
+                    "video_id": str(r["video_id"]),
+                    "frame_idx": int(r.get("frame_idx", clean_frames[0] if clean_frames else 0)),
+                    "event_frames": clean_frames,
+                    "events": clean_events,
+                    "score": float(r.get("score", 0.0))
+                }
+                final_results.append(clean_r)
                 if len(final_results) >= top_k:
                     break
 
