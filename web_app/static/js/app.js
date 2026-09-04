@@ -20,6 +20,8 @@ class AppController {
     this.querySelectEl = document.getElementById("select-query-pkg");
     this.toastEl = document.getElementById("toast-notice");
     this.toastMsgEl = document.getElementById("toast-msg");
+    this.sourceBadgeEl = document.getElementById("source-badge");
+    this.btnForceResearch = document.getElementById("btn-force-research");
     this.queryRequestCounter = 0;
     this.activeQueryToken = 0;
 
@@ -29,6 +31,7 @@ class AppController {
 
   initEvents() {
     document.getElementById("btn-search")?.addEventListener("click", () => this.executeSearch());
+    this.btnForceResearch?.addEventListener("click", () => this.executeSearch());
 
     this.omnibarInput?.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
@@ -173,6 +176,8 @@ class AppController {
     if (!this.cardsGridEl) return;
     if (this.statsCountEl) this.statsCountEl.innerHTML = `<span class="loading-pulse">Đang nạp...</span>`;
     if (this.statsLatencyEl) this.statsLatencyEl.innerHTML = `<span class="loading-pulse">...</span>`;
+    if (this.sourceBadgeEl) this.sourceBadgeEl.style.display = "none";
+    if (this.btnForceResearch) this.btnForceResearch.style.display = "none";
 
     const taskType = q?.task_type || "SEARCH";
     const qid = q?.id || "Đang xử lý";
@@ -318,6 +323,12 @@ class AppController {
 
         if (this.statsLatencyEl) this.statsLatencyEl.textContent = "0 ms (cache)";
         if (this.statsCountEl) this.statsCountEl.textContent = `${formatted.length}`;
+        if (this.sourceBadgeEl) {
+          this.sourceBadgeEl.textContent = "📦 Bài nộp có sẵn";
+          this.sourceBadgeEl.className = "source-pill cache";
+          this.sourceBadgeEl.style.display = "inline-flex";
+        }
+        if (this.btnForceResearch) this.btnForceResearch.style.display = "inline-flex";
 
         this.clearSidebarLoading();
         this.renderCards(formatted);
@@ -367,6 +378,12 @@ class AppController {
         this.currentResults = data.results || [];
         if (this.statsLatencyEl) this.statsLatencyEl.textContent = `${data.latency_ms} ms`;
         if (this.statsCountEl) this.statsCountEl.textContent = `${this.currentResults.length}`;
+        if (this.sourceBadgeEl) {
+          this.sourceBadgeEl.textContent = "⚡ AI A8_SOTA";
+          this.sourceBadgeEl.className = "source-pill live";
+          this.sourceBadgeEl.style.display = "inline-flex";
+        }
+        if (this.btnForceResearch) this.btnForceResearch.style.display = "none";
 
         // Nhận diện bài toán KIS / QA / TRAKE
         const isTrake = (this.currentQueryData?.task_type === "TRAKE") || (data.task_type === "trake");

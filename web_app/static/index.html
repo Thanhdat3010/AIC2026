@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   
-  <link rel="stylesheet" href="/static/css/style.css?v=20260904_3" />
+  <link rel="stylesheet" href="/static/css/style.css?v=20260904_4" />
 </head>
 <body>
 
@@ -91,10 +91,12 @@
         </div>
 
         <div class="stats-line">
-          <div>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <span>Đã tìm thấy: <strong id="stats-count" style="color: #38bdf8; font-family: monospace;">0</strong> ứng viên</span>
-            <span style="margin: 0 8px;">•</span>
+            <span style="margin: 0 2px;">•</span>
             <span>Tốc độ: <strong id="stats-latency" style="color: #38bdf8; font-family: monospace;">0 ms</strong></span>
+            <span id="source-badge" class="source-pill cache" style="display: none;">📦 Bài nộp có sẵn</span>
+            <button id="btn-force-research" class="btn-mini-research" style="display: none;" title="Chạy lại AI A8_SOTA từ đầu cho câu này">🔄 Chạy lại AI</button>
           </div>
           <div>
             <span>Thuật toán: <strong>A8_SOTA</strong> (Video-R@1: 78.1%)</span>
@@ -256,10 +258,10 @@
   </div>
 
   <!-- SCRIPTS -->
-  <script src="/static/js/websocket.js?v=20260904_3"></script>
-  <script src="/static/js/player.js?v=20260904_3"></script>
-  <script src="/static/js/trake.js?v=20260904_3"></script>
-  <script src="/static/js/app.js?v=20260904_3"></script>
+  <script src="/static/js/websocket.js?v=20260904_4"></script>
+  <script src="/static/js/player.js?v=20260904_4"></script>
+  <script src="/static/js/trake.js?v=20260904_4"></script>
+  <script src="/static/js/app.js?v=20260904_4"></script>
 
 </body>
 </html>
