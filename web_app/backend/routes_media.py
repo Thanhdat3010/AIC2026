@@ -78,10 +78,11 @@ async def get_surrounding_filmstrip(video_id: str, frame_idx: int, count: int = 
     """
     loader = get_loader()
     kfs = loader.get_surrounding_keyframes(video_id, frame_idx, count=count)
+    frame_indices = [k["frame_idx"] if isinstance(k, dict) else int(k) for k in kfs]
     return {
         "video_id": video_id,
         "center_frame": frame_idx,
-        "surrounding_frames": kfs
+        "surrounding_frames": frame_indices
     }
 
 @router.get("/video_stream/{video_id}")
