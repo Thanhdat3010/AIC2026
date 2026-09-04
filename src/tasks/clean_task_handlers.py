@@ -181,7 +181,7 @@ class QAHandler:
         best_answer, reranked_candidates, vid_to_evidence = self.qa_agent.answer_and_rerank(
             qa_question=qa_direct if use_query_decomp else query_vi,
             candidates=hits[:30],
-            max_inspect_frames=8,
+            max_inspect_frames=4,
             use_multi_crop=True
         )
 

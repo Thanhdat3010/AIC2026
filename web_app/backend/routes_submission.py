@@ -153,8 +153,10 @@ async def save_submission(req: SaveSubmissionRequest):
             if isinstance(r, dict):
                 v = r.get("video_id", "")
                 if req.task_type.lower() == "qa":
-                    ans = r.get("answer", "")
-                    ans_clean = f'"{ans}"' if ans else '""'
+                    ans_raw = str(r.get("answer", "")).replace("\n", " ").replace("\r", " ").strip()
+                    if len(ans_raw) > 95:
+                        ans_raw = ans_raw[:92] + "..."
+                    ans_clean = f'"{ans_raw}"' if ans_raw else '""'
                     f.write(f"{v},{r.get('frame_idx', 0)},{ans_clean}\n")
                 elif req.task_type.lower() == "trake" and "event_frames" in r:
                     ev_str = ",".join([str(x) for x in r["event_frames"]])
@@ -203,7 +205,10 @@ async def override_rank1(req: OverrideRank1Request):
     # Chuẩn bị dòng Rank 1
     t = req.task_type.lower()
     if t == "qa":
-        ans = f'"{req.qa_answer.strip()}"' if req.qa_answer else '""'
+        ans_raw = str(req.qa_answer or "").replace("\n", " ").replace("\r", " ").strip()
+        if len(ans_raw) > 95:
+            ans_raw = ans_raw[:92] + "..."
+        ans = f'"{ans_raw}"' if ans_raw else '""'
         new_row = f"{req.video_id.strip()},{req.frame_idx},{ans}"
     elif t == "trake" and req.trake_frames:
         new_row = f"{req.video_id.strip()},{req.trake_frames.strip()}"

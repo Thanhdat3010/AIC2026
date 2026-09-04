@@ -78,7 +78,7 @@ def detect_task_type(query_text: str) -> str:
     return "kis"
 
 @router.post("/auto")
-async def unified_search(req: SearchRequest):
+def unified_search(req: SearchRequest):
     """
     Điểm truy cập tìm kiếm duy nhất, tự động nhận diện KIS/QA/TRAKE và chạy bằng cấu hình tối thượng A8_SOTA.
     """
@@ -100,6 +100,7 @@ async def unified_search(req: SearchRequest):
     else:
         preds, info, lat = kis_handler.search(q, top_k=req.top_k, config_name=req.config_name)
     total_latency_ms = (time.perf_counter() - t0) * 1000
+    print(f"🔍 [AI-SEARCH] Task: {task.upper()} | Latency: {total_latency_ms:.1f}ms | Top-K: {req.top_k} | Query: {q[:70]}...", flush=True)
 
     return sanitize_for_json({
         "status": "success",
@@ -112,7 +113,7 @@ async def unified_search(req: SearchRequest):
     })
 
 @router.post("/kis")
-async def search_kis_explicit(req: SearchRequest):
+def search_kis_explicit(req: SearchRequest):
     _, _, kis_handler, _, _ = get_engine()
     t0 = time.perf_counter()
     preds, info, lat = kis_handler.search(req.query, top_k=req.top_k, config_name=req.config_name)
@@ -127,7 +128,7 @@ async def search_kis_explicit(req: SearchRequest):
     })
 
 @router.post("/qa")
-async def search_qa_explicit(req: SearchRequest):
+def search_qa_explicit(req: SearchRequest):
     _, _, _, qa_handler, _ = get_engine()
     t0 = time.perf_counter()
     preds, info, lat = qa_handler.search(req.query, top_k=req.top_k, config_name=req.config_name)
@@ -142,7 +143,7 @@ async def search_qa_explicit(req: SearchRequest):
     })
 
 @router.post("/trake")
-async def search_trake_explicit(req: SearchRequest):
+def search_trake_explicit(req: SearchRequest):
     _, _, _, _, trake_handler = get_engine()
     t0 = time.perf_counter()
     preds, info, lat = trake_handler.search(req.query, top_k=req.top_k, config_name=req.config_name)

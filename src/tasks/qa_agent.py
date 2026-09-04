@@ -84,7 +84,7 @@ class VisualQAAgent:
         self,
         qa_question: str,
         candidates: list[dict],
-        max_inspect_frames: int = 8,
+        max_inspect_frames: int = 4,
         use_multi_crop: bool = True,
         qa_modality: str = "visual"
     ) -> tuple[str, list[dict], dict[str, int]]:
@@ -189,6 +189,11 @@ Trả về ĐÚNG định dạng JSON thuần túy:
                         continue
                     else:
                         break
+
+            # 🎯 EARLY EXIT: Đã tìm thấy câu trả lời xác thực -> Dừng ngay lập tức để tối ưu tốc độ (< 5s)!
+            if best_cand_idx >= 0:
+                print(f"🎯 [QA-EARLY-EXIT] Đã tìm thấy câu trả lời tại ứng viên #{best_cand_idx+1} ({v_id}_{f_idx}): '{best_answer}' -> Dừng kiểm tra sớm!", flush=True)
+                break
 
         # Nếu tìm thấy khung hình có câu trả lời tự tin, hoán đổi khung hình đó lên Rank #1
         reranked = candidates.copy()
