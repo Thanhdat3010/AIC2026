@@ -162,26 +162,6 @@ class TrakeStudio {
       statusEl.style.color = "#ef4444";
     }
   }
-      statusEl.style.color = "#94a3b8";
-      return;
-    }
-
-    let isStrictlyIncreasing = true;
-    for (let i = 0; i < validFrames.length - 1; i++) {
-      if (validFrames[i] >= validFrames[i + 1]) {
-        isStrictlyIncreasing = false;
-        break;
-      }
-    }
-
-    if (isStrictlyIncreasing) {
-      statusEl.textContent = `✅ Hợp lệ (${validFrames.length} events)`;
-      statusEl.style.color = "#34d399";
-    } else {
-      statusEl.textContent = "⚠️ Cảnh báo: Lệch thứ tự thời gian!";
-      statusEl.style.color = "#ef4444";
-    }
-  }
 
   async saveTrakeToSubmission() {
     const valid = this.assignedFrames.filter(f => f !== null);
