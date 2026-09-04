@@ -31,11 +31,11 @@ def clean_video_name(video_id: str) -> str:
 def format_qa_answer_csv(answer: str) -> str:
     """
     Format Answer cho Q&A theo đúng chuẩn CSV của BTC:
-    - Độ dài tối đa 100 ký tự.
+    - Độ dài tối đa 100 ký tự (cắt tối đa 90 ký tự an toàn).
     - Escape dấu ngoặc kép đôi nếu có bên trong chuỗi.
     - Bọc trong dấu ngoặc kép an toàn.
     """
-    ans = answer.strip()[:100]
+    ans = answer.strip()[:90]
     ans_escaped = ans.replace('"', '""')
     return f'"{ans_escaped}"'
 
@@ -46,7 +46,11 @@ def parse_input_queries(input_path: Path) -> list[dict]:
     queries = []
 
     if input_path.is_dir():
-        txt_files = sorted(list(input_path.glob("*.txt")))
+        # Sắp xếp tự nhiên (Natural sort: 1, 2, 3... thay vì 1, 10, 11...)
+        txt_files = sorted(
+            list(input_path.glob("*.txt")),
+            key=lambda p: [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', p.stem)]
+        )
         print(f"📂 Tìm thấy {len(txt_files)} file truy vấn .txt trong thư mục {input_path}")
         for tf in txt_files:
             stem = tf.stem

@@ -22,6 +22,20 @@ class AppController {
     this.toastMsgEl = document.getElementById("toast-msg");
     this.sourceBadgeEl = document.getElementById("source-badge");
     this.btnForceResearch = document.getElementById("btn-force-research");
+
+    // Khung Thêm / Chèn Thủ Công Clip & Frame Từ Bên Ngoài (Manual Override)
+    this.btnToggleManual = document.getElementById("btn-toggle-manual");
+    this.manualPanel = document.getElementById("manual-override-panel");
+    this.manualInputVideo = document.getElementById("manual-input-video");
+    this.manualInputFrame = document.getElementById("manual-input-frame");
+    this.manualInputQA = document.getElementById("manual-input-qa");
+    this.manualInputTRAKE = document.getElementById("manual-input-trake");
+    this.manualGroupQA = document.getElementById("manual-group-qa");
+    this.manualGroupTRAKE = document.getElementById("manual-group-trake");
+    this.btnManualPinR1 = document.getElementById("btn-manual-pin-r1");
+    this.btnManualAppend = document.getElementById("btn-manual-append");
+    this.btnManualPreview = document.getElementById("btn-manual-preview");
+
     this.queryRequestCounter = 0;
     this.activeQueryToken = 0;
 
@@ -54,6 +68,47 @@ class AppController {
     this.querySelectEl?.addEventListener("change", (e) => {
       this.selectedQueryPkg = e.target.value;
       this.loadQueries();
+    });
+
+    // Sự kiện Thêm / Chèn Thủ Công (Manual Override)
+    this.btnToggleManual?.addEventListener("click", () => {
+      if (!this.manualPanel) return;
+      const isClosed = (this.manualPanel.style.display === "none");
+      this.manualPanel.style.display = isClosed ? "flex" : "none";
+      if (isClosed) {
+        if (window.videoInspector?.currentVideoId && !this.manualInputVideo?.value) {
+          this.manualInputVideo.value = window.videoInspector.currentVideoId;
+          this.manualInputFrame.value = window.videoInspector.currentFrameIdx || 0;
+        }
+        this.manualInputVideo?.focus();
+        this.manualInputVideo?.select();
+      }
+    });
+
+    this.btnManualPreview?.addEventListener("click", () => {
+      const vid = this.manualInputVideo?.value.trim().replace(/\.mp4$/i, "");
+      const fidx = parseInt(this.manualInputFrame?.value.trim()) || 0;
+      if (!vid) {
+        alert("⚠️ Vui lòng nhập Mã Video (Video ID) để xem trước!");
+        this.manualInputVideo?.focus();
+        return;
+      }
+      if (window.videoInspector) {
+        window.videoInspector.loadVideo(vid, fidx);
+      }
+    });
+
+    this.btnManualPinR1?.addEventListener("click", () => this.submitManualCandidate("rank1"));
+    this.btnManualAppend?.addEventListener("click", () => this.submitManualCandidate("append"));
+
+    // Enter key trong các ô input thủ công tự động kích hoạt Ghim Rank #1
+    [this.manualInputVideo, this.manualInputFrame, this.manualInputQA, this.manualInputTRAKE].forEach(inp => {
+      inp?.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.submitManualCandidate("rank1");
+        }
+      });
     });
 
     // Hotkeys
@@ -273,6 +328,9 @@ class AppController {
     if (trakeBox) trakeBox.style.display = (q.task_type === "TRAKE") ? "flex" : "none";
     if (lockR1Btn) lockR1Btn.style.display = (q.task_type === "TRAKE") ? "none" : "flex";
 
+    if (this.manualGroupQA) this.manualGroupQA.style.display = (q.task_type === "QA") ? "flex" : "none";
+    if (this.manualGroupTRAKE) this.manualGroupTRAKE.style.display = (q.task_type === "TRAKE") ? "flex" : "none";
+
     if (window.trakeStudio && q.task_type === "TRAKE") {
       window.trakeStudio.setupQuery(q.content);
     }
@@ -299,13 +357,14 @@ class AppController {
       if (data.exists && data.rows && data.rows.length > 0) {
         const isTrake = (this.currentQueryData?.task_type === "TRAKE");
         const formatted = data.rows.map((parts, idx) => {
-          const rawFrames = parts.slice(1).map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+          const cleanParts = parts.map(x => (typeof x === 'string') ? x.replace(/^["']|["']$/g, '').trim() : x);
+          const rawFrames = cleanParts.slice(1).map(x => parseInt(String(x).trim())).filter(x => !isNaN(x));
           return {
             rank: idx + 1,
-            video_id: parts[0].trim(),
+            video_id: cleanParts[0],
             frame_idx: rawFrames.length > 0 ? rawFrames[0] : 0,
             event_frames: isTrake ? rawFrames : [],
-            answer: (!isTrake && parts[2]) ? parts[2].replace(/"/g, '') : '',
+            answer: (!isTrake && cleanParts[2]) ? cleanParts[2] : '',
             score: 1.0 - (idx * 0.005)
           };
         });
@@ -518,6 +577,83 @@ class AppController {
       }
     } catch (e) {
       console.error(e);
+    }
+  }
+
+  async submitManualCandidate(position = "rank1") {
+    if (!this.currentQueryData) {
+      alert("⚠️ Vui lòng chọn câu hỏi trong danh sách trước khi thêm thủ công!");
+      return;
+    }
+
+    const videoId = this.manualInputVideo?.value.trim().replace(/\.mp4$/i, "");
+    if (!videoId) {
+      alert("⚠️ Vui lòng nhập Mã Video (Video ID), ví dụ: L22_V022, L30_V047!");
+      this.manualInputVideo?.focus();
+      return;
+    }
+
+    const frameIdx = parseInt(this.manualInputFrame?.value.trim()) || 0;
+    const taskType = this.currentQueryData.task_type;
+    let qaAnswer = "";
+    let trakeFrames = "";
+
+    if (taskType === "QA") {
+      qaAnswer = this.manualInputQA?.value.trim() || "";
+      if (!qaAnswer) {
+        alert("⚠️ Vui lòng nhập Đáp án QA cho câu hỏi này!");
+        this.manualInputQA?.focus();
+        return;
+      }
+    } else if (taskType === "TRAKE") {
+      trakeFrames = this.manualInputTRAKE?.value.trim() || "";
+      if (!trakeFrames) {
+        trakeFrames = String(frameIdx);
+      }
+    }
+
+    try {
+      const res = await fetch("/api/contest/override_rank1", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          output_package: this.selectedOutputPkg,
+          query_id: this.currentQueryData.id,
+          task_type: taskType,
+          video_id: videoId,
+          frame_idx: frameIdx,
+          qa_answer: qaAnswer,
+          trake_frames: trakeFrames,
+          position: position
+        })
+      });
+
+      const data = await res.json();
+      if (data.status === "success") {
+        const posText = (position === "rank1") ? "Rank #1 (đẩy cũ xuống)" : "cuối danh sách";
+        this.showToast(`🎉 Đã thêm ${videoId} (#${frameIdx}) vào ${posText}!`);
+
+        // Tự động load và tua video sang video vừa chèn để xem ngay
+        if (window.videoInspector) {
+          window.videoInspector.loadVideo(videoId, frameIdx);
+        }
+
+        // Tự động cập nhật chuỗi TRAKE Studio nếu là câu TRAKE
+        if (taskType === "TRAKE" && window.trakeStudio && trakeFrames) {
+          const evList = trakeFrames.split(",").map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+          if (evList.length > 0) {
+            window.trakeStudio.setInitialFrames(evList, videoId);
+          }
+        }
+
+        // Load lại danh sách card từ file vừa lưu
+        await this.loadCurrentSubmissionData(this.currentQueryData.id);
+        this.loadQueries();
+      } else {
+        alert(data.detail || "Có lỗi khi lưu kết quả!");
+      }
+    } catch (e) {
+      alert("Lỗi kết nối khi ghim video: " + e);
     }
   }
 

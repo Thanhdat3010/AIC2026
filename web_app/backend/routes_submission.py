@@ -1,5 +1,6 @@
 import json
 import zipfile
+import csv
 from pathlib import Path
 from typing import List, Optional
 from pydantic import BaseModel
@@ -118,10 +119,10 @@ async def get_submission_data(output_package: str, query_id: str):
 
     rows = []
     with open(csv_path, "r", encoding="utf-8") as f:
-        for line in f:
-            l = line.strip()
-            if l:
-                rows.append(l.split(","))
+        reader = csv.reader(f)
+        for r in reader:
+            if r:
+                rows.append([col.strip() for col in r])
 
     return {"query_id": query_id, "exists": True, "rows": rows}
 
@@ -185,44 +186,78 @@ class OverrideRank1Request(BaseModel):
     frame_idx: int
     qa_answer: Optional[str] = ""
     trake_frames: Optional[str] = ""
+    position: Optional[str] = "rank1" # "rank1" hoặc "append"
 
 @router.post("/override_rank1")
 async def override_rank1(req: OverrideRank1Request):
     """
-    Ghim thủ công Video ID và Frame Index lên vị trí Rank #1 ngay lập tức.
+    Ghim hoặc thêm thủ công Video ID và Frame Index từ bên ngoài vào bài nộp (hỗ trợ KIS, QA, TRAKE).
     """
     out_dir = OUTPUT_DIR / req.output_package / "submission"
     out_dir.mkdir(parents=True, exist_ok=True)
     csv_path = out_dir / f"{req.query_id}.csv"
     zip_dest = OUTPUT_DIR / req.output_package / "submission.zip"
 
+    clean_vid = req.video_id.replace(".mp4", "").replace(".MP4", "").strip()
+    if not clean_vid:
+        raise HTTPException(status_code=400, detail="Mã Video không được để trống!")
+
     existing_lines = []
     if csv_path.exists():
         with open(csv_path, "r", encoding="utf-8") as f:
             existing_lines = [l.strip() for l in f if l.strip()]
         _undo_history.setdefault(req.query_id, []).append("\n".join(existing_lines))
+        _undo_history[req.query_id] = _undo_history[req.query_id][-10:]
 
-    # Chuẩn bị dòng Rank 1
+    # Chuẩn bị dòng mới chuẩn 100% BTC
     t = req.task_type.lower()
     if t == "qa":
         ans_raw = str(req.qa_answer or "").replace("\n", " ").replace("\r", " ").strip()
+        ans_raw = ans_raw.strip('"') # Xóa dấu nháy kép thừa nếu người dùng nhập
         if len(ans_raw) > 95:
             ans_raw = ans_raw[:92] + "..."
-        ans = f'"{ans_raw}"' if ans_raw else '""'
-        new_row = f"{req.video_id.strip()},{req.frame_idx},{ans}"
-    elif t == "trake" and req.trake_frames:
-        new_row = f"{req.video_id.strip()},{req.trake_frames.strip()}"
+        ans = f'"{ans_raw}"'
+        new_row = f"{clean_vid},{int(req.frame_idx)},{ans}"
+    elif t == "trake":
+        if req.trake_frames:
+            ev_list = [str(int(x.strip())) for x in req.trake_frames.split(",") if x.strip().isdigit()]
+            if not ev_list:
+                ev_list = [str(int(req.frame_idx))]
+            new_row = f"{clean_vid},{','.join(ev_list)}"
+        else:
+            new_row = f"{clean_vid},{int(req.frame_idx)}"
     else:
-        new_row = f"{req.video_id.strip()},{req.frame_idx}"
+        new_row = f"{clean_vid},{int(req.frame_idx)}"
 
-    updated_lines = [new_row] + [l for l in existing_lines if l != new_row][:99]
+    # Lọc bỏ dòng cũ nếu trùng video_id và frame_idx
+    filtered_existing = []
+    for l in existing_lines:
+        parts = l.split(",")
+        if parts:
+            p_vid = parts[0].strip().strip('"')
+            p_fidx = parts[1].strip().strip('"') if len(parts) > 1 else ""
+            if p_vid == clean_vid and p_fidx == str(int(req.frame_idx)):
+                continue
+        filtered_existing.append(l)
+
+    pos = (req.position or "rank1").lower()
+    if pos == "append":
+        updated_lines = (filtered_existing + [new_row])[:100]
+    else:
+        updated_lines = ([new_row] + filtered_existing)[:100]
 
     with open(csv_path, "w", encoding="utf-8") as f:
         for l in updated_lines:
             f.write(l + "\n")
 
     sync_submission_zip(out_dir, zip_dest)
-    return {"status": "success", "query_id": req.query_id, "rank1_set": new_row}
+    return {
+        "status": "success",
+        "query_id": req.query_id,
+        "row_set": new_row,
+        "position": pos,
+        "total_rows": len(updated_lines)
+    }
 
 @router.post("/undo")
 async def undo_submission(output_package: str, query_id: str):
