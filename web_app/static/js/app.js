@@ -20,6 +20,8 @@ class AppController {
     this.querySelectEl = document.getElementById("select-query-pkg");
     this.toastEl = document.getElementById("toast-notice");
     this.toastMsgEl = document.getElementById("toast-msg");
+    this.queryRequestCounter = 0;
+    this.activeQueryToken = 0;
 
     this.initEvents();
     this.loadPackages();
@@ -27,6 +29,13 @@ class AppController {
 
   initEvents() {
     document.getElementById("btn-search")?.addEventListener("click", () => this.executeSearch());
+
+    this.omnibarInput?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        this.executeSearch();
+      }
+    });
 
     document.getElementById("btn-download-zip")?.addEventListener("click", () => {
       window.location.href = `/api/contest/download_zip?output_package=${this.selectedOutputPkg}`;
@@ -160,12 +169,79 @@ class AppController {
     }
   }
 
-  selectQuery(q) {
-    this.currentQueryData = q;
+  showLoadingGrid(q, message) {
+    if (!this.cardsGridEl) return;
+    if (this.statsCountEl) this.statsCountEl.innerHTML = `<span class="loading-pulse">Đang nạp...</span>`;
+    if (this.statsLatencyEl) this.statsLatencyEl.innerHTML = `<span class="loading-pulse">...</span>`;
 
-    // Highlight card
-    this.queryListEl?.querySelectorAll('.question-card').forEach(el => el.classList.remove('active'));
-    document.getElementById(`q-card-${q.id}`)?.classList.add('active');
+    const taskType = q?.task_type || "SEARCH";
+    const qid = q?.id || "Đang xử lý";
+    const tagClass = taskType.toLowerCase();
+
+    // Sinh 10 khung thẻ Skeleton với hiệu ứng shimmer chuyển động
+    const skeletons = Array.from({ length: 10 }, (_, i) => `
+      <div class="skeleton-card">
+        <div class="skeleton-img">
+          <div class="skeleton-shimmer"></div>
+          <span class="skeleton-pill">#${i + 1}</span>
+        </div>
+        <div class="skeleton-body">
+          <div class="skeleton-line full"></div>
+          <div class="skeleton-line half"></div>
+          <div class="skeleton-btn-row">
+            <div class="skeleton-btn"></div>
+            <div class="skeleton-btn"></div>
+          </div>
+        </div>
+      </div>
+    `).join("");
+
+    this.cardsGridEl.innerHTML = `
+      <div class="query-transition-notice">
+        <div class="query-spinner"></div>
+        <div class="query-notice-body">
+          <div class="query-notice-header">
+            <span>Đang chuyển sang câu hỏi:</span>
+            <strong class="query-badge-qid">${qid}</strong>
+            <span class="q-tag ${tagClass}">${taskType}</span>
+          </div>
+          <div class="query-notice-status" id="loading-status-text">${message || "Đang tải dữ liệu..."}</div>
+        </div>
+      </div>
+      ${skeletons}
+    `;
+  }
+
+  updateLoadingStatus(msg) {
+    const el = document.getElementById("loading-status-text");
+    if (el) el.textContent = msg;
+  }
+
+  clearSidebarLoading() {
+    this.queryListEl?.querySelectorAll('.question-card.loading').forEach(el => {
+      el.classList.remove('loading');
+    });
+  }
+
+  selectQuery(q) {
+    if (!q) return;
+    this.currentQueryData = q;
+    const requestToken = ++this.queryRequestCounter;
+    this.activeQueryToken = requestToken;
+
+    // Highlight card & hiển thị trạng thái loading ở sidebar
+    this.queryListEl?.querySelectorAll('.question-card').forEach(el => {
+      el.classList.remove('active', 'loading');
+    });
+    const activeCard = document.getElementById(`q-card-${q.id}`);
+    if (activeCard) {
+      activeCard.classList.add('active', 'loading');
+    }
+
+    // Tạm dừng video đang phát nếu có
+    if (window.videoInspector && window.videoInspector.videoEl && !window.videoInspector.videoEl.paused) {
+      window.videoInspector.videoEl.pause();
+    }
 
     // Omnibar & Banner Full Text
     if (this.omnibarInput) this.omnibarInput.value = q.content;
@@ -195,15 +271,26 @@ class AppController {
     if (window.trakeStudio && q.task_type === "TRAKE") {
       window.trakeStudio.setupQuery(q.content);
     }
+    if (q.task_type === "QA") {
+      const qaField = document.getElementById("qa-input-field");
+      if (qaField) qaField.value = "";
+    }
+
+    // HIỂN THỊ NGAY GIAO DIỆN SKELETON ĐỂ TRÁNH LẪN LỘN KẾT QUẢ CŨ
+    this.showLoadingGrid(q, "🔄 Đang truy xuất kết quả đã lưu & cấu hình ứng viên...");
 
     // Nạp kết quả
-    this.loadCurrentSubmissionData(q.id);
+    this.loadCurrentSubmissionData(q.id, requestToken);
   }
 
-  async loadCurrentSubmissionData(queryId) {
+  async loadCurrentSubmissionData(queryId, token = null) {
     try {
       const res = await fetch(`/api/contest/submission_data?output_package=${this.selectedOutputPkg}&query_id=${queryId}`);
+      if (token && token !== this.activeQueryToken) return;
+
       const data = await res.json();
+      if (token && token !== this.activeQueryToken) return;
+
       if (data.exists && data.rows && data.rows.length > 0) {
         const isTrake = (this.currentQueryData?.task_type === "TRAKE");
         const formatted = data.rows.map((parts, idx) => {
@@ -229,22 +316,35 @@ class AppController {
           window.trakeStudio?.setInitialFrames(formatted[0].event_frames, formatted[0].video_id);
         }
 
+        if (this.statsLatencyEl) this.statsLatencyEl.textContent = "0 ms (cache)";
+        if (this.statsCountEl) this.statsCountEl.textContent = `${formatted.length}`;
+
+        this.clearSidebarLoading();
         this.renderCards(formatted);
       } else {
         // Tự động tìm kiếm nếu chưa có kết quả
-        this.executeSearch();
+        this.updateLoadingStatus("🚀 Chưa có bài nộp lưu sẵn. Đang chạy AI A8_SOTA (SigLIP-2 + Gemini)...");
+        this.executeSearch(token);
       }
     } catch (e) {
-      this.executeSearch();
+      if (token && token !== this.activeQueryToken) return;
+      this.updateLoadingStatus("🚀 Chưa có bài nộp lưu sẵn. Đang chạy AI A8_SOTA (SigLIP-2 + Gemini)...");
+      this.executeSearch(token);
     }
   }
 
-  async executeSearch() {
+  async executeSearch(token = null) {
     const query = this.omnibarInput?.value.trim();
     if (!query) return;
 
+    if (!token) {
+      token = ++this.queryRequestCounter;
+      this.activeQueryToken = token;
+      this.showLoadingGrid(this.currentQueryData, "🚀 Đang thực hiện tìm kiếm đa phương thức A8_SOTA...");
+    }
+
     const taskType = this.currentQueryData ? this.currentQueryData.task_type.toLowerCase() : "auto";
-    if (this.statsLatencyEl) this.statsLatencyEl.textContent = "Đang tìm...";
+    if (this.statsLatencyEl) this.statsLatencyEl.innerHTML = `<span class="loading-pulse">Đang tìm...</span>`;
 
     try {
       const res = await fetch("/api/search/auto", {
@@ -258,7 +358,11 @@ class AppController {
         })
       });
 
+      if (token && token !== this.activeQueryToken) return;
+
       const data = await res.json();
+      if (token && token !== this.activeQueryToken) return;
+
       if (data.status === "success") {
         this.currentResults = data.results || [];
         if (this.statsLatencyEl) this.statsLatencyEl.textContent = `${data.latency_ms} ms`;
@@ -288,6 +392,7 @@ class AppController {
           if (lockR1Btn) lockR1Btn.style.display = "flex";
         }
 
+        this.clearSidebarLoading();
         this.renderCards(this.currentResults);
 
         if (this.currentQueryData) {
@@ -295,6 +400,8 @@ class AppController {
         }
       }
     } catch (e) {
+      if (token && token !== this.activeQueryToken) return;
+      this.clearSidebarLoading();
       if (this.statsLatencyEl) this.statsLatencyEl.textContent = "Lỗi kết nối!";
     }
   }
