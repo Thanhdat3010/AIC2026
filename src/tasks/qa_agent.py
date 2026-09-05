@@ -86,7 +86,8 @@ class VisualQAAgent:
         candidates: list[dict],
         max_inspect_frames: int = 4,
         use_multi_crop: bool = True,
-        qa_modality: str = "visual"
+        qa_modality: str = "visual",
+        include_audio: bool = True
     ) -> tuple[str, list[dict], dict[str, int]]:
         """
         Duyệt qua các khung hình Top đầu, tìm câu trả lời và tái xếp hạng lại danh sách.
@@ -94,6 +95,15 @@ class VisualQAAgent:
         """
         if not candidates:
             return "Không xác định", [], {}
+
+        cache_path = BASE_DIR / "data" / "benchmark" / "gt2_vlm_qa_cache.json"
+        vlm_cache = {}
+        if cache_path.exists():
+            try:
+                with open(cache_path, "r", encoding="utf-8") as f:
+                    vlm_cache = json.load(f)
+            except Exception:
+                vlm_cache = {}
 
         inspect_cands = candidates[:max_inspect_frames]
         best_answer = "Không xác định"
@@ -103,33 +113,38 @@ class VisualQAAgent:
         for idx, cand in enumerate(inspect_cands):
             v_id = cand["video_id"]
             f_idx = cand["frame_idx"]
-            img = self.img_loader.get_image(v_id, f_idx)
-            if img is None:
-                continue
+            cache_key = f"{v_id}_{f_idx}_{qa_question}_{include_audio}"
 
-            img_full = img.copy()
-            if max(img_full.size) > 1024:
-                img_full.thumbnail((1024, 1024))
+            res_json = None
+            if cache_key in vlm_cache:
+                res_json = vlm_cache[cache_key]
+            else:
+                img = self.img_loader.get_image(v_id, f_idx)
+                if img is None:
+                    continue
 
-            contents = [img_full]
-            
-            # Unified Multimodal Context Injection (Luôn nạp đầy đủ cả Ảnh + ASR [t±30s] + OCR)
-            pts = self.frame_to_time.get((v_id, f_idx), 0.0)
-            context_str = ""
-            
-            ocr_txt = self.video_frame_to_ocr.get((v_id, f_idx), "")
-            if ocr_txt:
-                context_str += f"\n[Chữ OCR hiển thị trên khung hình]: {ocr_txt}"
+                img_full = img.copy()
+                if max(img_full.size) > 1024:
+                    img_full.thumbnail((1024, 1024))
+
+                contents = [img_full]
                 
-            asr_texts = []
-            for chunk in self.video_to_asr.get(v_id, []):
-                # Mở rộng cửa sổ thời gian lên 30s để bắt trọn lời thuyết minh/phỏng vấn
-                if chunk["start"] - 30.0 <= pts <= chunk["end"] + 30.0:
-                    asr_texts.append(chunk["text"])
-            if asr_texts:
-                context_str += f"\n[Lời thoại ASR thuyết minh quanh cảnh này]: {' | '.join(asr_texts)}"
+                pts = self.frame_to_time.get((v_id, f_idx), 0.0)
+                context_str = ""
                 
-            prompt = f"""Bạn là Trợ lý VLM Thông minh (Multimodal Verifier) cho cuộc thi AI Challenge TP.HCM.
+                ocr_txt = self.video_frame_to_ocr.get((v_id, f_idx), "")
+                if ocr_txt:
+                    context_str += f"\n[Chữ OCR hiển thị trên khung hình]: {ocr_txt}"
+                    
+                if include_audio:
+                    asr_texts = []
+                    for chunk in self.video_to_asr.get(v_id, []):
+                        if chunk["start"] - 30.0 <= pts <= chunk["end"] + 30.0:
+                            asr_texts.append(chunk["text"])
+                    if asr_texts:
+                        context_str += f"\n[Lời thoại ASR thuyết minh quanh cảnh này]: {' | '.join(asr_texts)}"
+                    
+                prompt = f"""Bạn là Trợ lý VLM Thông minh (Multimodal Verifier) cho cuộc thi AI Challenge TP.HCM.
 Nhiệm vụ: Quan sát kỹ hình ảnh và kết hợp ngữ cảnh âm thanh/chữ viết để trả lời câu hỏi (QA) bằng TIẾNG VIỆT ĐẦY ĐỦ Ý, CHÍNH XÁC VÀ ĐÚNG TRỌNG TÂM (đáp án dưới 100 ký tự).
 
 Câu hỏi: {qa_question}{context_str}
@@ -147,47 +162,55 @@ Trả về ĐÚNG định dạng JSON thuần túy:
     {{ "frame_id": {f_idx}, "observation": "Mô tả bằng chứng bạn nhìn thấy hoặc nghe thấy" }}
   ]
 }}"""
-            contents.append(prompt)
+                contents.append(prompt)
 
-            # Multi-Key Failover Call
-            keys = list(self.key_pool.gemini_keys)
-            for key in keys:
-                try:
-                    client = genai.Client(api_key=key)
-                    response = client.models.generate_content(
-                        model="gemini-3.5-flash-lite",
-                        contents=contents,
-                        config=types.GenerateContentConfig(
-                            response_mime_type="application/json",
-                            temperature=0.0
+                # Multi-Key Failover Call
+                keys = list(self.key_pool.gemini_keys)
+                for key in keys:
+                    try:
+                        client = genai.Client(api_key=key)
+                        response = client.models.generate_content(
+                            model="gemini-3.5-flash-lite",
+                            contents=contents,
+                            config=types.GenerateContentConfig(
+                                response_mime_type="application/json",
+                                temperature=0.0
+                            )
                         )
-                    )
-                    res_json = json.loads(response.text.strip())
-                    status = res_json.get("status", "insufficient")
-                    ans = res_json.get("answer", "").strip()
-                    evidence = res_json.get("evidence", [])
-
-                    cand["qa_answer"] = ans
-                    cand["answer"] = ans
-                    cand["qa_status"] = status
-                    cand["qa_evidence"] = evidence
-                    cand["qa_confidence"] = 1.0 if status == "answer" else 0.0
-
-                    if status == "answer" and ans.lower() not in ["không xác định", "không có", "unknown", "n/a"]:
-                        ev_f = f_idx
-                        if evidence and isinstance(evidence, list) and isinstance(evidence[0], dict):
-                            ev_f = int(evidence[0].get("frame_id", f_idx))
-                        vid_to_evidence_frame[v_id] = ev_f
-                        if best_cand_idx < 0:
-                            best_answer = ans
-                            best_cand_idx = idx
+                        res_json = json.loads(response.text.strip())
+                        vlm_cache[cache_key] = res_json
+                        try:
+                            with open(cache_path, "w", encoding="utf-8") as f:
+                                json.dump(vlm_cache, f, ensure_ascii=False, indent=2)
+                        except Exception:
+                            pass
                         break
-                    break # Thành công nhận JSON thì sang candidate tiếp theo
-                except Exception as e:
-                    err_str = str(e).lower()
-                    if "429" in err_str or "quota" in err_str:
-                        continue
-                    else:
+                    except Exception as e:
+                        err_str = str(e).lower()
+                        if "429" in err_str or "quota" in err_str:
+                            continue
+                        else:
+                            break
+
+            if res_json:
+                status = res_json.get("status", "insufficient")
+                ans = res_json.get("answer", "").strip()
+                evidence = res_json.get("evidence", [])
+
+                cand["qa_answer"] = ans
+                cand["answer"] = ans
+                cand["qa_status"] = status
+                cand["qa_evidence"] = evidence
+                cand["qa_confidence"] = 1.0 if status == "answer" else 0.0
+
+                if status == "answer" and ans.lower() not in ["không xác định", "không có", "unknown", "n/a"]:
+                    ev_f = f_idx
+                    if evidence and isinstance(evidence, list) and isinstance(evidence[0], dict):
+                        ev_f = int(evidence[0].get("frame_id", f_idx))
+                    vid_to_evidence_frame[v_id] = ev_f
+                    if best_cand_idx < 0:
+                        best_answer = ans
+                        best_cand_idx = idx
                         break
 
             # 🎯 EARLY EXIT: Đã tìm thấy câu trả lời xác thực -> Dừng ngay lập tức để tối ưu tốc độ (< 5s)!

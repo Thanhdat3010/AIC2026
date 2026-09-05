@@ -42,12 +42,12 @@ class KISHandler:
             query_en=query_en,
             ocr_keywords=ocr_kws,
             asr_keywords=asr_kws,
-            config_name="A7" if config_name in ["A8_1", "A8_2", "A8_3", "A8_4", "A8", "A8_SOTA"] else config_name,
+            config_name="M3" if config_name == "Abl_NoGate" else ("A7" if config_name in ["A8_1", "A8_2", "A8_3", "A8_4", "A8", "A8_SOTA", "M5", "M6", "M6_SOTA", "Abl_NoViterbi", "Abl_NoAudioQA"] else config_name),
             top_k=top_k * 2
         )
 
         # 2.5. CoDE (ECCV 2024): Multi-Query Dual-Perspective Fusion (MQ-DPF)
-        use_kis_mq_dpf = config_name in ["A8_4", "A8", "A8_SOTA"]
+        use_kis_mq_dpf = config_name in ["A8_4", "A8", "A8_SOTA", "M6", "M6_SOTA", "Abl_NoGate", "Abl_NoViterbi", "Abl_NoAudioQA"]
         if use_kis_mq_dpf and refined.get("core_action_vi") and final_hits:
             core_action_vi = refined.get("core_action_vi")
             core_action_en = refined.get("core_action_en", core_action_vi)
@@ -65,7 +65,7 @@ class KISHandler:
 
         # 3. Temporal Proximity Density Expansion (U-CESE Suggestion Window Inspired)
         # Khắc phục triệt để TEMPORAL_NEAR_MISS bằng cách mở rộng chùm keyframes lân cận cho Top Videos
-        if config_name in ["A7", "A8_1", "A8_2", "A8_3", "A8_4", "A8", "A8_SOTA", "A9", "A10", "A10_FINAL"] and final_hits:
+        if config_name in ["A7", "A8_1", "A8_2", "A8_3", "A8_4", "A8", "A8_SOTA", "A9", "A10", "A10_FINAL", "M5", "M6", "M6_SOTA", "Abl_NoGate", "Abl_NoViterbi", "Abl_NoAudioQA"] and final_hits:
             expanded_rows = []
             seen_pairs = set()
             
@@ -136,7 +136,7 @@ class QAHandler:
         is_count = refined.get("is_count_query", False)
         
         # Chọn Visual Scene Query theo cấu hình
-        use_query_decomp = config_name in ["A6_1", "A7", "A8_1", "A8_2", "A8_3", "A8_4", "A8", "A8_SOTA", "A9", "A10", "A10_FINAL"]
+        use_query_decomp = config_name in ["A6_1", "A7", "A8_1", "A8_2", "A8_3", "A8_4", "A8", "A8_SOTA", "A9", "A10", "A10_FINAL", "M4", "M5", "M6", "M6_SOTA", "Abl_NoGate", "Abl_NoViterbi", "Abl_NoAudioQA"]
         if use_query_decomp and refined.get("visual_scene_vi"):
             search_query_vi = refined.get("visual_scene_vi")
             search_query_en = refined.get("visual_scene_en", refined.get("english_visual", query_vi))
@@ -154,7 +154,7 @@ class QAHandler:
             query_en=search_query_en,
             ocr_keywords=ocr_kws,
             asr_keywords=asr_kws,
-            config_name="A6" if config_name in ["A6_1", "A6_2", "A6_3", "A6_4"] else ("A7" if config_name.startswith("A8") else config_name),
+            config_name="M3" if config_name == "Abl_NoGate" else ("A7" if (config_name.startswith("A8") or config_name in ["M5", "M6", "M6_SOTA", "Abl_NoViterbi", "Abl_NoAudioQA"]) else config_name),
             top_k=top_k * 3
         )
 
@@ -178,11 +178,13 @@ class QAHandler:
                 hits = speech_cands + hits
 
         # 4. Unified Multimodal VLM Solver (U-CESE Section 4.1 & SeViLA NeurIPS 2023)
+        include_audio = (config_name != "Abl_NoAudioQA")
         best_answer, reranked_candidates, vid_to_evidence = self.qa_agent.answer_and_rerank(
             qa_question=qa_direct if use_query_decomp else query_vi,
             candidates=hits[:30],
             max_inspect_frames=4,
-            use_multi_crop=True
+            use_multi_crop=True,
+            include_audio=include_audio
         )
 
         if not best_answer or best_answer.lower() in ["không xác định", "unknown", "n/a"]:
@@ -228,7 +230,7 @@ class QAHandler:
             hits = new_hits
 
         # 5. Phân bổ kết quả nộp bài theo cấu hình
-        use_pure_vector = config_name in ["A6_3", "A7", "A8_1", "A8_2", "A8_3", "A8_4", "A8", "A8_SOTA", "A9", "A10", "A10_FINAL", "A6_1", "A6_2"]
+        use_pure_vector = config_name in ["A6_3", "A7", "A8_1", "A8_2", "A8_3", "A8_4", "A8", "A8_SOTA", "A9", "A10", "A10_FINAL", "A6_1", "A6_2", "M5", "M6", "M6_SOTA", "Abl_NoGate", "Abl_NoViterbi", "Abl_NoAudioQA"]
         
         if use_pure_vector:
             # T3: Proximity-Enhanced Distribution: Cấp chùm keyframe lân cận cho Top Candidates để chống TEMPORAL_NEAR_MISS
@@ -362,8 +364,9 @@ class TRAKEHandler:
         sub_events_vi = refined.get("sub_events_vi", [])
         sub_events_en = refined.get("sub_events_en", [])
         
-        use_llm_tesd = config_name in ["A8_2", "A8_3", "A8_4", "A8", "A8_SOTA"]
-        use_adaptive_gap = config_name in ["A8_3", "A8_4", "A8", "A8_SOTA"]
+        use_llm_tesd = config_name in ["A8_2", "A8_3", "A8_4", "A8", "A8_SOTA", "M6", "M6_SOTA", "Abl_NoGate", "Abl_NoViterbi", "Abl_NoAudioQA"]
+        use_adaptive_gap = config_name in ["A8_3", "A8_4", "A8", "A8_SOTA", "M6", "M6_SOTA", "Abl_NoGate", "Abl_NoViterbi", "Abl_NoAudioQA"]
+        use_viterbi_dp = (config_name != "Abl_NoViterbi")
 
         if not sub_events_vi or len(sub_events_vi) < 2:
             # Bóc tách tự nhiên từ câu văn tiếng Việt (fallback khi offline)
@@ -390,8 +393,8 @@ class TRAKEHandler:
                     parts = [p.strip() for p in re.split(r"(?:[eE]|cảnh|sự kiện)\s*\d+[:\s.-]+|;\s*|sau đó|tiếp theo|kế đến", query_vi, flags=re.IGNORECASE) if len(p.strip()) > 8]
                     sub_events_vi = parts if len(parts) >= 2 else [query_vi, query_vi, query_vi]
 
-        # Nếu cấu hình là A0..A4 (chưa kích hoạt Joint TRAKE DP) -> fallback đơn giản
-        if config_name in ["A0", "A1", "A2", "A3", "A4"]:
+        # Nếu cấu hình là A0..A4 hoặc M0..M4 (chưa kích hoạt Joint TRAKE DP) -> fallback đơn giản
+        if config_name in ["A0", "A1", "A2", "A3", "A4", "M0", "M1", "M2", "M3", "M4"]:
             hits = self.search_core.search_visual(self.search_core.encode_text(query_vi), top_k=top_k)
             rows = []
             num_ev = len(sub_events_vi)
@@ -418,7 +421,8 @@ class TRAKEHandler:
             use_event_coverage=True,
             use_row_norm_dp=True,
             use_segmental_dp=False,
-            use_adaptive_gap=use_adaptive_gap
+            use_adaptive_gap=use_adaptive_gap,
+            use_viterbi_dp=use_viterbi_dp
         )
 
         # 3. Đảm bảo đủ 100 dòng chuẩn BTC và đúng số lượng N cột events

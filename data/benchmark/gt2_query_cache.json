@@ -1,0 +1,869 @@
+{
+  "test-qa-01_qa": {
+    "cleaned_vi": "Trong phân cảnh ngoài trời có dải băng cảnh báo đỏ trắng và cột nước phun thẳng đứng lên trời từ mặt đất, người đàn ông mặc áo thun có họa tiết sọc ngang đứng ở tiền cảnh đang đeo phụ kiện gì trên cổ tay phải của mình?",
+    "visual_scene_vi": "Phân cảnh ngoài trời có dải băng cảnh báo đỏ trắng và cột nước phun thẳng đứng lên trời từ mặt đất, người đàn ông mặc áo thun có họa tiết sọc ngang đứng ở tiền cảnh",
+    "visual_scene_en": "An outdoor scene with red and white caution tape and a vertical jet of water spraying straight up from the ground, featuring a man wearing a horizontally striped t-shirt standing in the foreground",
+    "core_action_vi": "người đàn ông mặc áo thun sọc ngang đứng ở tiền cảnh",
+    "core_action_en": "man wearing a striped t-shirt standing in the foreground",
+    "english_visual": "An outdoor scene with red and white caution tape and a vertical water jet spraying from the ground, with a man in a striped t-shirt standing in the foreground",
+    "qa_direct_question": "Người đàn ông mặc áo thun sọc ngang đang đeo phụ kiện gì trên cổ tay phải?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "người đàn ông mặc áo thun sọc ngang đứng ở tiền cảnh trong phân cảnh ngoài trời có dải băng cảnh báo đỏ trắng và cột nước phun"
+    ],
+    "sub_events_en": [
+      "man in a striped t-shirt standing in the foreground in an outdoor scene with red and white caution tape and a water jet"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "qa",
+    "is_count_query": false
+  },
+  "test-kis-02_kis": {
+    "cleaned_vi": "Hai người phụ nữ ngồi bệt trên sàn trước những tấm chiếu dệt hoa văn nhiều màu treo trên vách; người phụ nữ bên trái mặc áo màu xanh ngọc bích đeo kính cận, người phụ nữ bên phải mặc áo hoa văn màu đỏ mận cùng ngồi thao tác trên khung dệt chiếu nằm ngang.",
+    "visual_scene_vi": "Hai người phụ nữ ngồi trên sàn trước những tấm chiếu dệt hoa văn nhiều màu treo trên vách, một người mặc áo xanh ngọc bích đeo kính cận, người kia mặc áo hoa văn đỏ mận, cả hai đang thao tác trên khung dệt chiếu nằm ngang.",
+    "visual_scene_en": "Two women sitting on the floor in front of multicolored patterned mats hanging on the wall; one woman on the left wearing a turquoise shirt and glasses, the woman on the right wearing a plum red patterned shirt, both operating a horizontal mat-weaving loom.",
+    "core_action_vi": "hai người phụ nữ thao tác trên khung dệt chiếu nằm ngang",
+    "core_action_en": "two women operating a horizontal mat-weaving loom",
+    "english_visual": "Two women sitting on the floor in front of multicolored patterned mats hanging on the wall; one woman on the left wearing a turquoise shirt and glasses, the woman on the right wearing a plum red patterned shirt, both operating a horizontal mat-weaving loom.",
+    "qa_direct_question": "Hai người phụ nữ đang làm gì trên khung dệt?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "hai người phụ nữ ngồi bệt trên sàn trước những tấm chiếu dệt hoa văn nhiều màu treo trên vách",
+      "người phụ nữ bên trái mặc áo xanh ngọc bích đeo kính cận và người phụ nữ bên phải mặc áo hoa văn đỏ mận cùng ngồi thao tác trên khung dệt chiếu nằm ngang"
+    ],
+    "sub_events_en": [
+      "two women sitting on the floor in front of multicolored patterned mats hanging on the wall",
+      "the woman on the left wearing a turquoise shirt and glasses and the woman on the right wearing a plum red patterned shirt operating a horizontal mat-weaving loom"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-kis-03_kis": {
+    "cleaned_vi": "Trước tấm phông nền màu xanh dương có in danh sách các chuyên khoa y tế, người đàn ông mặc sơ mi trắng dùng hai tay khoác và chỉnh chiếc áo blouse trắng qua vai chàng trai trẻ đeo kính cận đang đeo dây thẻ màu xanh dương trước ngực.",
+    "visual_scene_vi": "Trước tấm phông nền màu xanh dương có in danh sách các chuyên khoa y tế, người đàn ông mặc sơ mi trắng khoác áo blouse trắng qua vai chàng trai trẻ đeo kính cận có dây thẻ màu xanh.",
+    "visual_scene_en": "In front of a blue background printed with a list of medical specialties, a man in a white shirt puts a white lab coat over the shoulders of a young man wearing glasses and a blue lanyard.",
+    "core_action_vi": "người đàn ông mặc sơ mi trắng khoác áo blouse cho chàng trai trẻ",
+    "core_action_en": "man in white shirt putting lab coat on young man",
+    "english_visual": "In front of a blue background printed with a list of medical specialties, a man in a white shirt puts a white lab coat over the shoulders of a young man wearing glasses and a blue lanyard.",
+    "qa_direct_question": "Người đàn ông mặc sơ mi trắng đang làm gì cho chàng trai trẻ?",
+    "ocr_keywords": [
+      "danh sách các chuyên khoa y tế"
+    ],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "người đàn ông mặc sơ mi trắng cầm chiếc áo blouse trắng",
+      "người đàn ông dùng hai tay khoác và chỉnh chiếc áo blouse qua vai chàng trai trẻ đeo kính cận"
+    ],
+    "sub_events_en": [
+      "man in white shirt holding a white lab coat",
+      "man using both hands to put and adjust the lab coat over the shoulders of the young man wearing glasses"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-kis-04_kis": {
+    "cleaned_vi": "Trong màn biểu diễn võ thuật trên đường phố, ba võ sinh cởi trần thắt băng đỏ trên đầu xếp chồng lên nhau nằm trên các bàn chông nhọn, trong khi một chiến sĩ mặc áo đen đứng phía trên dùng búa tạ đập vỡ tấm đá đặt trên ngực người trên cùng.",
+    "visual_scene_vi": "Biểu diễn võ thuật đường phố, ba võ sinh cởi trần thắt băng đỏ nằm xếp chồng trên bàn chông, chiến sĩ mặc áo đen dùng búa tạ đập vỡ tấm đá trên ngực võ sinh",
+    "visual_scene_en": "Street martial arts performance, three shirtless martial artists with red headbands stacked on sharp nail beds, a warrior in black standing above using a sledgehammer to smash a stone slab placed on the top person's chest",
+    "core_action_vi": "chiến sĩ dùng búa tạ đập vỡ tấm đá đặt trên ngực võ sinh",
+    "core_action_en": "warrior using sledgehammer to smash stone slab on martial artist's chest",
+    "english_visual": "Street martial arts performance, three shirtless martial artists with red headbands stacked on sharp nail beds, a warrior in black standing above using a sledgehammer to smash a stone slab placed on the top person's chest",
+    "qa_direct_question": "Ai dùng búa tạ đập vỡ tấm đá đặt trên ngực võ sinh?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "ba võ sinh cởi trần thắt băng đỏ xếp chồng lên nhau nằm trên bàn chông",
+      "chiến sĩ mặc áo đen đứng phía trên dùng búa tạ đập vỡ tấm đá đặt trên ngực người trên cùng"
+    ],
+    "sub_events_en": [
+      "three shirtless martial artists with red headbands stacked lying on nail beds",
+      "warrior in black standing above using sledgehammer to smash stone slab on top person's chest"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-qa-05_qa": {
+    "cleaned_vi": "Ở lề đường của một chặng đua thể thao, cạnh linh vật màu vàng đeo kính râm và người phụ nữ mặc áo dài đội cài tóc lấp lánh, người đứng cạnh cầm bảng điện tử màu đen đang hiển thị chữ số LED màu đỏ nào?",
+    "visual_scene_vi": "Lề đường chặng đua thể thao có linh vật màu vàng đeo kính râm, người phụ nữ mặc áo dài đội cài tóc lấp lánh, và một người đứng cầm bảng điện tử màu đen",
+    "visual_scene_en": "Sidewalk of a sports race featuring a yellow mascot wearing sunglasses, a woman in traditional ao dai with a sparkling hair accessory, and a person standing next to her holding a black electronic board displaying red LED digits",
+    "core_action_vi": "người đứng cầm bảng điện tử màu đen hiển thị chữ số LED màu đỏ",
+    "core_action_en": "person standing holding a black electronic board displaying red LED digits",
+    "english_visual": "Sidewalk of a sports race featuring a yellow mascot wearing sunglasses, a woman in traditional ao dai with a sparkling hair accessory, and a person standing next to her holding a black electronic board displaying red LED digits",
+    "qa_direct_question": "Người đứng cầm bảng điện tử màu đen đang hiển thị chữ số LED màu đỏ nào?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "người đứng ở lề đường chặng đua thể thao",
+      "người đứng cạnh linh vật màu vàng đeo kính râm và người phụ nữ mặc áo dài",
+      "người cầm bảng điện tử màu đen hiển thị chữ số LED màu đỏ"
+    ],
+    "sub_events_en": [
+      "person standing at the roadside of a sports race",
+      "person standing next to a yellow mascot with sunglasses and a woman in ao dai",
+      "person holding a black electronic board displaying red LED digits"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "qa",
+    "is_count_query": true
+  },
+  "test-kis-06_kis": {
+    "cleaned_vi": "Cảnh quay toàn cảnh flycam từ trên cao nhìn xuống đoạn đường dẫn uốn cong lên cây cầu treo dây võng lớn bắc qua vịnh biển; trên mặt đường có ô tô màu trắng di chuyển phía trước đoàn mô tô mở đường và các tay đua xe đạp.",
+    "visual_scene_vi": "Cảnh quay flycam từ trên cao nhìn xuống đoạn đường cong lên cây cầu treo lớn qua vịnh biển, ô tô trắng di chuyển phía trước đoàn mô tô mở đường và các tay đua xe đạp.",
+    "visual_scene_en": "High-angle drone panoramic shot looking down at a curved road leading up to a large suspension bridge crossing a sea bay; a white car is moving ahead of a lead motorcade and bicycle racers on the road.",
+    "core_action_vi": "ô tô và đoàn mô tô, tay đua xe đạp di chuyển trên cầu treo",
+    "core_action_en": "car, motorcade, and bicycle racers moving on a suspension bridge",
+    "english_visual": "High-angle drone panoramic shot looking down at a curved road leading up to a large suspension bridge crossing a sea bay; a white car is moving ahead of a lead motorcade and bicycle racers on the road.",
+    "qa_direct_question": "Ô tô trắng và đoàn mô tô, tay đua xe đạp đang di chuyển ở đâu?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "flycam quay toàn cảnh từ trên cao đoạn đường dẫn uốn cong lên cây cầu treo lớn bắc qua vịnh biển",
+      "ô tô màu trắng di chuyển phía trước đoàn mô tô mở đường và các tay đua xe đạp trên mặt đường"
+    ],
+    "sub_events_en": [
+      "drone panoramic shot from above of a curved road leading up to a large suspension bridge crossing a sea bay",
+      "a white car moving ahead of a lead motorcade and bicycle racers on the road"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-qa-07_qa": {
+    "cleaned_vi": "Trong hội trường sự kiện lễ hội, trước dãy bàn đại biểu phủ khăn trắng, người đàn ông mặc áo thun có cổ màu xanh dương đeo thẻ ban tổ chức trước ngực đang dùng hai tay giơ cao vật gì lên trên đầu?",
+    "visual_scene_vi": "Trong hội trường sự kiện lễ hội, trước dãy bàn đại biểu phủ khăn trắng, người đàn ông mặc áo thun có cổ màu xanh dương đeo thẻ ban tổ chức đang dùng hai tay giơ cao vật lên trên đầu",
+    "visual_scene_en": "In a festival event hall, in front of a row of delegate tables covered with white cloths, a man wearing a blue polo shirt and an organizing committee badge is raising an object high above his head with both hands",
+    "core_action_vi": "người đàn ông giơ cao vật gì lên trên đầu",
+    "core_action_en": "man raising an object high above his head",
+    "english_visual": "In a festival event hall, in front of a row of delegate tables covered with white cloths, a man wearing a blue polo shirt and an organizing committee badge is raising an object high above his head with both hands",
+    "qa_direct_question": "Người đàn ông mặc áo thun xanh dương đang giơ vật gì lên đầu?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "người đàn ông mặc áo thun xanh dương đứng trước bàn đại biểu",
+      "người đàn ông đeo thẻ ban tổ chức trước ngực",
+      "người đàn ông dùng hai tay giơ cao vật lên trên đầu"
+    ],
+    "sub_events_en": [
+      "man wearing a blue polo shirt standing in front of the delegate table",
+      "man wearing an organizing committee badge on his chest",
+      "man raising an object high above his head with both hands"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "qa",
+    "is_count_query": false
+  },
+  "test-kis-08_kis": {
+    "cleaned_vi": "Cận cảnh đội nhạcຄom lễ hội: người thanh niên mặc võ phục màu đỏ viền vàng có cắm cờ ngũ sắc sau lưng giơ cao hai dùi gỗ đánh liên hồi vào quả trống lân lớn, bên cạnh có đồng đội gõ chiêng đồng trên giá đỡ kim loại.",
+    "visual_scene_vi": "Cận cảnh đội nhạc công lễ hội, người thanh niên mặc võ phục màu đỏ viền vàng cắm cờ ngũ sắc sau lưng đang giơ cao hai dùi gỗ đánh liên hồi vào quả trống lân lớn, bên cạnh là đồng đội đang gõ chiêng đồng trên giá đỡ kim loại",
+    "visual_scene_en": "Close-up of a festival music team: a young man wearing a red martial arts uniform with yellow trims and five-colored flags on his back is holding up two wooden mallets, continuously beating a large lion dance drum, next to a teammate playing a bronze gong on a metal stand",
+    "core_action_vi": "người thanh niên đánh trống lân lớn và đồng đội gõ chiêng đồng",
+    "core_action_en": "young man beating a large lion dance drum and teammate playing a bronze gong",
+    "english_visual": "Close-up of a festival music team featuring a young man in a red martial arts uniform with flags on his back striking a large drum with two mallets, while a teammate plays a bronze gong nearby",
+    "qa_direct_question": "Người thanh niên mặc võ phục đỏ đánh nhạc cụ gì?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "người thanh niên mặc võ phục màu đỏ viền vàng có cắm cờ ngũ sắc sau lưng giơ cao hai dùi gỗ đánh liên hồi vào quả trống lân lớn",
+      "đồng đội bên cạnh gõ chiêng đồng trên giá đỡ kim loại"
+    ],
+    "sub_events_en": [
+      "young man in red martial arts uniform with flags on his back raising two wooden mallets to continuously beat a large lion dance drum",
+      "teammate nearby striking a bronze gong on a metal stand"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-kis-09_kis": {
+    "cleaned_vi": "Cận cảnh hai nhạc công hóa trang vẽ mặt nạ tuồng hoa văn đỏ đen mặc trang phục màu trắng viền đỏ: người phía trước giơ bắt chéo hai dùi trống màu đen trên đầu trước quả trống lớn, người phía sau gõ chiêng đồng.",
+    "visual_scene_vi": "Cận cảnh hai nhạc công hóa trang vẽ mặt nạ tuồng hoa văn đỏ đen mặc trang phục màu trắng viền đỏ, người phía trước giơ bắt chéo hai dùi trống màu đen trên đầu trước quả trống lớn, người phía sau gõ chiêng đồng",
+    "visual_scene_en": "Close-up of two musicians in tuong face makeup with red and black patterns wearing white costumes with red borders: the front person crossing two black drumsticks above their head in front of a large drum, the back person playing a bronze gong",
+    "core_action_vi": "hai nhạc công biểu diễn trống và chiêng",
+    "core_action_en": "two musicians performing with drums and gong",
+    "english_visual": "Close-up of two musicians in tuong face makeup with red and black patterns wearing white costumes with red borders: the front person crossing two black drumsticks above their head in front of a large drum, the back person playing a bronze gong",
+    "qa_direct_question": "Hai nhạc công làm gì?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "người nhạc công phía trước giơ bắt chéo hai dùi trống màu đen trên đầu trước quả trống lớn",
+      "người nhạc công phía sau gõ chiêng đồng"
+    ],
+    "sub_events_en": [
+      "the front musician crossing two black drumsticks above their head in front of a large drum",
+      "the back musician playing a bronze gong"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-kis-10_kis": {
+    "cleaned_vi": "Cảnh quay góc nhìn thẳng từ trên cao nhìn xuống sân bóng rổ màu xanh lá: các cầu thủ mặc áo đấu màu xanh lá viền vàng và áo đỏ cùng nhảy lên tranh chấp khi quả bóng rổ màu đỏ đang bay về phía bảng rổ màu trắng.",
+    "visual_scene_vi": "Góc nhìn thẳng từ trên cao xuống sân bóng rổ màu xanh lá, cầu thủ mặc áo xanh lá viền vàng và áo đỏ nhảy lên tranh chấp, quả bóng rổ màu đỏ bay về phía bảng rổ màu trắng.",
+    "visual_scene_en": "Top-down overhead view of a green basketball court, players in green-yellow trimmed jerseys and red jerseys jumping for a contest, with a red basketball flying toward a white backboard.",
+    "core_action_vi": "các cầu thủ nhảy lên tranh chấp bóng rổ",
+    "core_action_en": "players jumping to contest the basketball",
+    "english_visual": "Top-down overhead view of a green basketball court, players in green-yellow trimmed jerseys and red jerseys jumping for a contest, with a red basketball flying toward a white backboard.",
+    "qa_direct_question": "Cầu thủ nhảy lên tranh chấp bóng rổ trên sân màu gì?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "cầu thủ mặc áo đấu màu xanh lá viền vàng và áo đỏ cùng nhảy lên tranh chấp",
+      "quả bóng rổ màu đỏ đang bay về phía bảng rổ màu trắng"
+    ],
+    "sub_events_en": [
+      "players in green-yellow trimmed and red jerseys jump together to contest",
+      "the red basketball is flying toward the white backboard"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-kis-11_kis": {
+    "cleaned_vi": "Trong phòng thực hành công nghệ, người đàn ông mặc sơ mi trắng đeo dây thẻ màu xanh dương chỉ ngón tay vào màn hình cảm ứng gắn trước ngực của robot hình người màu trắng phối cam.",
+    "visual_scene_vi": "Trong phòng thực hành công nghệ, người đàn ông mặc sơ mi trắng đeo dây thẻ màu xanh dương chỉ ngón tay vào màn hình cảm ứng gắn trước ngực của robot hình người màu trắng phối cam.",
+    "visual_scene_en": "In a technology laboratory, a man wearing a white shirt and a blue lanyard points his finger at a touch screen mounted on the chest of a white and orange humanoid robot.",
+    "core_action_vi": "người đàn ông chỉ ngón tay vào màn hình của robot",
+    "core_action_en": "man pointing finger at robot's screen",
+    "english_visual": "In a technology laboratory, a man wearing a white shirt and a blue lanyard points his finger at a touch screen mounted on the chest of a white and orange humanoid robot.",
+    "qa_direct_question": "Người đàn ông chỉ ngón tay vào đâu của robot?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "người đàn ông mặc sơ mi trắng đeo dây thẻ màu xanh dương đứng trước robot",
+      "người đàn ông chỉ ngón tay vào màn hình cảm ứng trên ngực robot"
+    ],
+    "sub_events_en": [
+      "man wearing a white shirt and blue lanyard stands in front of a robot",
+      "man points his finger at the touchscreen on the robot's chest"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-kis-12_kis": {
+    "cleaned_vi": "Trước phông nền rèm sọc đứng màu trắng, ba nam sinh đeo kính mặc áo sơ mi đồng phục trắng có thêu logo trước ngực ngồi trên ghế tròn cùng gảy đàn guitar acoustic và hát.",
+    "visual_scene_vi": "Ba nam sinh đeo kính mặc áo sơ mi đồng phục trắng có thêu logo ngồi trên ghế tròn trước phông nền rèm sọc đứng màu trắng cùng gảy đàn guitar acoustic và hát",
+    "visual_scene_en": "Three male students wearing glasses and white uniform shirts with embroidered logos sitting on round stools in front of a vertical striped white curtain backdrop, playing acoustic guitars and singing",
+    "core_action_vi": "ba nam sinh gảy đàn guitar acoustic và hát",
+    "core_action_en": "three male students playing acoustic guitars and singing",
+    "english_visual": "Three male students wearing glasses and white uniform shirts with embroidered logos sitting on round stools in front of a vertical striped white curtain backdrop, playing acoustic guitars and singing",
+    "qa_direct_question": "Ba nam sinh làm gì trước phông nền rèm sọc đứng màu trắng?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "ba nam sinh ngồi trên ghế tròn trước phông nền rèm sọc đứng màu trắng",
+      "ba nam sinh cùng gảy đàn guitar acoustic và hát"
+    ],
+    "sub_events_en": [
+      "three male students sitting on round stools in front of a vertical striped white curtain backdrop",
+      "three male students playing acoustic guitars and singing"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-qa-13_qa": {
+    "cleaned_vi": "Trong phân cảnh giới thiệu món ăn có bảng chữ màu đỏ 'ĐÙI ẾCH CHIÊN MÈ' đặt trên bàn gỗ, chén đựng nước sốt chấm hình bông hoa ở góc dưới bên phải có màu gì?",
+    "visual_scene_vi": "Phân cảnh giới thiệu món ăn với bảng chữ màu đỏ 'ĐÙI ẾCH CHIÊN MÈ' trên bàn gỗ, có chén đựng nước sốt hình bông hoa ở góc dưới bên phải",
+    "visual_scene_en": "Food presentation scene featuring a red text sign reading 'ĐÙI ẾCH CHIÊN MÈ' on a wooden table, with a flower-shaped dipping sauce bowl at the bottom right corner",
+    "core_action_vi": "giới thiệu món ăn trên bàn gỗ",
+    "core_action_en": "presenting food dish on a wooden table",
+    "english_visual": "Food presentation scene featuring a red text sign reading 'ĐÙI ẾCH CHIÊN MÈ' on a wooden table, with a flower-shaped dipping sauce bowl at the bottom right corner",
+    "qa_direct_question": "Chén đựng nước sốt chấm hình bông hoa ở góc dưới bên phải có màu gì?",
+    "ocr_keywords": [
+      "ĐÙI ẾCH CHIÊN MÈ"
+    ],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [],
+    "sub_events_en": [],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "qa",
+    "is_count_query": false
+  },
+  "test-kis-14_kis": {
+    "cleaned_vi": "Cận cảnh chiếc vá lưới kim loại vớt các miếng mề gà đã chần chín ra khỏi nồi thủy tinh màu hổ phách đang sôi trên bếp.",
+    "visual_scene_vi": "Chiếc vá lưới kim loại vớt các miếng mề gà đã chần chín ra khỏi nồi thủy tinh màu hổ phách đang sôi trên bếp",
+    "visual_scene_en": "Close-up of a metal mesh skimmer scooping blanched chicken gizzard pieces out of a boiling amber glass pot on a stove.",
+    "core_action_vi": "vá lưới kim loại vớt mề gà khỏi nồi thủy tinh đang sôi",
+    "core_action_en": "metal mesh skimmer scooping chicken gizzards from boiling glass pot",
+    "english_visual": "Close-up shot showing a metal mesh strainer removing blanched chicken gizzards from a bubbling amber-colored glass pot placed on a stove.",
+    "qa_direct_question": "Cận cảnh chiếc vá lưới kim loại vớt mề gà ra khỏi nồi gì?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "chiếc vá lưới kim loại vớt các miếng mề gà đã chần chín ra khỏi nồi thủy tinh màu hổ phách đang sôi trên bếp"
+    ],
+    "sub_events_en": [
+      "metal mesh skimmer scooping blanched chicken gizzards out of a boiling amber glass pot on a stove"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-qa-15_qa": {
+    "cleaned_vi": "Trong phân cảnh đầu bếp mặc áo trắng cầm chiếc hộp đựng gia vị hình vuông màu trắng, chữ màu trắng in bên trong biểu tượng màu đỏ ở thân hộp là chữ gì?",
+    "visual_scene_vi": "Đầu bếp mặc áo trắng cầm chiếc hộp đựng gia vị hình vuông màu trắng có biểu tượng màu đỏ ở thân hộp",
+    "visual_scene_en": "A chef wearing a white uniform holding a square white spice box with a red logo on it",
+    "core_action_vi": "đầu bếp cầm hộp gia vị",
+    "core_action_en": "chef holding a spice box",
+    "english_visual": "A chef in white holding a square white spice container with a red symbol on the body",
+    "qa_direct_question": "Chữ màu trắng in bên trong biểu tượng màu đỏ ở thân hộp là chữ gì?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "đầu bếp mặc áo trắng cầm chiếc hộp đựng gia vị hình vuông màu trắng"
+    ],
+    "sub_events_en": [
+      "chef in white holding a square white spice box"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "qa",
+    "is_count_query": false
+  },
+  "test-kis-16_kis": {
+    "cleaned_vi": "Cận cảnh đôi bàn tay dùng dao bếp bản lớn cán nâu thái quả xoài chín màu vàng thành các lát dài mỏng trên mặt thớt gỗ.",
+    "visual_scene_vi": "Đôi bàn tay dùng dao bếp bản lớn cán nâu thái quả xoài chín màu vàng thành các lát dài mỏng trên mặt thớt gỗ",
+    "visual_scene_en": "Close-up of hands using a large kitchen knife with a brown handle to slice a ripe yellow mango into thin long slices on a wooden cutting board",
+    "core_action_vi": "đôi bàn tay dùng dao thái quả xoài thành các lát trên thớt gỗ",
+    "core_action_en": "hands using a knife to slice a mango on a cutting board",
+    "english_visual": "Close-up of hands using a large kitchen knife with a brown handle to slice a ripe yellow mango into thin long slices on a wooden cutting board",
+    "qa_direct_question": "Đôi bàn tay đang thái quả gì trên mặt thớt gỗ?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "đôi bàn tay cầm dao bếp bản lớn cán nâu",
+      "đôi bàn tay dùng dao thái quả xoài chín màu vàng thành các lát dài mỏng trên mặt thớt gỗ"
+    ],
+    "sub_events_en": [
+      "hands holding a large kitchen knife with a brown handle",
+      "hands using the knife to slice a ripe yellow mango into thin long slices on a wooden cutting board"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-trake-17_trake": {
+    "cleaned_vi": "Hãy tìm và liệt kê theo thứ tự thời gian các phân cảnh liên quan đến phi lê cá trê: phân cảnh thái sợi phi lê cá trên thớt gỗ, phân cảnh chiên các miếng cá trong chảo dầu sôi, và phân cảnh gắp cá chiên giòn để lên đĩa lót giấy thấm dầu màu trắng.",
+    "visual_scene_vi": "phân cảnh liên quan đến phi lê cá trê gồm thái sợi trên thớt gỗ, chiên trong chảo dầu sôi, và gắp ra đĩa lót giấy thấm dầu",
+    "visual_scene_en": "scenes related to catfish fillet including slicing fillets on a wooden cutting board, frying fish pieces in a pan of boiling oil, and picking up crispy fried fish onto a plate lined with white oil-absorbing paper",
+    "core_action_vi": "người làm bếp thái sợi phi lê cá, chiên cá và gắp ra đĩa",
+    "core_action_en": "chef slicing catfish fillet, frying fish, and transferring to a plate",
+    "english_visual": "sequences showing catfish fillet being sliced on a wooden board, fried in boiling oil, and transferred to a plate with white oil-absorbing paper",
+    "qa_direct_question": "Phân cảnh nào thể hiện việc thái sợi phi lê cá trê, chiên cá và gắp ra đĩa lót giấy thấm dầu?",
+    "ocr_keywords": [],
+    "asr_keywords": [
+      "phi lê cá trê"
+    ],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "thái sợi phi lê cá trên thớt gỗ",
+      "chiên các miếng cá trong chảo dầu sôi",
+      "gắp cá chiên giòn để lên đĩa lót giấy thấm dầu màu trắng"
+    ],
+    "sub_events_en": [
+      "slicing catfish fillet on a wooden cutting board",
+      "frying fish pieces in a pan of boiling oil",
+      "picking up crispy fried fish onto a plate lined with white oil-absorbing paper"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "trake",
+    "is_count_query": false
+  },
+  "test-kis-18_kis": {
+    "cleaned_vi": "Cận cảnh đôi bàn tay đeo găng ni lông trong suốt dùng dao thái và xếp các lát chuối chín cùng những lát dâu tây đỏ tươi lên một chiếc đĩa thủy tinh trong suốt.",
+    "visual_scene_vi": "Cận cảnh đôi bàn tay đeo găng ni lông dùng dao thái và xếp lát chuối chín cùng lát dâu tây lên đĩa thủy tinh.",
+    "visual_scene_en": "Close-up of gloved hands using a knife to slice and arrange ripe banana slices and fresh red strawberry slices on a transparent glass plate.",
+    "core_action_vi": "đôi bàn tay đeo găng thái và xếp chuối, dâu tây lên đĩa",
+    "core_action_en": "gloved hands slicing and arranging bananas and strawberries on a plate",
+    "english_visual": "Close-up of gloved hands using a knife to slice and arrange ripe banana slices and fresh red strawberry slices on a transparent glass plate.",
+    "qa_direct_question": "Đôi bàn tay đang thái và xếp loại trái cây nào lên đĩa?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "đôi bàn tay đeo găng ni lông dùng dao thái lát chuối chín",
+      "đôi bàn tay đeo găng ni lông xếp các lát chuối và lát dâu tây lên đĩa thủy tinh"
+    ],
+    "sub_events_en": [
+      "gloved hands using a knife to slice ripe bananas",
+      "gloved hands arranging banana slices and strawberry slices on a glass plate"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-kis-19_kis": {
+    "cleaned_vi": "Cận cảnh những chiếc bánh hoành thánh vừa được gói xong tạo hình nếp gấp cánh hoa xếp trên chiếc đĩa sứ vuông màu trắng.",
+    "visual_scene_vi": "Cận cảnh những chiếc bánh hoành thánh được gói tạo hình nếp gấp cánh hoa xếp trên đĩa sứ vuông màu trắng",
+    "visual_scene_en": "Close-up of freshly wrapped wontons shaped with petal-like folds arranged on a white square porcelain plate",
+    "core_action_vi": "bánh hoành thánh tạo hình nếp gấp cánh hoa xếp trên đĩa sứ vuông",
+    "core_action_en": "wontons with petal folds arranged on a square porcelain plate",
+    "english_visual": "Close-up shot of freshly wrapped wontons with flower petal folds, placed neatly on a white square ceramic plate.",
+    "qa_direct_question": "Những chiếc bánh hoành thánh được xếp trên vật gì?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "cận cảnh bánh hoành thánh tạo hình nếp gấp cánh hoa",
+      "bánh hoành thánh xếp trên chiếc đĩa sứ vuông màu trắng"
+    ],
+    "sub_events_en": [
+      "close up of wontons shaped with petal folds",
+      "wontons arranged on a white square porcelain plate"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-kis-20_kis": {
+    "cleaned_vi": "Cận cảnh đĩa sứ tròn màu trắng xếp những viên chả tôm sống màu hồng nhạt lấm tấm tiêu và ớt đỏ.",
+    "visual_scene_vi": "Cận cảnh đĩa sứ tròn màu trắng xếp những viên chả tôm sống màu hồng nhạt lấm tấm tiêu và ớt đỏ",
+    "visual_scene_en": "Close-up of a round white ceramic plate arranged with raw light pink shrimp paste balls speckled with black pepper and red chili",
+    "core_action_vi": "đĩa sứ trắng đựng viên chả tôm lấm tấm tiêu ớt",
+    "core_action_en": "white ceramic plate holding shrimp balls with pepper and chili",
+    "english_visual": "Close-up of a round white ceramic plate arranged with raw light pink shrimp paste balls speckled with black pepper and red chili",
+    "qa_direct_question": "",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "Cận cảnh đĩa sứ tròn màu trắng xếp những viên chả tôm sống màu hồng nhạt lấm tấm tiêu và ớt đỏ"
+    ],
+    "sub_events_en": [
+      "Close-up of a round white ceramic plate arranged with raw light pink shrimp paste balls speckled with black pepper and red chili"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-kis-21_kis": {
+    "cleaned_vi": "Cận cảnh các viên chả sống được lăn bao phủ một lớp cốm hạt màu xanh lá cây tươi xếp trên chiếc đĩa sứ tròn màu trắng.",
+    "visual_scene_vi": "Cận cảnh viên chả sống lăn phủ lớp cốm hạt màu xanh lá cây tươi xếp trên đĩa sứ tròn màu trắng.",
+    "visual_scene_en": "Close-up of raw meatballs rolled and coated with fresh green young rice flakes (cốm), arranged on a white round porcelain plate.",
+    "core_action_vi": "viên chả sống được lăn phủ cốm xếp trên đĩa",
+    "core_action_en": "raw meatballs coated with green rice flakes arranged on a plate",
+    "english_visual": "Close-up of raw meatballs being rolled and coated with a layer of fresh green young rice flakes, neatly arranged on a white round porcelain plate.",
+    "qa_direct_question": "Các viên chả sống lăn lớp cốm màu xanh được xếp trên cái gì?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "viên chả sống được lăn bao phủ một lớp cốm xanh",
+      "các viên chả được xếp trên chiếc đĩa sứ tròn màu trắng"
+    ],
+    "sub_events_en": [
+      "raw meatballs are rolled and covered with a layer of green rice flakes",
+      "the meatballs are arranged on a white round porcelain plate"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-kis-22_kis": {
+    "cleaned_vi": "Cận cảnh đôi bàn tay dùng bay kim loại phết lớp nhân màu vàng lên mặt chiếc bánh pancake tròn màu nâu đặt trên đĩa sứ màu đỏ viền tròn.",
+    "visual_scene_vi": "Đôi bàn tay dùng bay kim loại phết lớp nhân màu vàng lên mặt chiếc bánh pancake tròn màu nâu trên đĩa sứ màu đỏ viền tròn",
+    "visual_scene_en": "Close-up of hands using a metal trowel to spread a yellow filling onto the surface of a round brown pancake placed on a red ceramic plate with a rounded rim",
+    "core_action_vi": "đôi bàn tay phết nhân lên bánh pancake",
+    "core_action_en": "hands spreading filling on pancake",
+    "english_visual": "Close-up shot of hands using a metal trowel to spread a yellow filling onto a round brown pancake on a red plate",
+    "qa_direct_question": "Đôi bàn tay đang phết lớp nhân màu gì lên chiếc bánh pancake?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "đôi bàn tay cầm bay kim loại phết lớp nhân màu vàng lên mặt chiếc bánh pancake tròn màu nâu trên đĩa sứ màu đỏ"
+    ],
+    "sub_events_en": [
+      "hands holding a metal trowel spreading yellow filling on a round brown pancake on a red ceramic plate"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-kis-23_kis": {
+    "cleaned_vi": "Cận cảnh đôi bàn tay cầm chén nhỏ màu vàng đổ những hạt mè đen vào tô bột chiên giòn màu trắng ngà và khuấy đều bằng muỗng kim loại.",
+    "visual_scene_vi": "cận cảnh đôi bàn tay cầm chén nhỏ màu vàng đổ hạt mè đen vào tô bột chiên giòn màu trắng ngà và khuấy bằng muỗng kim loại",
+    "visual_scene_en": "close-up of hands holding a small yellow bowl pouring black sesame seeds into a bowl of off-white crispy flour batter and stirring evenly with a metal spoon",
+    "core_action_vi": "đôi bàn tay đổ hạt mè đen vào tô bột và khuấy đều",
+    "core_action_en": "hands pouring black sesame seeds into a batter bowl and stirring",
+    "english_visual": "close-up of hands holding a small yellow bowl pouring black sesame seeds into a bowl of off-white crispy flour batter and stirring evenly with a metal spoon",
+    "qa_direct_question": "Đôi bàn tay đang đổ và khuấy cái gì trong tô?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "đôi bàn tay cầm chén nhỏ màu vàng đổ hạt mè đen vào tô bột chiên giòn màu trắng ngà",
+      "đôi bàn tay dùng muỗng kim loại khuấy đều hỗn hợp"
+    ],
+    "sub_events_en": [
+      "hands holding a small yellow bowl pouring black sesame seeds into an off-white crispy flour batter bowl",
+      "hands stirring the mixture evenly with a metal spoon"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-kis-24_kis": {
+    "cleaned_vi": "Cận cảnh người dẫn chương trình mặc áo ngắn tay màu xanh lá cây đeo kính mắt gọng đen viền vuông cầm chiếc vé màu trắng trước cabin cáp treo màu đỏ.",
+    "visual_scene_vi": "Cận cảnh người dẫn chương trình mặc áo ngắn tay màu xanh lá cây đeo kính mắt gọng đen viền vuông cầm chiếc vé màu trắng trước cabin cáp treo màu đỏ.",
+    "visual_scene_en": "Close-up of a presenter wearing a short-sleeved green shirt and black square-rimmed glasses holding a white ticket in front of a red cable car cabin.",
+    "core_action_vi": "người dẫn chương trình cầm chiếc vé",
+    "core_action_en": "presenter holding a ticket",
+    "english_visual": "Close-up shot of a presenter wearing a green short-sleeve shirt and black square-rimmed eyeglasses, holding a white ticket in front of a red cable car cabin.",
+    "qa_direct_question": "Người dẫn chương trình cầm vật gì trước cabin cáp treo màu đỏ?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "người dẫn chương trình mặc áo ngắn tay màu xanh lá cây đeo kính mắt gọng đen viền vuông cầm chiếc vé màu trắng trước cabin cáp treo màu đỏ"
+    ],
+    "sub_events_en": [
+      "presenter wearing a short-sleeved green shirt and black square-rimmed glasses holding a white ticket in front of a red cable car cabin"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-trake-25_trake": {
+    "cleaned_vi": "Hãy tìm và liệt kê theo thứ tự thời gian các phân cảnh của cô gái mặc áo đen váy trắng dài: phân cảnh ngồi trên xe lôi xích lô màu trắng viền xanh lá vẫy tay chào trước cổng đền thờ họ Mạc, phân cảnh bước lên cầu thang gỗ ngoài trời của nhà lưu niệm Tao đàn Chiêu Anh Các, và phân cảnh đi dạo dọc theo con đường lát đá giữa rặng cây xanh trong khuôn viên lăng mộ.",
+    "visual_scene_vi": "Cô gái mặc áo đen váy trắng dài xuất hiện lần lượt tại đền thờ họ Mạc, nhà lưu niệm Tao đàn Chiêu Anh Các và khu vực lăng mộ",
+    "visual_scene_en": "A girl wearing a black top and a long white skirt appearing sequentially at Mac Family Temple, Tao Dan Chieu Anh Cac Memorial House, and a mausoleum area",
+    "core_action_vi": "cô gái mặc áo đen váy trắng dài di chuyển và thực hiện các hoạt động qua nhiều phân cảnh",
+    "core_action_en": "a girl wearing a black top and a long white skirt moving and performing activities across multiple scenes",
+    "english_visual": "A sequence of scenes showing a girl wearing a black top and a long white skirt: riding a white and green rickshaw waving in front of Mac Family Temple, walking up the outdoor wooden stairs of Tao Dan Chieu Anh Cac Memorial House, and strolling along a stone-paved path among green trees in the mausoleum grounds.",
+    "qa_direct_question": "Cô gái mặc áo đen váy trắng dài xuất hiện trong những phân cảnh nào theo thứ tự thời gian?",
+    "ocr_keywords": [
+      "đền thờ họ Mạc",
+      "Tao đàn Chiêu Anh Các"
+    ],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "cô gái mặc áo đen váy trắng dài ngồi trên xe lôi xích lô màu trắng viền xanh lá vẫy tay chào trước cổng đền thờ họ Mạc",
+      "cô gái mặc áo đen váy trắng dài bước lên cầu thang gỗ ngoài trời của nhà lưu niệm Tao đàn Chiêu Anh Các",
+      "cô gái mặc áo đen váy trắng dài đi dạo dọc theo con đường lát đá giữa rặng cây xanh trong khuôn viên lăng mộ"
+    ],
+    "sub_events_en": [
+      "a girl wearing a black top and a long white skirt sitting on a white and green rickshaw waving in front of the Mac Family Temple gate",
+      "a girl wearing a black top and a long white skirt walking up the outdoor wooden stairs of the Tao Dan Chieu Anh Cac Memorial House",
+      "a girl wearing a black top and a long white skirt strolling along the stone-paved path among green trees in the mausoleum grounds"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "trake",
+    "is_count_query": false
+  },
+  "test-kis-26_kis": {
+    "cleaned_vi": "Góc quay từ trên cao nhìn xuống lề đường chợ: người phụ nữ đội khăn trùm đầu màu đỏ mận ngồi cạnh rổ nhựa tròn màu đỏ đựng cá tươi bán cho người phụ nữ cắp chiếc thùng các-tông dán băng keo đỏ.",
+    "visual_scene_vi": "Góc quay trên cao lề đường chợ: người phụ nữ đội khăn trùm đầu màu đỏ mận ngồi cạnh rổ nhựa tròn màu đỏ đựng cá tươi bán hàng cho người phụ nữ cắp thùng các-tông dán băng keo đỏ",
+    "visual_scene_en": "High-angle view of a market roadside: a woman wearing a dark red headscarf sitting next to a red round plastic basket containing fresh fish, selling to a woman carrying a cardboard box sealed with red tape",
+    "core_action_vi": "người phụ nữ đội khăn đỏ bán cá cho người phụ nữ cắp thùng các-tông",
+    "core_action_en": "woman wearing a red headscarf selling fish to a woman carrying a cardboard box",
+    "english_visual": "High-angle view of a market roadside: a woman wearing a dark red headscarf sitting next to a red round plastic basket containing fresh fish, selling to a woman carrying a cardboard box sealed with red tape",
+    "qa_direct_question": "Người phụ nữ đội khăn trùm đầu màu đỏ mận bán cá cho ai?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "người phụ nữ đội khăn trùm đầu màu đỏ mận ngồi cạnh rổ nhựa tròn màu đỏ đựng cá tươi trên lề đường chợ",
+      "người phụ nữ đội khăn đỏ bán cá cho người phụ nữ cắp chiếc thùng các-tông dán băng keo đỏ"
+    ],
+    "sub_events_en": [
+      "a woman wearing a dark red headscarf sitting next to a red round plastic basket containing fresh fish on the market roadside",
+      "the woman in the red headscarf selling fish to a woman carrying a cardboard box sealed with red tape"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-qa-27_qa": {
+    "cleaned_vi": "Trong phân cảnh đường phố có các xe máy đang lưu thông, chiếc xe ô tô màu trắng di chuyển về phía trước có biển số xe là gì?",
+    "visual_scene_vi": "đường phố có các xe máy đang lưu thông, chiếc xe ô tô màu trắng di chuyển về phía trước",
+    "visual_scene_en": "street scene with moving motorcycles, a white car moving forward",
+    "core_action_vi": "xe ô tô màu trắng di chuyển về phía trước",
+    "core_action_en": "white car moving forward",
+    "english_visual": "street scene with moving motorcycles, a white car moving forward",
+    "qa_direct_question": "Biển số xe của chiếc ô tô màu trắng di chuyển về phía trước là gì?",
+    "ocr_keywords": [
+      "biển số xe"
+    ],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "xe ô tô màu trắng di chuyển về phía trước trên đường phố có xe máy lưu thông"
+    ],
+    "sub_events_en": [
+      "white car moving forward on a street with moving motorcycles"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "qa",
+    "is_count_query": false
+  },
+  "test-trake-28_trake": {
+    "cleaned_vi": "Hãy tìm và liệt kê theo thứ tự thời gian các phân cảnh liên quan đến sản phẩm thủ công từ cây lục bình: phân cảnh cận cảnh đôi bàn tay đan bím các sợi lục bình khô, phân cảnh cận cảnh bộ bình trà đan bằng lục bình thêu hoa đỏ trên kệ trưng bày, và phân cảnh cận cảnh chiếc túi xách hình bán nguyệt đan bằng lục bình đính hoa hồng đỏ.",
+    "visual_scene_vi": "Các phân cảnh sản phẩm thủ công từ cây lục bình gồm đôi bàn tay đan bím sợi lục bình khô, bộ bình trà đan bằng lục bình thêu hoa đỏ trên kệ, và chiếc túi xách hình bán nguyệt đan bằng lục bình đính hoa hồng đỏ.",
+    "visual_scene_en": "Sequences of handicraft products made from water hyacinth: close-up of hands braiding dry water hyacinth fibers, close-up of a tea set woven from water hyacinth embroidered with red flowers on a display shelf, and close-up of a semi-circular handbag woven from water hyacinth decorated with red roses.",
+    "core_action_vi": "liệt kê phân cảnh sản phẩm thủ công từ cây lục bình",
+    "core_action_en": "listing scenes of water hyacinth handicraft products",
+    "english_visual": "Sequences of handicraft products made from water hyacinth: close-up of hands braiding dry water hyacinth fibers, close-up of a tea set woven from water hyacinth embroidered with red flowers on a display shelf, and close-up of a semi-circular handbag woven from water hyacinth decorated with red roses.",
+    "qa_direct_question": "Phân cảnh sản phẩm thủ công từ cây lục bình nào xuất hiện theo thứ tự thời gian?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "cận cảnh đôi bàn tay đan bím các sợi lục bình khô",
+      "cận cảnh bộ bình trà đan bằng lục bình thêu hoa đỏ trên kệ trưng bày",
+      "cận cảnh chiếc túi xách hình bán nguyệt đan bằng lục bình đính hoa hồng đỏ"
+    ],
+    "sub_events_en": [
+      "close-up of hands braiding dry water hyacinth fibers",
+      "close-up of a tea set woven from water hyacinth embroidered with red flowers on a display shelf",
+      "close-up of a semi-circular handbag woven from water hyacinth decorated with red roses"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "trake",
+    "is_count_query": false
+  },
+  "test-kis-29_kis": {
+    "cleaned_vi": "Cận cảnh người phụ nữ mặc áo sơ mi trắng đeo hoa tai hình trái tim dùng tay nâng và giới thiệu một chùm nho xanh trước ống kính máy quay.",
+    "visual_scene_vi": "cận cảnh người phụ nữ mặc áo sơ mi trắng đeo hoa tai hình trái tim dùng tay nâng và giới thiệu chùm nho xanh trước ống kính",
+    "visual_scene_en": "close-up of a woman wearing a white shirt and heart-shaped earrings, holding up and introducing a bunch of green grapes in front of the camera",
+    "core_action_vi": "người phụ nữ nâng và giới thiệu chùm nho xanh",
+    "core_action_en": "woman lifting and introducing a bunch of green grapes",
+    "english_visual": "close-up of a woman wearing a white shirt and heart-shaped earrings, holding up and introducing a bunch of green grapes in front of the camera",
+    "qa_direct_question": "Người phụ nữ nâng và giới thiệu cái gì trước ống kính?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "người phụ nữ mặc áo sơ mi trắng và đeo hoa tai hình trái tim xuất hiện trước ống kính",
+      "người phụ nữ dùng tay nâng chùm nho xanh lên",
+      "người phụ nữ giới thiệu chùm nho xanh trước máy quay"
+    ],
+    "sub_events_en": [
+      "woman wearing a white shirt and heart-shaped earrings appears in front of the camera",
+      "woman uses her hands to lift a bunch of green grapes",
+      "woman introduces the bunch of green grapes to the camera"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-qa-30_qa": {
+    "cleaned_vi": "Trong phân cảnh cận cảnh hai chiếc cờ lê kim loại màu bạc nằm trên nền xi măng cạnh khung sườn xe đạp, dòng chữ tiếng Anh in hoa dập nổi trên thân chiếc cờ lê bên dưới là chữ gì?",
+    "visual_scene_vi": "Cận cảnh hai chiếc cờ lê kim loại màu bạc nằm trên nền xi măng cạnh khung sườn xe đạp",
+    "visual_scene_en": "Close-up of two silver metal wrenches lying on a cement background beside a bicycle frame",
+    "core_action_vi": "hai chiếc cờ lê kim loại nằm trên nền xi măng",
+    "core_action_en": "two metal wrenches lying on cement background",
+    "english_visual": "Close-up of two silver metal wrenches lying on a cement background beside a bicycle frame with embossed English text",
+    "qa_direct_question": "Dòng chữ tiếng Anh in hoa dập nổi trên thân chiếc cờ lê bên dưới là chữ gì?",
+    "ocr_keywords": [
+      "chữ tiếng Anh in hoa"
+    ],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "hai chiếc cờ lê kim loại màu bạc nằm trên nền xi măng cạnh khung sườn xe đạp"
+    ],
+    "sub_events_en": [
+      "two silver metal wrenches lying on a cement background beside a bicycle frame"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "qa",
+    "is_count_query": false
+  },
+  "test-kis-31_kis": {
+    "cleaned_vi": "Cận cảnh cô gái đeo khăn vải hoa nhiều màu che kín mắt nằm ngửa ngâm mình dưới dòng nước suối trong khi có người nhỏ giọt nước lên trán.",
+    "visual_scene_vi": "cô gái đeo khăn vải hoa nhiều màu che kín mắt nằm ngửa ngâm mình dưới dòng nước suối, có người nhỏ giọt nước lên trán",
+    "visual_scene_en": "Close-up of a girl wearing a colorful floral fabric scarf covering her eyes, lying on her back submerged in clear stream water while someone drips water onto her forehead.",
+    "core_action_vi": "cô gái nằm ngửa dưới suối và được nhỏ nước lên trán",
+    "core_action_en": "girl lying on her back in the stream having water dripped on her forehead",
+    "english_visual": "Close-up of a girl wearing a colorful floral fabric scarf covering her eyes, lying on her back submerged in clear stream water while someone drips water onto her forehead.",
+    "qa_direct_question": "Cô gái đeo khăn che mắt đang làm gì dưới suối?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "cô gái đeo khăn vải hoa che mắt nằm ngửa ngâm mình dưới dòng nước suối",
+      "có người nhỏ giọt nước lên trán cô gái"
+    ],
+    "sub_events_en": [
+      "a girl wearing a floral scarf covering her eyes lying on her back in stream water",
+      "someone dripping water onto the girl's forehead"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  },
+  "test-kis-32_kis": {
+    "cleaned_vi": "Trong quán ăn, cô gái trẻ mặc áo đầm màu đen tay bồng dùng hai tay bưng một tô phở sứ màu trắng bước đi bưng thức ăn cho khách.",
+    "visual_scene_vi": "Trong quán ăn, cô gái trẻ mặc áo đầm màu đen tay bồng dùng hai tay bưng một tô phở sứ màu trắng bước đi",
+    "visual_scene_en": "In a restaurant, a young woman wearing a black puff-sleeve dress uses both hands to carry a white ceramic bowl of pho while walking",
+    "core_action_vi": "cô gái trẻ bưng tô phở bước đi",
+    "core_action_en": "young woman carrying a bowl of pho and walking",
+    "english_visual": "In a restaurant, a young woman wearing a black puff-sleeve dress uses both hands to carry a white ceramic bowl of pho while walking to serve customers",
+    "qa_direct_question": "Ai đang bưng tô phở sứ màu trắng bước đi trong quán ăn?",
+    "ocr_keywords": [],
+    "asr_keywords": [],
+    "is_dialogue_query": false,
+    "sub_events_vi": [
+      "cô gái trẻ mặc áo đầm màu đen cầm tô phở sứ màu trắng",
+      "cô gái dùng hai tay bưng tô phở bước đi phục vụ khách"
+    ],
+    "sub_events_en": [
+      "young woman in a black dress holding a white ceramic bowl of pho",
+      "young woman walking with both hands carrying the bowl of pho to serve customers"
+    ],
+    "weights": {
+      "visual": 0.7,
+      "ocr": 0.15,
+      "asr": 0.15
+    },
+    "task_type": "kis",
+    "is_count_query": false
+  }
+}

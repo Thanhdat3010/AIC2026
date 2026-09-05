@@ -291,7 +291,8 @@ class TRAKEAlignmentAgent:
         use_event_coverage: bool = True,
         use_row_norm_dp: bool = True,
         use_segmental_dp: bool = False,
-        use_adaptive_gap: bool = False
+        use_adaptive_gap: bool = False,
+        use_viterbi_dp: bool = True
     ) -> list[dict]:
         """
         Tìm kiếm và căn chỉnh chuỗi sự kiện bằng Multi-Query Retrieval & Calibrated Event Coverage.
@@ -416,7 +417,9 @@ class TRAKEAlignmentAgent:
             pts_times = cd["pts_times"]
             f_indices = cd["frame_indices"]
             
-            if use_segmental_dp:
+            if not use_viterbi_dp:
+                chosen_kf_indices = [int(np.argmax(sim_matrix[i])) for i in range(n_events)]
+            elif use_segmental_dp:
                 chosen_kf_indices = self._solve_segmental_dp(sim_matrix, pts_times)
             else:
                 chosen_kf_indices = self._solve_monotonic_dp(sim_matrix, pts_times, use_adaptive_gap=use_adaptive_gap)

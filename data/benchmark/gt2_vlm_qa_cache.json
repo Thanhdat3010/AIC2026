@@ -1,0 +1,152 @@
+{
+  "L21_V001_7074_Người đàn ông mặc áo thun sọc ngang đang đeo phụ kiện gì trên cổ tay phải?_True": {
+    "status": "answer",
+    "answer": "Vòng tay",
+    "evidence": [
+      {
+        "frame_id": 7074,
+        "observation": "Người đàn ông mặc áo sọc ngang đang đứng cạnh cột nước phun, trên cổ tay phải có đeo một chiếc vòng tay."
+      }
+    ]
+  },
+  "L23_V001_0_Người đứng cầm bảng điện tử màu đen đang hiển thị chữ số LED màu đỏ nào?_True": {
+    "status": "answer",
+    "answer": "Số 2",
+    "evidence": [
+      {
+        "frame_id": 0,
+        "observation": "Người đàn ông mặc áo đỏ đang cầm bảng điện tử màu đen hiển thị chữ số LED màu đỏ là số 2."
+      }
+    ]
+  },
+  "L24_V017_2736_Người đàn ông mặc áo thun xanh dương đang giơ vật gì lên đầu?_True": {
+    "status": "insufficient",
+    "answer": "Không có người đàn ông mặc áo thun xanh dương nào đang giơ vật gì lên đầu trong hình ảnh.",
+    "evidence": [
+      {
+        "frame_id": 2736,
+        "observation": "Người mặc áo xanh ở góc trái đang đứng bình thường, không giơ vật gì lên đầu."
+      }
+    ]
+  },
+  "L24_V002_16768_Người đàn ông mặc áo thun xanh dương đang giơ vật gì lên đầu?_True": {
+    "status": "answer",
+    "answer": "Người đàn ông mặc áo thun xanh dương đang giơ tấm bảng điểm lên đầu.",
+    "evidence": [
+      {
+        "frame_id": 16768,
+        "observation": "Hình ảnh trọng tài số 3 mặc áo thun xanh dương, đang giơ bảng điểm lên cao bằng một tay."
+      }
+    ]
+  },
+  "L26_V001_7155_Chén đựng nước sốt chấm hình bông hoa ở góc dưới bên phải có màu gì?_True": {
+    "status": "answer",
+    "answer": "Chén đựng nước sốt ở góc dưới bên phải có màu vàng",
+    "evidence": [
+      {
+        "frame_id": 7155,
+        "observation": "Góc dưới bên phải bức ảnh hiển thị một chén đựng dung dịch màu vàng (dầu ăn hoặc nước sốt) trên nền gỗ trắng."
+      }
+    ]
+  },
+  "L26_V082_2466_Chữ màu trắng in bên trong biểu tượng màu đỏ ở thân hộp là chữ gì?_True": {
+    "status": "answer",
+    "answer": "Không có chữ nào in bên trong biểu tượng màu đỏ",
+    "evidence": [
+      {
+        "frame_id": 2466,
+        "observation": "Quan sát kỹ hình ảnh, biểu tượng màu đỏ trên hộp chỉ là một vết dính màu đỏ hình tròn, không có chữ trắng bên trong."
+      }
+    ]
+  },
+  "L21_V008_20820_Biển số xe của chiếc ô tô màu trắng di chuyển về phía trước là gì?_True": {
+    "status": "answer",
+    "answer": "51K-083.84",
+    "evidence": [
+      {
+        "frame_id": 0,
+        "observation": "Biển số xe của chiếc ô tô màu trắng ở góc phải là 51K-083.84"
+      }
+    ]
+  },
+  "L30_V001_1181_Dòng chữ tiếng Anh in hoa dập nổi trên thân chiếc cờ lê bên dưới là chữ gì?_True": {
+    "status": "answer",
+    "answer": "CHROME VANADIUM",
+    "evidence": [
+      {
+        "frame_id": 1181,
+        "observation": "Dòng chữ in hoa 'CHROME VANADIUM' dập nổi trên thân cờ lê."
+      }
+    ]
+  },
+  "L21_V001_7074_Người đàn ông mặc áo thun sọc ngang đang đeo phụ kiện gì trên cổ tay phải?_False": {
+    "status": "answer",
+    "answer": "Người đàn ông đang đeo một chiếc vòng màu tối trên cổ tay phải.",
+    "evidence": [
+      {
+        "frame_id": 7074,
+        "observation": "Hình ảnh ghi lại người đàn ông mặc áo thun sọc ngang đứng cạnh cột nước phun, cổ tay phải của anh ấy có đeo một chiếc vòng nhỏ."
+      }
+    ]
+  },
+  "L23_V001_0_Người đứng cầm bảng điện tử màu đen đang hiển thị chữ số LED màu đỏ nào?_False": {
+    "status": "answer",
+    "answer": "Số 2",
+    "evidence": [
+      {
+        "frame_id": 0,
+        "observation": "Người bên phải đang cầm bảng điện tử màu đen hiển thị chữ số LED màu đỏ là số 2."
+      }
+    ]
+  },
+  "L24_V017_2736_Người đàn ông mặc áo thun xanh dương đang giơ vật gì lên đầu?_False": {
+    "status": "answer",
+    "answer": "Người đàn ông mặc áo thun xanh dương không giơ vật gì lên đầu trong khung hình.",
+    "evidence": [
+      {
+        "frame_id": 2736,
+        "observation": "Hình ảnh cho thấy người đàn ông mặc áo thun xanh dương đang đứng bên trái ngoài sân thi đấu, không giơ vật gì lên đầu."
+      }
+    ]
+  },
+  "L26_V001_7155_Chén đựng nước sốt chấm hình bông hoa ở góc dưới bên phải có màu gì?_False": {
+    "status": "answer",
+    "answer": "Màu vàng",
+    "evidence": [
+      {
+        "frame_id": 7155,
+        "observation": "Góc dưới bên phải có một chén đựng dung dịch màu vàng nổi bật."
+      }
+    ]
+  },
+  "L26_V082_2466_Chữ màu trắng in bên trong biểu tượng màu đỏ ở thân hộp là chữ gì?_False": {
+    "status": "answer",
+    "answer": "Chữ T",
+    "evidence": [
+      {
+        "frame_id": 2466,
+        "observation": "Quan sát kỹ thân hộp màu trắng có in biểu tượng màu đỏ chứa chữ T màu trắng bên trong."
+      }
+    ]
+  },
+  "L21_V008_20820_Biển số xe của chiếc ô tô màu trắng di chuyển về phía trước là gì?_False": {
+    "status": "answer",
+    "answer": "51K-083.84",
+    "evidence": [
+      {
+        "frame_id": 20820,
+        "observation": "Biển số xe của ô tô màu trắng hiển thị rõ trên đầu xe là 51K-083.84"
+      }
+    ]
+  },
+  "L30_V001_1181_Dòng chữ tiếng Anh in hoa dập nổi trên thân chiếc cờ lê bên dưới là chữ gì?_False": {
+    "status": "answer",
+    "answer": "CHROME VANADIUM",
+    "evidence": [
+      {
+        "frame_id": 1181,
+        "observation": "Nhìn thấy dòng chữ 'CHROME VANADIUM' dập nổi trên thân chiếc cờ lê nằm trên nền đất."
+      }
+    ]
+  }
+}
