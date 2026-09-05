@@ -149,11 +149,6 @@ python scripts/submission/submission_validator.py output/sotuyen3/submission.zip
 ```
 AIC2026/
 ├── ABLATION_STUDY.md                # Báo cáo chi tiết 10 cấu hình thực nghiệm
-├── paper/
-│   └── AIC_paper/                   # Toàn bộ bản thảo LaTeX & BibTeX cho SOICT 2026
-│       ├── main.tex                 # Bản thảo hoàn chỉnh của bài báo V-GATE
-│       ├── mybibliography.bib       # 20 tài liệu tham khảo đã kiểm chứng 100% DOI
-│       └── llncs.cls                # Class template chuẩn Springer LNCS
 ├── data/
 │   └── benchmark/                   # Ground Truth 2 & file kết quả ablation summary
 ├── scripts/

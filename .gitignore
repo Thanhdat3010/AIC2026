@@ -67,3 +67,7 @@ scratch/
 .idea/
 .vscode/
 *.swp
+
+# Paper manuscripts (Local draft only)
+paper/
+
